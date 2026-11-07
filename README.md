@@ -13,7 +13,6 @@
 ![Three.js](https://img.shields.io/badge/Three.js-3D-000000?logo=threedotjs&logoColor=white)
 ![Vite](https://img.shields.io/badge/Vite-5-646CFF?logo=vite&logoColor=white)
 
-**[🌐 Live demo](https://abdalla-cooked.github.io/DATATHON2026/)** · **[🎥 Demo video](#)** · **[📓 Notebook](notebooks/train.ipynb)** · **[🗺️ Build plan](PLAN.md)**
 
 <!-- Replace with a screenshot or GIF of the 3D view: docs/img/hero.gif -->
 <img src="docs/img/hero.gif" alt="3D solar system with 42,704 near-Earth asteroids colored by hazard risk" width="820">
