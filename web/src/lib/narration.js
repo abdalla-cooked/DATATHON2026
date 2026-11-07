@@ -1,13 +1,16 @@
-// Mission Control Live player (PLAN.md §8). Hybrid:
-//   1. pre-recorded clips from public/audio/manifest.json (scripts/narrate.py): instant, work offline
-//   2. live ElevenLabs voice from api/say (web/api/say.js) for any asteroid without a recording
-//   3. subtitles only, if neither is available (GitHub Pages, offline, quota used up)
+// Mission Control Live player (PLAN.md §8). Best available, per click:
+//   1. live writing: Claude writes a fresh exchange (api/script), ElevenLabs voices it (api/say) -- never the same twice
+//   2. pre-recorded clips from public/audio/manifest.json (scripts/narrate.py): instant, work offline
+//   3. template dialogue voiced live by ElevenLabs (api/say), for asteroids without a recording
+//   4. subtitles only (GitHub Pages, offline, quota used up)
 // No API key ever reaches the browser. Subtitles always show, so it also works with the sound off.
 import L from './lines.js';
 import { buildLines, paramsFor, toQuery } from './dialogue.js';
 
 let manifest = null;
 let live = false;
+let scripted = false;                // Claude writes the dialogue (api/script)
+const SCRIPT_TIMEOUT_MS = 15000;      // Opus at low effort measured 4.5-8.5 s per script; past this, fall back
 let on = true;                       // clicking an asteroid is a user gesture, so sound is allowed
 let current = null;
 let token = 0;                       // bumps on every new dialogue, so a newer one cancels an older one
@@ -16,7 +19,7 @@ const listeners = new Set();         // subtitle listeners: ({ who, text } | nul
 const getJSON = (url) => fetch(url).then((r) => (r.ok ? r.json() : null)).catch(() => null);
 const ready = Promise.all([
   getJSON('audio/manifest.json').then((m) => { manifest = m; }),
-  getJSON('api/health').then((h) => { live = Boolean(h?.live); }),
+  getJSON('api/health').then((h) => { live = Boolean(h?.live); scripted = Boolean(h?.script); }),
 ]);
 
 const caption = (c) => listeners.forEach((fn) => fn(c));
@@ -43,11 +46,10 @@ function playClip(audio, text, mine) {
   });
 }
 
-// lines = [{ who, text, src }]. sfx = { before?: key, at?: [index, key] }
-async function playDialogue(lines, sfx = {}) {
+// lines = [{ who, text, src }]. sfx = { before?: key, at?: [index, key] }. Pass `mine` to continue a claimed turn.
+async function playDialogue(lines, sfx = {}, mine = null) {
   if (!on || !lines?.length) return;
-  stop();
-  const mine = ++token;
+  if (mine === null) { stop(); mine = ++token; } else if (mine !== token) return;
   const sfxSrc = (k) => (k && manifest?.sfx?.[k]) || null;
   if (sfxSrc(sfx.before)) await playClip(load(sfxSrc(sfx.before)), '', mine);
   let next = load(lines[0].src);
@@ -70,7 +72,38 @@ function liveDialogue(P) {
   return buildLines(P, L).map(([who, text], i) => ({ who, text, src: live ? `api/say?${q}&i=${i}` : null }));
 }
 
-const screamAt = (lines) => lines.findIndex((l) => l.who === 'INTERN' && /^A{3,}/.test(l.text));
+// Claude writes a fresh exchange; each line comes back signed so api/say voices exactly that text.
+// Resolves to null on any problem (slow, rate-limited, refused) so the caller can fall back.
+async function writtenDialogue(P) {
+  const ctl = new AbortController();
+  const timer = setTimeout(() => ctl.abort(), SCRIPT_TIMEOUT_MS);
+  try {
+    const r = await fetch(`api/script?${toQuery(P)}`, { signal: ctl.signal });
+    const body = r.ok ? await r.json() : null;
+    return body?.lines?.map(({ who, text, sig }) => ({
+      who, text, src: `api/say?${new URLSearchParams({ who, text, sig })}`,
+    })) ?? null;
+  } catch {
+    return null;
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+// Claims the turn, shows a "reading the data" caption + radio crackle, and asks Claude for a script.
+async function playWritten(P, sfx) {
+  stop();
+  const mine = ++token;
+  caption({ who: 'RADIO', text: 'Mission Control is reading the data…' });
+  if (manifest?.sfx?.radio) playClip(load(manifest.sfx.radio), '', mine);
+  const lines = await writtenDialogue(P);
+  if (mine !== token) return true;                     // the user already clicked something else
+  if (!lines) { caption(null); return false; }
+  await playDialogue(lines, sfx(lines), mine);
+  return true;
+}
+
+const screamAt = (lines) => lines.findIndex((l) => l.who === 'INTERN' && /^(A{3,}|AH|NO+)/i.test(l.text));
 
 export function stop() {
   token++;
@@ -86,6 +119,7 @@ export function setOn(value) {
 
 export const isOn = () => on;
 export const isLive = () => live;
+export const isScripted = () => scripted;
 
 export function onCaption(fn) {
   listeners.add(fn);
@@ -107,11 +141,16 @@ export async function playReaction(key) {
 // thr = Model B's cutoff (metrics.B.threshold), used for the tier when there's no recording.
 export async function playAsteroid(a, part = 'report', thr) {
   await ready;
-  if (!a) return;
+  if (!a || !on) return;
   const kind = part === 'hidden' && !a.hidden ? 'report' : part;
+  const P = paramsFor(a, kind, thr ?? manifest?.tiers?.screwed ?? 0.75);
+  if (scripted) {
+    const played = await playWritten(P, (lines) => (kind === 'whatif' ? { at: [screamAt(lines), 'impact'] } : {}));
+    if (played) return;
+  }
   const recorded = manifest?.asteroids?.[a.pdes];
-  const lines = recorded?.[kind] || liveDialogue(paramsFor(a, kind, thr ?? manifest?.tiers?.screwed ?? 0.75));
-  const tier = recorded?.tier || paramsFor(a, kind, thr ?? manifest?.tiers?.screwed ?? 0.75).t;
+  const lines = recorded?.[kind] || liveDialogue(P);
+  const tier = recorded?.tier || P.t;
   if (kind === 'whatif') return playDialogue(lines, { at: [screamAt(lines), 'impact'] });
   return playDialogue(lines, { before: kind === 'report' && tier === 'screwed' ? 'alarm' : 'radio' });
 }
@@ -123,6 +162,7 @@ export async function playCustom({ risk01, thr, sizeM = 0, speedKms = 20, energy
   if (!live) return playReaction(`custom_${t}_${1 + Math.floor(Math.random() * 2)}`);
   const P = { k: 'custom', n: 'your asteroid', r: Math.round(risk01 * 100), t, y: '', p: 0,
               s: Math.round(sizeM), v: speedKms, e: energyMt };
+  if (scripted && await playWritten(P, (lines) => ({ at: [screamAt(lines), 'impact'] }))) return;
   const lines = liveDialogue(P);
   return playDialogue(lines, { at: [screamAt(lines), 'impact'] });
 }

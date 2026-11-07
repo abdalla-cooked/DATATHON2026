@@ -963,16 +963,33 @@ joke. Our models do **not** detect or predict impacts, and the commentary never 
 | Button + subtitles | `web/src/components/MissionControl.jsx` | "🔊 Mission Control Live" mute button (bottom-left, **on by default**) + live captions so it works with sound off |
 | Triggers | `web/src/App.jsx` | **Every click on an asteroid** gets commentary (also re-clicks). Switching to Model B, mistakes, or hidden hazards plays that act |
 
-### 🔴 Live voice (hybrid) — how it works
+### 🔴 Live writing + live voice — how it works
 ```
-click an asteroid ─► recorded clip in manifest? ──yes──► play the MP3 (instant, offline)
+click an asteroid ─► live writing available? (api/health "script") ──yes──► api/script: Claude writes a NEW exchange
+                                  │ no / failed / >8 s                       from the asteroid's real numbers,
+                                  │                                          each line signed → api/say voices it
+                                  ▼
+                     recorded clip in manifest? ──yes──► play the MP3 (instant, offline)
                                   │ no
                                   ▼
-                     live voice available? (api/health) ──yes──► GET api/say?…&i=n per line → ElevenLabs Flash
+                     live voice available? ──yes──► template dialogue, GET api/say?…&i=n per line → ElevenLabs Flash
                                   │ no (GitHub Pages / offline / quota)
                                   ▼
                      subtitles only (the dialogue still "plays" on screen)
 ```
+**Live writing** (`web/api/script.js`) is what stops the repetition: every click gets a different exchange.
+- Claude (`claude-haiku-5-5` at `low` effort, about 2.5-7 s per script; Opus 5.5 wrote slightly better jokes but took 4.5-8.5 s.
+  Override with `LIVE_SCRIPT_MODEL` / `LIVE_SCRIPT_EFFORT`) gets the asteroid's
+  facts (name, risk score, NASA label, the model's reason, size, what-if energy) plus the characters and the
+  **honesty rules** in its system prompt: "risk score", never "probability"; hazardous = worth watching, not incoming;
+  what-ifs are hypothetical; no invented facts; admit the model's mistakes. A random comedic angle (game show, nature documentary…)
+  is added each time for variety.
+- Output is constrained JSON (`{lines: [{who, text}]}`), checked again on the server (3–8 lines, plain text, at most 220 chars).
+- Each line is **HMAC-signed** (`web/api/_sign.js`). `api/say` voices only signed lines or template lines, so the voices can't
+  be made to say arbitrary text.
+- Server-side refusal fallback (`fallbacks: "default"`) turns on automatically for Opus/Sonnet/Fable (Haiku has none). Rate limit: 12 scripts/minute per visitor (`LIVE_SCRIPTS_PER_MIN`).
+- Needs `ANTHROPIC_API_KEY` (repo-root `.env` in dev, Vercel env vars in prod). Without it, everything else still works.
+- While Claude writes (~2.5-7 s, waits up to 15 s), the subtitle shows "📡 Mission Control is reading the data…" with the radio crackle.
 - **All 42,704 asteroids** get commentary with their own name, risk score, reason, size and what-if numbers. The 71 featured ones
   use the recordings.
 - **The key never reaches the browser.** It lives in Vercel's environment variables (prod) or the repo-root `.env` (dev).
@@ -994,8 +1011,8 @@ $env:NODE_EXTRA_CA_CERTS = "$PWD\..\.certs\norton-root.pem"; npm run dev
 1. vercel.com → sign in with GitHub → **Add New → Project** → import the repo.
 2. **Root Directory: `web`**. Framework: Vite (auto-detected; `web/vercel.json` sets the build output to `dist`).
 3. **Settings → Environment Variables:** `ELEVENLABS_API_KEY`, `CAPCOM_VOICE_ID` (`onwK4e9ZLuTAKqWW03F9`, Daniel),
-   `INTERN_VOICE_ID` (`TX3LPaxmHKxFdv7VOQHJ`, Liam). Then **Redeploy**.
-4. Open `https://<project>.vercel.app/api/health` → `{"live":true}`. Click any dot on the site and hear the commentary.
+   `INTERN_VOICE_ID` (`TX3LPaxmHKxFdv7VOQHJ`, Liam), `ANTHROPIC_API_KEY` (live writing). Then **Redeploy**.
+4. Open `https://<project>.vercel.app/api/health` → `{"live":true,"script":true}`. Click any dot and hear a fresh exchange.
 5. GitHub Pages (`docs/`) still works as a backup: recordings + subtitles, no live voice.
 Submit the **Vercel URL**. Watch your ElevenLabs usage on its dashboard during judging.
 

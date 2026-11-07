@@ -1,9 +1,12 @@
 // Mission Control Live, live voice (PLAN.md §8). Vercel serverless function, also mounted by vite.config.js in dev.
-//   GET /api/say?k=report&n=2019 UQ7&r=8&t=chill&y=w-&p=0&s=250&v=22.5&e=987&i=2  -> audio/mpeg of line i
+//   GET /api/say?k=report&n=2019 UQ7&r=8&t=chill&y=w-&p=0&s=250&v=22.5&e=987&i=2  -> audio/mpeg of template line i
+//   GET /api/say?who=INTERN&text=...&sig=...                                        -> audio/mpeg of a line api/script wrote
 // The API key lives only here (Vercel env vars / repo-root .env in dev), never in the browser.
-// The text is rebuilt server-side from validated numbers (dialogue.js), so callers can't make it say anything else.
+// Callers can't make it say anything else: template lines are rebuilt from validated numbers (dialogue.js),
+// and Claude-written lines must carry the server's signature (_sign.js).
 import L from '../src/lib/lines.js';
 import { buildLines, sanitize } from '../src/lib/dialogue.js';
+import { verify } from './_sign.js';
 
 const MODEL_ID = 'eleven_flash_v2_5';                       // lowest-latency ElevenLabs model
 const PER_IP_PER_MIN = Number(process.env.LIVE_LINES_PER_MIN || 40);
@@ -33,9 +36,14 @@ function limited(ip, chars) {
 
 export default async function handler(req, res) {
   const q = Object.fromEntries(new URL(req.url, 'http://local').searchParams);
-  const P = sanitize(q, L);
-  const i = Number(q.i);
-  const line = P && Number.isInteger(i) ? buildLines(P, L)[i] : null;
+  let line = null;
+  if (q.sig) {
+    if (verify(q.who, q.text, q.sig)) line = [q.who, q.text];
+  } else {
+    const P = sanitize(q, L);
+    const i = Number(q.i);
+    line = P && Number.isInteger(i) ? buildLines(P, L)[i] : null;
+  }
   if (!line) return send(res, 400, 'bad request');
 
   const [who, text] = line;
