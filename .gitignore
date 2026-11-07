@@ -15,9 +15,14 @@ data/test.csv
 
 # Node (the built site in docs/ IS committed — GitHub Pages serves it)
 node_modules/
+web/dist/
+.vercel/
 
 # OS / editor
 .DS_Store
 Thumbs.db
 .vscode/
 .idea/
+
+# Local-only certificates (e.g. Norton HTTPS scanning root for dev)
+.certs/

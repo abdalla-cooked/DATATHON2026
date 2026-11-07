@@ -14,7 +14,7 @@
 
 **How to use this doc:** everyone reads sections 1–4 (10 min). Then each person goes to **their own section**
 (5, 6 or 7) and works through it **in order**. Every step ends with a ✅ **Check**. Don't move on until it passes.
-Section 8 (ElevenLabs narration) is shared and happens **tomorrow morning**. Section 9 is the two-day schedule.
+Section 8 (Mission Control Live, the ElevenLabs commentary) is shared and happens **tomorrow morning**. Section 9 is the two-day schedule.
 
 ---
 
@@ -938,178 +938,150 @@ Then submit (section 11 checklist).
 
 ---
 
-## 8. 🎙️ ElevenLabs narration (shared: P3 writes, P1 generates, P3 plays)
+## 8. 🎙️ Mission Control Live — ElevenLabs commentary (P3 writes, P1 generates, P3 plays)
 
-**Idea:** every asteroid gets a **funny voiced report**. A deadpan "mission control" voice reads the model's verdict,
-and the joke gets darker as the hazard probability goes up:
+**The concept:** two ElevenLabs voices commentate the end of the world like sports commentators, reacting to what the
+**models actually found**:
+- 🎙️ **CAPCOM**: calm and deadpan, reads the data.
+- 😱 **INTERN**: panics at everything and gets corrected.
 
-| Risk tier (Model B `pB`) | Tone | Example |
+> **CAPCOM:** "Asteroid Apophis. Risk score 99." **INTERN:** "Oh no. Oh no no no."
+> **CAPCOM:** "Mostly because it swings in to exactly where Earth lives." **INTERN:** "So we're screwed?"
+> **CAPCOM:** "Hazardous means worth watching. Not incoming." **INTERN:** "So we're a *little* screwed."
+
+**Why two voices:** the joke is the conversation, and CAPCOM's correction delivers the honest science *inside* the
+joke. Our models do **not** detect or predict impacts, and the commentary never claims they do.
+
+### ✅ Already built (Nov 7)
+| Piece | File | What it does |
 |---|---|---|
-| **Chill** (< 0.2) | bored, relieved | *"Asteroid 2018 BM3. Hazard probability: 4 percent. Go back to your sandwich."* |
-| **Sus** (0.2–0.6) | nervous | *"Asteroid 2020 BN7. 41 percent. Not great, not terrible. Maybe don't plan anything big."* |
-| **Screwed** (> 0.6) | doom, comic timing | *"Asteroid Apophis. 87 percent hazard. I'm not saying you're screwed… but you're screwed. Statistically speaking."* |
+| Commentary data | `scripts/train.py` | Adds `why` (Model B's biggest orbit reason, from LightGBM's built-in SHAP values), `v_imp` (hypothetical impact speed) and `E_mt` (hypothetical impact energy, megatons) to `asteroids.json` |
+| The script | `narration/lines.json` | Every line both voices say: the act dialogues, reactions, report templates, 14 "why" phrases, what-if template, sound-effect prompts |
+| Generator | `scripts/narrate.py` | Builds each asteroid's dialogues, generates one MP3 per line (CAPCOM and INTERN voices) + 4 sound effects, writes `web/public/audio/manifest.json`. `--dry-run` prints everything with no API calls |
+| Player | `web/src/lib/narration.js` | **Hybrid:** recorded clip if there is one, else **live voice**, else subtitles only. Newer dialogues cancel older ones |
+| Live voice | `web/api/say.js`, `web/api/health.js`, `web/src/lib/dialogue.js` | Serverless function holding the key: rebuilds the line from validated numbers, calls ElevenLabs Flash, returns MP3. Rate-limited, CDN-cached |
+| Button + subtitles | `web/src/components/MissionControl.jsx` | "🔊 Mission Control Live" mute button (bottom-left, **on by default**) + live captions so it works with sound off |
+| Triggers | `web/src/App.jsx` | **Every click on an asteroid** gets commentary (also re-clicks). Switching to Model B, mistakes, or hidden hazards plays that act |
 
-**Keep it honest (judges will check):** "potentially hazardous" means *it passes close enough to be worth watching*,
-not *it will hit Earth*. Every "screwed" clip ends with a short tag like *"Relax, hazardous means 'worth watching,'
-not 'on its way.' Probably."*, and the "What did it learn?" panel spells this out. The joke works better when the science is right.
-
-**Key rule: never call ElevenLabs from the website.** GitHub Pages is public, so any API key in `docs/` gets stolen.
-Instead we **generate MP3s ahead of time** with a Python script and commit just the audio files.
-For "click any asteroid," we pre-generate clips for the ~60 most interesting asteroids, not all 30k.
-
-### Step N1 — Account + key (P1, 10 min, can be tonight)
-1. Sign in at elevenlabs.io → profile → **API Keys** → create a key.
-2. In the repo root, create `.env` containing `ELEVENLABS_API_KEY=sk_...`, and add `.env` to `.gitignore` **before** your next commit.
-3. Check your **character quota** on the account page. The free tier is small, so keep every line short.
-   Rough budget: about 40 words per clip × about 70 clips ≈ 15k characters. If the quota is lower, cut the asteroid clips to the top 20.
-4. In the Voice Library, pick one voice as a team (calm and clear, e.g. a "narrator" or "news" style) and copy its **voice ID**.
-
-### Step N2 — Write the lines (P3, 30 min) → `narration/lines.json`
-```json
-{
-  "intro":  "Thirty-five thousand rocks cross near Earth's orbit. Which ones should we worry about? We taught a machine to decide.",
-  "act1":   "First, we gave the model everything. On its own, it rediscovered NASA's exact rule for hazardous asteroids.",
-  "act2":   "Then we took away the answer key. With only the shape of each orbit, it has to work out the geometry for itself.",
-  "act3":   "Then, a reality check. Asteroids the model warned about really did pass closer to Earth.",
-  "act4":   "And now the fun part. NASA judges size by brightness. But some asteroids are dark. Our model went looking for big ones hiding in plain sight. It found some.",
-  "mistakes": "Magenta dots are real hazards the model missed. Yellow dots are false alarms.",
-  "custom": "Design your own asteroid, and the model will judge it live.",
-
-  "tier_chill_1":   "Hazard level: snooze. Go back to your sandwich.",
-  "tier_chill_2":   "This one's harmless. Honestly, it's more scared of you.",
-  "tier_chill_3":   "Nothing to see here. Cancel the bunker.",
-  "tier_sus_1":     "Not great, not terrible. Maybe don't plan anything big.",
-  "tier_sus_2":     "Hmm. I'd keep one eye on the sky. The other eye can do whatever.",
-  "tier_sus_3":     "It's giving… mild concern.",
-  "tier_screwed_1": "I'm not saying you're screwed. But you're screwed. Statistically. Relax, hazardous means worth watching, not on its way. Probably.",
-  "tier_screwed_2": "Congratulations, you've built a planet-killer. Your insurance does not cover this.",
-  "tier_screwed_3": "Bad news: you're screwed. Good news: it's not this week. Hazardous means worth watching, not incoming."
-}
+### 🔴 Live voice (hybrid) — how it works
 ```
-Write **3 lines per tier** (the `tier_*` keys). They're played for **custom asteroids** from the sliders, because we can't pre-record every
-possible slider value. The site picks a random line from the matching tier. **The asteroid reports for real asteroids** are built
-automatically by `narrate.py` (see N3), which puts in the name and percentage and then adds one of P3's jokes from the `JOKES` lists.
-Read each line out loud: if it takes more than ~12 seconds, shorten it. Funny > long.
-Test the jokes on someone outside the team. If they don't laugh, cut it.
+click an asteroid ─► recorded clip in manifest? ──yes──► play the MP3 (instant, offline)
+                                  │ no
+                                  ▼
+                     live voice available? (api/health) ──yes──► GET api/say?…&i=n per line → ElevenLabs Flash
+                                  │ no (GitHub Pages / offline / quota)
+                                  ▼
+                     subtitles only (the dialogue still "plays" on screen)
+```
+- **All 42,704 asteroids** get commentary with their own name, risk score, reason, size and what-if numbers. The 71 featured ones
+  use the recordings.
+- **The key never reaches the browser.** It lives in Vercel's environment variables (prod) or the repo-root `.env` (dev).
+  `api/say` rebuilds each line itself from **validated numbers** (`dialogue.js` → `sanitize`), so nobody can make the voices say anything else.
+- **Cost control:** 40 lines/minute per visitor, 20,000 characters/hour per server instance (`LIVE_LINES_PER_MIN`,
+  `LIVE_CHARS_PER_HOUR` env vars), and identical lines are cached by the CDN and the browser, so repeat clicks are free.
+- **Speed:** about 0.2–0.5 s per line. Line *n+1* is fetched while line *n* plays.
+- `dialogue.js` is the JS twin of the builders in `narrate.py`. Change both if you change the dialogue structure.
+  `web/src/lib/lines.js` is **generated** from `narration/lines.json` by `narrate.py`: edit the JSON, then rerun
+  `python scripts/narrate.py` (it costs nothing when no lines changed).
 
-### Step N3 — Generate the audio (P1, 30 min) → `scripts/narrate.py`
+**Run it locally:** `npm run dev` serves `api/*` too (see `vite.config.js`), reading the key from the repo-root `.env`.
+On a machine with **Norton** (it re-signs HTTPS), point Node at Norton's root first (PowerShell, from `web/`):
+```powershell
+$env:NODE_EXTRA_CA_CERTS = "$PWD\..\.certs\norton-root.pem"; npm run dev
+```
+
+**Deploy (live voice needs Vercel; GitHub Pages can't run the function):**
+1. vercel.com → sign in with GitHub → **Add New → Project** → import the repo.
+2. **Root Directory: `web`**. Framework: Vite (auto-detected; `web/vercel.json` sets the build output to `dist`).
+3. **Settings → Environment Variables:** `ELEVENLABS_API_KEY`, `CAPCOM_VOICE_ID` (`onwK4e9ZLuTAKqWW03F9`, Daniel),
+   `INTERN_VOICE_ID` (`TX3LPaxmHKxFdv7VOQHJ`, Liam). Then **Redeploy**.
+4. Open `https://<project>.vercel.app/api/health` → `{"live":true}`. Click any dot on the site and hear the commentary.
+5. GitHub Pages (`docs/`) still works as a backup: recordings + subtitles, no live voice.
+Submit the **Vercel URL**. Watch your ElevenLabs usage on its dashboard during judging.
+
+### The five moments (all driven by real model output)
+| # | Trigger | Based on | Status |
+|---|---|---|---|
+| 1 | **Click an asteroid** | Model B risk score + its `why` + NASA's label (*"Plot twist: NASA disagrees"* for the model's mistakes) | ✅ wired |
+| 2 | **🕵️ Hidden hazards toggle**, then click a lime dot | Act 4 size model: *"NASA judged it by brightness. Our model says it's 250 meters of dark rock."* | ✅ player ready. P2/P3 need the `showHidden` toggle |
+| 3 | **💥 "What if it hit?" button** in the info panel | Act 4 size + real flyby speed → ½mv² → megatons + Hiroshimas, with an impact boom. Always ends *"It is not going to hit. This is a what-if."* | ⬜ P3: add the button (step N4) |
+| 4 | **Near miss during fast-forward** | Simulated position inside a labeled danger zone: *"Oh no no wait wait…"* then *"It missed. By millions of kilometers."* | ⬜ P2: trigger (step N5) |
+| 5 | **Design your own asteroid** | Live in-browser model: a reaction per risk tier, plus *"You built a planet-killer"* if it's aimed at Earth | ⬜ P3: call `playCustomTier()` (step N4) |
+
+**The what-if physics** (in `train.py`, shown on screen too so it works with sound off):
+```
+mass   = 2000 kg/m³ × (π/6) × D³          # D = measured size, else the Act 4 estimate
+v_imp  = √(v_inf² + 11.2²) km/s           # v_inf = median flyby speed from cad.csv; 11.2 = Earth's escape speed
+energy = ½ × mass × v_imp²  → megatons     # 1 Mt = 4.184e15 J; Hiroshima ≈ 0.015 Mt
+```
+Example: Apophis ≈ 780 Mt ≈ 52 thousand Hiroshimas (hypothetical).
+
+### Step N1 — Account, key, voices (P1, 15 min)
+1. elevenlabs.io → profile → **API Keys** → create a key.
+2. Copy `.env.example` to `.env` (gitignored) and fill in `ELEVENLABS_API_KEY`, `CAPCOM_VOICE_ID`, `INTERN_VOICE_ID`.
+3. Voice Library: pick **two clearly different voices** as a team. CAPCOM: calm, low, newsreader. INTERN: younger,
+   expressive. Copy each **voice ID**.
+4. **Quota:** a full run is about **15,000 characters** (about 380 lines for 71 asteroids + acts + reactions) plus 4 sound effects.
+   The free tier is smaller than that, so check your plan. On a small plan, run `--limit 20` first.
+
+✅ **Check:** `git status` does **not** show `.env`.
+
+### Step N2 — Punch up the script (P3, 30–45 min) → `narration/lines.json`
+Everything either voice says is in this one file: `acts`, `reactions`, the `report` template and joke pools, `hidden`,
+`whatif`, the 14 `why` phrases (e.g. `"q+"` = "its closest point to the Sun sits right around Earth's distance"), and `sfx` prompts.
+- Rewrite any line to be funnier. Keep it **under about 12 seconds** out loud.
+- **Keep every honesty line**: CAPCOM's *"Hazardous means worth watching. Not incoming."* and *"It is not going to hit. This is a what-if."*
+- Say **"risk score"**, never "probability" (pA/pB are inflated risk scores).
+- `{name}`, `{risk}`, `{why}`, `{size}`, `{speed}`, `{energy}`, `{hiroshimas}`, `{hidden_count}` are filled in automatically.
+- Editing one line only regenerates that one clip, so iterating costs almost nothing.
+
+Then preview everything for free:
 ```bash
-pip install elevenlabs python-dotenv
+python scripts/narrate.py --dry-run
 ```
-```python
-import json, os, pandas as pd
-from dotenv import load_dotenv
-from elevenlabs.client import ElevenLabs
+✅ **Check:** read three dialogues out loud as a team. If nobody laughs, rewrite.
 
-load_dotenv()
-client = ElevenLabs(api_key=os.environ["ELEVENLABS_API_KEY"])
-VOICE_ID = "PASTE_VOICE_ID"
-MODEL_ID = "eleven_multilingual_v2"
-os.makedirs("docs/audio", exist_ok=True)
-
-def speak(key, text):
-    path = f"docs/audio/{key}.mp3"
-    if os.path.exists(path):          # never pay twice for the same clip
-        return
-    audio = client.text_to_speech.convert(voice_id=VOICE_ID, model_id=MODEL_ID,
-                                          text=text, output_format="mp3_44100_128")
-    with open(path, "wb") as f:
-        for chunk in audio:
-            f.write(chunk)
-    print("✓", key)
-
-lines = json.load(open("narration/lines.json"))
-for key, text in lines.items():
-    speak(key, text)
-
-# asteroid clips: presets + worst misses + top test-set PHAs
-ast = pd.DataFrame(json.load(open("docs/data/asteroids.json")))
-metrics = json.load(open("docs/data/metrics.json"))
-picks = ast[ast["name"].str.contains("Apophis|Bennu|Didymos")]
-picks = pd.concat([picks, ast[ast["name"].isin([m["name"] for m in metrics["worst_misses"]])],
-                   ast[ast["hidden"] == True].nlargest(15, "D_lo"),          # Act 4 hidden hazards
-                   ast[(ast["test"]) & (ast["pha"] == 1)].nlargest(40, "pB")]).drop_duplicates("pdes")
-
-import random
-random.seed(42)
-JOKES = {   # P3 writes these. Short, punchy, one sentence each
-    "chill":   ["Go back to your sandwich.", "Cancel the bunker.", "It's more scared of you than you are of it."],
-    "sus":     ["Not great, not terrible.", "Maybe don't plan anything big.", "I'd keep one eye on the sky."],
-    "screwed": ["I'm not saying you're screwed. But you're screwed. Statistically.",
-                "Your insurance does not cover this.", "Bad news: you're screwed. Good news: not this week."],
-}
-TAG = " Relax, hazardous means worth watching, not on its way. Probably."
-def tier(p): return "chill" if p < 0.2 else "sus" if p < 0.6 else "screwed"
-
-manifest = {}
-for _, a in picks.iterrows():
-    t = tier(a.pB)
-    name = a["name"].split("(")[0].strip()
-    nasa = "NASA agrees." if (a.pha == 1) == (t == "screwed") else "Plot twist: NASA disagrees."
-    text = f"Asteroid {name}. Hazard probability: {round(a.pB * 100)} percent. {random.choice(JOKES[t])} {nasa}"
-    if t == "screwed":
-        text += TAG
-    if a["hidden"] == True:                                   # Act 4 gets its own script
-        text = (f"Asteroid {name}. Officially harmless. Our model thinks it's about {int(round(a.D_pred, -1))} meters "
-                f"of dark space rock, which is big enough to count. Somebody tell NASA.")
-        t = "hidden"
-    key = "ast_" + str(a.pdes).replace(" ", "_")
-    speak(key, text)
-    manifest[a.pdes] = {"src": f"audio/{key}.mp3", "tier": t}
-json.dump(manifest, open("docs/audio/manifest.json", "w"), indent=1)
+### Step N3 — Generate (P1, 15 min + generation time)
+**Run after the final `train.py`.** The risk scores and sizes are spoken, so retraining afterwards means regenerating.
+```bash
+python scripts/narrate.py --limit 5     # cheap test: listen before spending the quota
+python scripts/narrate.py               # everything
 ```
-The "Plot twist: NASA disagrees" line is for the model's **mistakes**. It turns the worst misses into a joke
-*and* shows the judges you know where your model is wrong.
+**Voice tuning:** settings per voice are in `lines.json` → `voices`. A lower `stability` (INTERN 0.3) makes the delivery more
+dramatic, a higher one (CAPCOM 0.65) keeps it deadpan. `...` in a line adds a pause.
 
-**Voice settings for comic timing:** choose a deadpan narrator voice. In ElevenLabs, lower **Stability** (about 0.35) makes the
-delivery more expressive, and `...` in the text adds a dramatic pause (*"you're... screwed"*). Generate `tier_screwed_1` first,
-listen, and tweak before making the rest. That saves quota.
-Run it **after** the final model export (otherwise the percentages it reads out will be wrong). If you retrain, delete
-`docs/audio/ast_*.mp3` and run it again.
+✅ **Check:** `web/public/audio/` has the MP3s, 4 `sfx_*.mp3` and `manifest.json`. `npm run dev`, turn on
+🔊 Mission Control Live, and the intro plays with subtitles. Click Apophis to hear the alarm and its report.
 
-✅ **Check:** `docs/audio/` has `intro.mp3` … `custom.mp3`, the `ast_*.mp3` clips and `manifest.json`.
-Play `ast_99942.mp3` and it says Apophis's real number. `git status` must **not** show `.env`.
-
-### Step N4 — Play it on the site (P3, 30 min) → `docs/narration.js`
+### Step N4 — Buttons that trigger commentary (P3, 45 min)
+`web/src/lib/narration.js` exports everything you need:
 ```js
-const manifest = await (await fetch('audio/manifest.json')).json().catch(() => ({}));
-let on = false, current;
-export function say(src) {
-  if (!on || !src) return;
-  current?.pause();
-  current = new Audio(src); current.play().catch(() => {});
-}
-const btn = document.createElement('button');
-btn.id = 'voiceToggle'; btn.textContent = '🔇 Narration off';
-btn.onclick = () => { on = !on; btn.textContent = on ? '🔊 Narration on' : '🔇 Narration off'; if (on) say('audio/intro.mp3'); };
-document.getElementById('topbar').appendChild(btn);
-
-addEventListener('asteroid-selected', ({ detail: a }) => say(manifest[a.pdes]?.src));
-
-// custom asteroids: random pre-recorded joke from the matching risk tier
-const tierOf = p => p < 0.2 ? 'chill' : p < 0.6 ? 'sus' : 'screwed';
-let lastTier;
-addEventListener('custom-scored', ({ detail }) => {
-  const t = tierOf(detail.pB);
-  if (t === lastTier) return;                 // only speak when the tier changes, not on every slider tick
-  lastTier = t;
-  say(`audio/tier_${t}_${1 + Math.floor(Math.random() * 3)}.mp3`);
-});
-addEventListener('view-changed', ({ detail: v }) => {
-  if (v.showHidden) say('audio/act4.mp3');
-  else if (v.showMistakes) say('audio/mistakes.mp3');
-  else if (v.model === 'B') say('audio/act2.mp3');
-});
+import { playAsteroid, hasClip, playCustomTier, playReaction, sfx } from '../lib/narration.js';
 ```
-Add `<script type="module" src="narration.js"></script>` to `index.html`. Play `act1`/`act3` when those panels scroll into view
-(an `IntersectionObserver` on `#learned`) and `custom` when the sliders are first touched.
-Narration **starts off**: browsers block sound until the user clicks something, and judges may be in a quiet room.
+1. **💥 "What if it hit?"** in `SidePanel.jsx`, under the selected asteroid's info:
+   - Always show the numbers (works with sound off): *"Hypothetical impact: {E_mt} Mt ≈ {E_mt / 0.015} Hiroshimas at {v_imp} km/s.
+     Not a prediction."*
+   - On click: `playAsteroid(selected.pdes, 'whatif')` (plays the dialogue with the impact boom at the scream).
+   - `hasClip(pdes, 'whatif')` is false for asteroids without audio. The numbers still show.
+2. **Custom asteroid verdict:** whenever the slider score changes tier, call `playCustomTier(score)`.
+   If the custom orbit crosses Earth's, call `playReaction('custom_hit')`.
+3. **Hidden hazards:** add `showHidden` to the view state + toggle (Act 4 steps). `App.jsx` already plays `act4` when it turns
+   on, and the hidden-hazard dialogue when a lime dot is clicked.
 
-Also show the tier as a badge in the info panel and slider verdict (😎 Chill / 😬 Sus / 💀 Screwed) so the joke lands even with sound off.
+### Step N5 — Near-miss commentary (P2, 30 min, needs fast-forward)
+In the animation loop, measure the distance from each **hazardous or hidden** asteroid to Earth's simulated position.
+When one enters a clearly labeled danger zone (e.g. 0.05 AU) **while time is running**:
+```js
+playReaction('near_miss_start'); sfx('whoosh');
+// ...when it leaves the zone:
+playReaction(Math.random() < 0.5 ? 'near_miss_end_1' : 'near_miss_end_2');
+```
+Rate-limit it (at most one every ~20 s) or it'll talk nonstop. Label the zone "simulated danger zone": positions are approximate.
 
-✅ **Check:** turn narration on and the intro plays. Click Apophis and its "screwed" report plays. Dragging the sliders from a safe
-orbit to an Earth-crossing one changes the badge and plays a new joke at each tier change. Click an asteroid with no clip and nothing breaks.
-Works on the deployed site, not just localhost.
+### Rules
+- **Never put the key in browser code.** Live voice goes through `web/api/say.js` only. No `VITE_`-prefixed key, ever.
+- Narration **starts on** (clicks are user gestures, so sound is allowed), with a mute button. Subtitles cover the silent case.
+- Never say an asteroid *will* hit. The what-if is always labeled hypothetical, and CAPCOM always says so out loud.
 
 ---
 
