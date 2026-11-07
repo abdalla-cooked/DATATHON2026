@@ -15,10 +15,9 @@ export const PLANETS = [
 
 const wrap360 = (x) => ((x % 360) + 360) % 360;
 
-// Orbital elements (kepler.js shape: a, e, i, om, w, ma) for `planet` on `date`.
-export function planetElementsAt(planet, date = new Date()) {
-  const jd = date.getTime() / 86400000 + 2440587.5; // Unix ms → Julian Date
-  const T = (jd - 2451545.0) / 36525;               // Julian centuries since J2000
+// Orbital elements (kepler.js shape: a, e, i, om, w, ma) for `planet` on Julian Date `jd`.
+export function planetElementsAt(planet, jd) {
+  const T = (jd - 2451545.0) / 36525; // Julian centuries since J2000
   const L = planet.L + planet.dL * T;
   return {
     a: planet.a, e: planet.e, i: planet.i, om: planet.om,
