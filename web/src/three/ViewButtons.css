@@ -27,6 +27,13 @@
   .view-buttons { top: 118px; flex-direction: row; flex-wrap: wrap; right: 16px; }
 }
 
+/* "Highlight risk" toggle: asteroids are plain rock until it's on, then red = high risk, blue = low risk */
+.view-buttons .cloud-info .risk-toggle { text-align: center; font-weight: 600; }
+.view-buttons .cloud-info .risk-toggle.on { background: linear-gradient(90deg, #c22a2a, #2f62d8); border-color: transparent; color: #fff; }
+.view-buttons .cloud-info .risk-toggle:disabled { opacity: .45; cursor: not-allowed; }
+.view-buttons .cloud-info .risk-key .hot { color: #ff3030; }
+.view-buttons .cloud-info .risk-key .cold { color: #3d7bff; }
+
 /* Act 4 caption: the hidden-hazards discovery */
 .view-buttons .cloud-info .hidden-card {
   margin: 4px 0 0; padding-top: 6px; border-top: 1px solid #1f2940;
