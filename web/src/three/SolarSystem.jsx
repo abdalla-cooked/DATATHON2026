@@ -8,6 +8,9 @@ import { orbitLine, positionAt } from './kepler.js';
 
 const COLD = new THREE.Color(0x3a7bff); // p = 0, safe
 const HOT = new THREE.Color(0xff3030);  // p = 1, hazardous
+const MISS = new THREE.Color(0xff00ff);        // mistakes mode: real hazard the model missed
+const FALSE_ALARM = new THREE.Color(0xffd400); // mistakes mode: flagged but not actually hazardous
+const DIM = new THREE.Color(0x2a3550);         // mistakes mode: correct prediction, faded out
 const POINT_SIZE = 6;                    // pixels on screen (sizeAttenuation off). Try 3 once the real ~30k points load.
 
 // Round dot sprite, so points render as circles instead of squares.
@@ -58,8 +61,15 @@ export default function SolarSystem({ asteroids, metrics, view, onSelect }) {
     addEventListener('resize', resize);
     resize();
 
-    renderer.setAnimationLoop(() => { controls.update(); renderer.render(scene, camera); });
-    sceneRef.current = { scene, camera, renderer };
+    const ctx = { scene, camera, renderer, points: null, shown: [], pulse: false };
+    sceneRef.current = ctx;
+    renderer.setAnimationLoop(() => {
+      controls.update();
+      if (ctx.points) {
+        ctx.points.material.size = ctx.pulse ? POINT_SIZE + 2.5 * (1 + Math.sin(performance.now() / 200)) : POINT_SIZE;
+      }
+      renderer.render(scene, camera);
+    });
 
     return () => {
       removeEventListener('resize', resize);
@@ -69,22 +79,35 @@ export default function SolarSystem({ asteroids, metrics, view, onSelect }) {
     };
   }, []);
 
-  // Step 3: every asteroid as one point, at its real position (mean anomaly `ma`),
-  // colored blue (safe) → red (hazardous) by the selected model's probability.
-  // Rebuilds when the data arrives or the model toggle changes.
-  // TODO(P2 step 4): testOnly filter + showMistakes coloring (needs metrics[model].threshold).
+  // Steps 3–4: every asteroid as one point, at its real position (mean anomaly `ma`).
+  //   Normal mode:   blue (safe) → red (hazardous) by the selected model's probability.
+  //   Mistakes mode: magenta = real hazard the model missed, yellow = false alarm, everything correct fades out.
+  //   testOnly:      only asteroids from the unseen test set.
+  // Rebuilds whenever the data or any toggle changes.
   useEffect(() => {
     const ctx = sceneRef.current;
     if (!ctx || !asteroids) return;
     const key = view.model === 'A' ? 'pA' : 'pB';
-    const list = asteroids.filter((a) => a.e < 1); // bound orbits only; positionAt can't place e ≥ 1
+    const thr = metrics?.[view.model]?.threshold;
+    const mistakes = view.showMistakes && thr != null; // needs the model's threshold from metrics.json
+
+    const list = asteroids.filter((a) => a.e < 1 && (!view.testOnly || a.test)); // bound orbits only
+
+    const colorOf = (a, out) => {
+      const p = a[key] ?? 0;
+      if (!mistakes) return out.copy(COLD).lerp(HOT, p);
+      const flagged = p >= thr;
+      if (a.pha === 1 && !flagged) return out.copy(MISS);
+      if (a.pha === 0 && flagged) return out.copy(FALSE_ALARM);
+      return out.copy(DIM);
+    };
 
     const pos = new Float32Array(list.length * 3);
     const col = new Float32Array(list.length * 3);
     const c = new THREE.Color();
     list.forEach((a, k) => {
       positionAt(a).toArray(pos, k * 3);
-      c.copy(COLD).lerp(HOT, a[key] ?? 0).toArray(col, k * 3);
+      colorOf(a, c).toArray(col, k * 3);
     });
     const geometry = new THREE.BufferGeometry();
     geometry.setAttribute('position', new THREE.BufferAttribute(pos, 3));
@@ -95,13 +118,15 @@ export default function SolarSystem({ asteroids, metrics, view, onSelect }) {
     ctx.scene.add(points);
     ctx.points = points;
     ctx.shown = list; // index in the cloud → asteroid object (for click-to-inspect in step 5)
+    ctx.pulse = mistakes; // the animation loop makes the dots pulse while mistakes mode is on
 
     return () => {
       ctx.scene.remove(points);
       geometry.dispose();
       points.material.dispose();
+      ctx.points = null;
     };
-  }, [asteroids, view.model]);
+  }, [asteroids, metrics, view.model, view.testOnly, view.showMistakes]);
 
   // TODO(P2 step 5): raycast on click → onSelect(asteroid).
 
