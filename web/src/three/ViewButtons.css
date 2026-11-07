@@ -1,0 +1,28 @@
+/* P2 owns this file. Camera preset buttons, top-left under the top bar. */
+.view-buttons {
+  position: fixed; left: 16px; top: 76px; z-index: 6;
+  display: flex; flex-direction: column; gap: 6px;
+  font: 12px system-ui, sans-serif;
+}
+.view-buttons button {
+  background: rgba(10, 14, 25, .85); backdrop-filter: blur(6px);
+  color: #dde; border: 1px solid #1f2940; border-radius: 6px;
+  padding: 5px 10px; font: inherit; cursor: pointer; text-align: left;
+}
+.view-buttons button.on { background: #3a7bff; border-color: #3a7bff; color: #fff; }
+.view-buttons button:focus-visible { outline: 2px solid #3a7bff; outline-offset: 2px; }
+
+/* "Show all asteroids" switch + count caption under the buttons */
+.view-buttons .cloud-info {
+  margin-top: 4px; padding: 6px 10px; max-width: 220px;
+  background: rgba(10, 14, 25, .85); backdrop-filter: blur(6px);
+  border: 1px solid #1f2940; border-radius: 6px; color: #dde;
+  display: flex; flex-direction: column; gap: 4px;
+}
+.view-buttons .cloud-info label { cursor: pointer; }
+.view-buttons .cloud-info small { color: #8b95aa; font-size: 11px; line-height: 1.4; font-variant-numeric: tabular-nums; }
+
+/* phones: the top bar wraps taller, so sit lower and lay the buttons out in a row */
+@media (max-width: 760px) {
+  .view-buttons { top: 118px; flex-direction: row; flex-wrap: wrap; right: 16px; }
+}

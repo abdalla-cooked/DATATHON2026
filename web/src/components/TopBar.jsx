@@ -13,7 +13,7 @@ export default function TopBar({ view, setView }) {
           <button className={view.model === 'A' ? 'on' : ''} onClick={() => set({ model: 'A' })}
             title="Uses every feature, including MOID and size">Model A · all features</button>
           <button className={view.model === 'B' ? 'on' : ''} onClick={() => set({ model: 'B' })}
-            title="MOID and H removed. Has to infer Earth-crossing geometry from the orbit shape">Model B · orbit only</button>
+            title="MOID removed, size kept. Has to infer Earth-crossing geometry from the orbit shape">Model B · no MOID</button>
         </div>
         <label><input type="checkbox" checked={view.testOnly} onChange={(e) => set({ testOnly: e.target.checked })} /> Unseen test set only</label>
         <label><input type="checkbox" checked={view.showMistakes} onChange={(e) => set({ showMistakes: e.target.checked })} /> Show mistakes</label>

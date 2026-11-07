@@ -1,10 +1,10 @@
 // Feature order for each model. MUST match the order P1 trained with (see the comment at the top of each model file).
-// If the team decides Model B keeps H (size), add 'H' to FEAT_B here and in train.py. Nothing else changes.
+// Model B keeps H (size) and drops MOID, matching train.py.
 import { score as scoreA } from '../model/model_A.js';
 import { score as scoreB } from '../model/model_B.js';
 
 export const FEAT_A = ['a', 'e', 'i', 'om', 'w', 'q', 'ad', 'H', 'moid'];
-export const FEAT_B = ['a', 'e', 'i', 'om', 'w', 'q', 'ad'];
+export const FEAT_B = ['a', 'e', 'i', 'om', 'w', 'q', 'ad', 'H'];
 
 export function scoreBoth(el) {
   return {

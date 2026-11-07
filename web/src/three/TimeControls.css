@@ -1,0 +1,22 @@
+/* P2 owns this file. Bottom-center time bar over the 3D scene. */
+.time-controls {
+  position: fixed; left: 50%; bottom: 16px; transform: translateX(-50%); z-index: 6;
+  display: flex; align-items: center; gap: 10px;
+  width: min(560px, calc(100vw - 32px)); padding: 8px 12px;
+  background: rgba(10, 14, 25, .85); backdrop-filter: blur(6px);
+  border: 1px solid #1f2940; border-radius: 8px;
+  color: #dde; font: 13px system-ui, sans-serif;
+}
+.time-controls button, .time-controls select {
+  background: #1a2233; color: #dde; border: 1px solid #334; border-radius: 6px;
+  padding: 4px 8px; font: inherit; cursor: pointer;
+}
+.time-controls .tc-play { width: 34px; }
+.time-controls .tc-date { font-variant-numeric: tabular-nums; min-width: 84px; }
+.time-controls input[type="range"] { flex: 1; min-width: 60px; accent-color: #3a7bff; }
+.time-controls :focus-visible { outline: 2px solid #3a7bff; outline-offset: 2px; }
+
+/* keep clear of the legend (bottom-left) on mid-size screens */
+@media (max-width: 1100px) { .time-controls { bottom: 52px; } }
+/* phones: the side panel moves to the bottom 45vh */
+@media (max-width: 760px) { .time-controls { bottom: calc(45vh + 44px); } .time-controls .tc-today { display: none; } }

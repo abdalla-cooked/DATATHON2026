@@ -23,9 +23,9 @@ export default function LearnedPanel({ metrics: m, onPick }) {
         <h3>Take away the answer key</h3>
         <div className="ab">
           <div>Model A<b>{m.A.roc_auc.toFixed(3)}</b><span className="muted small">ROC-AUC, all features</span></div>
-          <div>Model B<b>{m.B.roc_auc.toFixed(3)}</b><span className="muted small">ROC-AUC, orbit only</span></div>
+          <div>Model B<b>{m.B.roc_auc.toFixed(3)}</b><span className="muted small">ROC-AUC, no MOID</span></div>
         </div>
-        <p className="muted small">Without MOID, Model B has to work out from the orbit's shape whether it crosses Earth's path.</p>
+        <p className="muted small">Model B gets size and orbit shape but no MOID, so it has to work out from the shape whether the orbit crosses Earth's path.</p>
       </div>
 
       {rc && (
@@ -42,6 +42,7 @@ export default function LearnedPanel({ metrics: m, onPick }) {
             }} />
           </div>
           <p className="muted small">Share of test asteroids with a recorded pass within 0.05 AU of Earth. The model never saw this data.</p>
+          {rc.note && <p className="muted small">{rc.note}</p>}
         </div>
       )}
 
