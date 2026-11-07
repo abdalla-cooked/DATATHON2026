@@ -23,6 +23,18 @@ const DOT = (() => {
   return new THREE.CanvasTexture(cv);
 })();
 
+// White ring sprite that marks the selected asteroid.
+const RING = (() => {
+  const s = 64, cv = document.createElement('canvas');
+  cv.width = cv.height = s;
+  const g = cv.getContext('2d');
+  g.strokeStyle = '#fff'; g.lineWidth = 6;
+  g.beginPath(); g.arc(s / 2, s / 2, s / 2 - 5, 0, Math.PI * 2); g.stroke();
+  return new THREE.CanvasTexture(cv);
+})();
+
+const PICK_RADIUS = 10; // pixels: how close a click must be to a dot to select it
+
 const PLANETS = [
   { name: 'Mercury', a: 0.387, e: 0.206, i: 7.0, om: 48.3, w: 29.1 },
   { name: 'Venus',   a: 0.723, e: 0.007, i: 3.4, om: 76.7, w: 54.9 },
@@ -128,7 +140,65 @@ export default function SolarSystem({ asteroids, metrics, view, onSelect }) {
     };
   }, [asteroids, metrics, view.model, view.testOnly, view.showMistakes]);
 
-  // TODO(P2 step 5): raycast on click → onSelect(asteroid).
+  // Step 5: click a dot → draw its orbit in white, mark it, and tell the app (onSelect → side panel).
+  // Picking is done in screen space (nearest dot within PICK_RADIUS pixels), which works the same at
+  // every zoom level because the dots are a fixed pixel size. Drags (rotating the camera) are ignored.
+  const onSelectRef = useRef(onSelect);
+  onSelectRef.current = onSelect;
+
+  useEffect(() => {
+    const ctx = sceneRef.current;
+    const canvas = canvasRef.current;
+    if (!ctx) return;
+    let down = null, selectedLine = null, marker = null;
+    const v = new THREE.Vector3();
+
+    const clearSelection = () => {
+      for (const obj of [selectedLine, marker]) {
+        if (!obj) continue;
+        ctx.scene.remove(obj);
+        obj.geometry.dispose();
+        obj.material.dispose();
+      }
+      selectedLine = marker = null;
+    };
+
+    const onPointerDown = (ev) => { down = { x: ev.clientX, y: ev.clientY }; };
+    const onPointerUp = (ev) => {
+      if (!down || Math.hypot(ev.clientX - down.x, ev.clientY - down.y) > 5) return; // it was a drag
+      const r = canvas.getBoundingClientRect();
+      const mx = ev.clientX - r.left, my = ev.clientY - r.top;
+      const pos = ctx.points?.geometry.attributes.position;
+      if (!pos) return;
+
+      let best = -1, bestD = PICK_RADIUS;
+      for (let k = 0; k < pos.count; k++) {
+        v.fromBufferAttribute(pos, k).project(ctx.camera);
+        if (v.z > 1) continue; // behind the camera
+        const d = Math.hypot((v.x + 1) / 2 * r.width - mx, (1 - v.y) / 2 * r.height - my);
+        if (d < bestD) { bestD = d; best = k; }
+      }
+      if (best < 0) return;
+
+      const a = ctx.shown[best];
+      clearSelection();
+      selectedLine = orbitLine(a, 0xffffff, 1);
+      marker = new THREE.Points(
+        new THREE.BufferGeometry().setFromPoints([positionAt(a)]),
+        new THREE.PointsMaterial({ size: POINT_SIZE * 2.5, sizeAttenuation: false, map: RING, transparent: true, depthTest: false }),
+      );
+      ctx.scene.add(selectedLine, marker);
+      onSelectRef.current?.(a);
+    };
+
+    canvas.addEventListener('pointerdown', onPointerDown);
+    canvas.addEventListener('pointerup', onPointerUp);
+    return () => {
+      canvas.removeEventListener('pointerdown', onPointerDown);
+      canvas.removeEventListener('pointerup', onPointerUp);
+      clearSelection();
+    };
+  }, []);
 
   return <canvas id="scene" ref={canvasRef} />;
 }
