@@ -15,6 +15,17 @@ export const tierOf = (risk01, thr) => (risk01 < 0.2 ? 'chill' : risk01 < thr ? 
 // Over 90 the rookie stops being nervous and properly panics (and the alarm plays instead of the radio).
 export const PANIC_OVER = 90;
 export const isPanic = (riskScore) => riskScore > PANIC_OVER;   // riskScore is 0-100
+// Over 95 the rookie sometimes (DOOM_CHANCE of asteroids, seeded so it's stable per asteroid) screams one of these.
+export const DOOM_OVER = 95;
+export const DOOM_CHANCE = 0.35;
+export const DOOM_LINES = [
+  "[screaming] We're all gonna die!",
+  "[screaming] We're all gonna DIE!",
+  "[panicking] This is it. We're all dead. We're so dead!",
+  "[screaming] Oh no no no, we're all gonna die!",
+  "[hyperventilating] Tell my mom I love her! We're all doomed!",
+  "[screaming] It's over! It's all over! We're gonna die!",
+];
 
 // [delivery tags] like "[panicking]" are acted by ElevenLabs v4, never spoken; subtitles hide them.
 export const stripTags = (text) => text.replace(/\[[^\]]*\]\s*/g, '').trim();
@@ -70,6 +81,8 @@ export function paramsFor(a, kind, thr) {
 }
 
 // Closing exchange: over 90 the full panic-and-calm-down scene, flagged = the "keep watching" scene, else one line.
+const doomFor = (P, pick) => (P.r > DOOM_OVER && pick() < DOOM_CHANCE ? [['INTERN', DOOM_LINES[Math.floor(pick() * DOOM_LINES.length)]]] : []);
+
 const closeFor = (P, R, choose) => (isPanic(P.r) ? R.close.panic : P.t === 'screwed' ? R.close.screwed : [choose(R.close[P.t])]);
 
 // [[who, text], ...] for the given params, or [] if the params can't make that dialogue.
@@ -85,6 +98,7 @@ export function buildLines(P, L) {
     const lines = [
       ['CAPCOM', fill(R.open, { name: P.n, risk: P.r })],
       ['INTERN', choose(R.react[isPanic(P.r) ? 'panic' : P.t])],
+      ...doomFor(P, pick),
     ];
     if (L.why[P.y]) lines.push(['CAPCOM', fill(R.because, { why: choose(L.why[P.y]) })]);
     lines.push(...closeFor(P, R, choose));
@@ -97,7 +111,7 @@ export function buildLines(P, L) {
   if (P.k === 'whatif') return P.e > 0 ? whatif(P.n) : [];
   if (P.k === 'custom') {
     // your own asteroid from the sliders: verdict, then the hypothetical impact
-    const lines = [['CAPCOM', `Your asteroid. Risk score ${P.r}.`], ['INTERN', choose(R.react[isPanic(P.r) ? 'panic' : P.t])]];
+    const lines = [['CAPCOM', `Your asteroid. Risk score ${P.r}.`], ['INTERN', choose(R.react[isPanic(P.r) ? 'panic' : P.t])], ...doomFor(P, pick)];
     lines.push(...closeFor(P, R, choose));
     return P.e > 0 ? [...lines, ...whatif('your asteroid')] : lines;
   }

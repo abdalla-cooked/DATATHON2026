@@ -38,6 +38,13 @@ SFX_MODEL_ID = "eleven_text_to_sound_v2"
 OUT_FORMAT = "mp3_44100_128"
 HIROSHIMA_MT = 0.015
 PRESETS = ["Apophis", "Bennu", "Didymos"]
+DOOM_OVER, DOOM_CHANCE = 95, 0.35   # over 95 the rookie sometimes screams one of DOOM_LINES (same as dialogue.js)
+DOOM_LINES = ["[screaming] We're all gonna die!",
+              "[screaming] We're all gonna DIE!",
+              "[panicking] This is it. We're all dead. We're so dead!",
+              "[screaming] Oh no no no, we're all gonna die!",
+              "[hyperventilating] Tell my mom I love her! We're all doomed!",
+              "[screaming] It's over! It's all over! We're gonna die!"]
 PANIC_OVER = 90                      # risk score over 90: the rookie panics and the alarm plays (same as dialogue.js)
 
 
@@ -98,6 +105,7 @@ def report(a, L, thr, rng):
     why = rng.choice(L["why"].get(a["why"], ["of the shape of its orbit"]))
     lines = [("CAPCOM", L["report"]["open"].format(name=short_name(a["name"]), risk=risk)),
              ("INTERN", rng.choice(L["report"]["react"]["panic" if panic else t])),
+             *([("INTERN", rng.choice(DOOM_LINES))] if risk > DOOM_OVER and rng.random() < DOOM_CHANCE else []),
              ("CAPCOM", L["report"]["because"].format(why=why))]
     close = L["report"]["close"]
     lines += close["panic"] if panic else close["screwed"] if t == "screwed" else [rng.choice(close[t])]
