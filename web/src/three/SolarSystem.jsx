@@ -4,7 +4,21 @@
 import { useEffect, useRef } from 'react';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
-import { orbitLine } from './kepler.js';
+import { orbitLine, positionAt } from './kepler.js';
+
+const COLD = new THREE.Color(0x3a7bff); // p = 0, safe
+const HOT = new THREE.Color(0xff3030);  // p = 1, hazardous
+const POINT_SIZE = 6;                    // pixels on screen (sizeAttenuation off). Try 3 once the real ~30k points load.
+
+// Round dot sprite, so points render as circles instead of squares.
+const DOT = (() => {
+  const s = 64, cv = document.createElement('canvas');
+  cv.width = cv.height = s;
+  const g = cv.getContext('2d');
+  g.fillStyle = '#fff';
+  g.beginPath(); g.arc(s / 2, s / 2, s / 2 - 1, 0, Math.PI * 2); g.fill();
+  return new THREE.CanvasTexture(cv);
+})();
 
 const PLANETS = [
   { name: 'Mercury', a: 0.387, e: 0.206, i: 7.0, om: 48.3, w: 29.1 },
@@ -55,7 +69,40 @@ export default function SolarSystem({ asteroids, metrics, view, onSelect }) {
     };
   }, []);
 
-  // TODO(P2 step 3–4): when `asteroids` / `metrics` / `view` change, rebuild the THREE.Points cloud.
+  // Step 3: every asteroid as one point, at its real position (mean anomaly `ma`),
+  // colored blue (safe) → red (hazardous) by the selected model's probability.
+  // Rebuilds when the data arrives or the model toggle changes.
+  // TODO(P2 step 4): testOnly filter + showMistakes coloring (needs metrics[model].threshold).
+  useEffect(() => {
+    const ctx = sceneRef.current;
+    if (!ctx || !asteroids) return;
+    const key = view.model === 'A' ? 'pA' : 'pB';
+    const list = asteroids.filter((a) => a.e < 1); // bound orbits only; positionAt can't place e ≥ 1
+
+    const pos = new Float32Array(list.length * 3);
+    const col = new Float32Array(list.length * 3);
+    const c = new THREE.Color();
+    list.forEach((a, k) => {
+      positionAt(a).toArray(pos, k * 3);
+      c.copy(COLD).lerp(HOT, a[key] ?? 0).toArray(col, k * 3);
+    });
+    const geometry = new THREE.BufferGeometry();
+    geometry.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+    geometry.setAttribute('color', new THREE.BufferAttribute(col, 3));
+    const points = new THREE.Points(geometry, new THREE.PointsMaterial({
+      size: POINT_SIZE, sizeAttenuation: false, vertexColors: true, map: DOT, alphaTest: 0.5, transparent: true,
+    }));
+    ctx.scene.add(points);
+    ctx.points = points;
+    ctx.shown = list; // index in the cloud → asteroid object (for click-to-inspect in step 5)
+
+    return () => {
+      ctx.scene.remove(points);
+      geometry.dispose();
+      points.material.dispose();
+    };
+  }, [asteroids, view.model]);
+
   // TODO(P2 step 5): raycast on click → onSelect(asteroid).
 
   return <canvas id="scene" ref={canvasRef} />;
