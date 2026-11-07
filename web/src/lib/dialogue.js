@@ -12,6 +12,21 @@ export const TIERS = ['chill', 'sus', 'screwed'];
 const HIROSHIMA_MT = 0.015;
 
 export const tierOf = (risk01, thr) => (risk01 < 0.2 ? 'chill' : risk01 < thr ? 'sus' : 'screwed');
+// Over 90 the rookie stops being nervous and properly panics (and the alarm plays instead of the radio).
+export const PANIC_OVER = 90;
+export const isPanic = (riskScore) => riskScore > PANIC_OVER;   // riskScore is 0-100
+
+// [delivery tags] like "[panicking]" are acted by ElevenLabs v4, never spoken; subtitles hide them.
+export const stripTags = (text) => text.replace(/\[[^\]]*\]\s*/g, '').trim();
+// Which intern_tones setting fits a line, from its tag (template lines; Claude-written lines get the risk band's tone).
+export function toneOf(who, text) {
+  if (who !== 'INTERN') return '';
+  const tag = (text.match(/^\[([^\]]*)\]/)?.[1] || '').toLowerCase();
+  if (/panick|scream|hyperventil|whimper|horrified/.test(tag)) return 'panic';
+  if (/relie|sigh|exhale/.test(tag)) return 'relieved';
+  if (/nervous|anxious|uneasy|shak|voice crack/.test(tag)) return 'worried';
+  return '';
+}
 
 // '99942 Apophis (2004 MN4)' -> 'Apophis', '(2019 UQ7)' -> '2019 UQ7', '411165 (2010 DF1)' -> '2010 DF1'
 export function shortName(full) {
@@ -54,6 +69,9 @@ export function paramsFor(a, kind, thr) {
   };
 }
 
+// Closing exchange: over 90 the full panic-and-calm-down scene, flagged = the "keep watching" scene, else one line.
+const closeFor = (P, R, choose) => (isPanic(P.r) ? R.close.panic : P.t === 'screwed' ? R.close.screwed : [choose(R.close[P.t])]);
+
 // [[who, text], ...] for the given params, or [] if the params can't make that dialogue.
 export function buildLines(P, L) {
   const pick = rngFor(`${P.k}|${P.n}`);
@@ -66,10 +84,10 @@ export function buildLines(P, L) {
   if (P.k === 'report') {
     const lines = [
       ['CAPCOM', fill(R.open, { name: P.n, risk: P.r })],
-      ['INTERN', choose(R.react[P.t])],
+      ['INTERN', choose(R.react[isPanic(P.r) ? 'panic' : P.t])],
     ];
     if (L.why[P.y]) lines.push(['CAPCOM', fill(R.because, { why: choose(L.why[P.y]) })]);
-    lines.push(...(P.t === 'screwed' ? R.close.screwed : [choose(R.close[P.t])]));
+    lines.push(...closeFor(P, R, choose));
     if ((P.t === 'screwed') !== (P.p === 1)) lines.push(...R.nasa_disagrees);
     return lines;
   }
@@ -79,8 +97,8 @@ export function buildLines(P, L) {
   if (P.k === 'whatif') return P.e > 0 ? whatif(P.n) : [];
   if (P.k === 'custom') {
     // your own asteroid from the sliders: verdict, then the hypothetical impact
-    const lines = [['CAPCOM', `Your asteroid. Risk score ${P.r}.`], ['INTERN', choose(R.react[P.t])]];
-    lines.push(...(P.t === 'screwed' ? R.close.screwed : [choose(R.close[P.t])]));
+    const lines = [['CAPCOM', `Your asteroid. Risk score ${P.r}.`], ['INTERN', choose(R.react[isPanic(P.r) ? 'panic' : P.t])]];
+    lines.push(...closeFor(P, R, choose));
     return P.e > 0 ? [...lines, ...whatif('your asteroid')] : lines;
   }
   return [];

@@ -5,7 +5,7 @@
 //   4. subtitles only (GitHub Pages, offline, quota used up)
 // No API key ever reaches the browser. Subtitles always show, so it also works with the sound off.
 import L from './lines.js';
-import { buildLines, paramsFor, toQuery } from './dialogue.js';
+import { buildLines, isPanic, paramsFor, stripTags, toQuery } from './dialogue.js';
 
 let manifest = null;
 let live = false;
@@ -22,9 +22,10 @@ const ready = Promise.all([
   getJSON('api/health').then((h) => { live = Boolean(h?.live); scripted = Boolean(h?.script); }),
 ]);
 
-const caption = (c) => listeners.forEach((fn) => fn(c));
+// subtitles never show the [delivery tags] that tell the voice how to act
+const caption = (c) => listeners.forEach((fn) => fn(c && { ...c, text: stripTags(c.text) }));
 const wait = (ms) => new Promise((r) => setTimeout(r, ms));
-const readingTime = (text) => Math.max(1200, text.length * 65);
+const readingTime = (text) => Math.max(1200, stripTags(text).length * 65);
 
 // Starts loading a clip right away (so the next line is ready when this one ends).
 function load(src) {
@@ -90,12 +91,14 @@ async function writtenDialogue(P) {
   }
 }
 
-// Claims the turn, shows a "reading the data" caption + radio crackle, and asks Claude for a script.
+// Claims the turn, plays the radio crackle (or the alarm, for a risk score over 90) while Claude writes the script.
 async function playWritten(P, sfx) {
   stop();
   const mine = ++token;
-  caption({ who: 'RADIO', text: 'Mission Control is reading the data…' });
-  if (manifest?.sfx?.radio) playClip(load(manifest.sfx.radio), '', mine);
+  const alert = isPanic(P.r);
+  caption(alert ? { who: 'ALERT', text: 'ALERT: risk score over 90' } : { who: 'RADIO', text: 'Mission Control is reading the data…' });
+  const cue = manifest?.sfx?.[alert ? 'alarm' : 'radio'];
+  if (cue) playClip(load(cue), '', mine);
   const lines = await writtenDialogue(P);
   if (mine !== token) return true;                     // the user already clicked something else
   if (!lines) { caption(null); return false; }
@@ -103,7 +106,7 @@ async function playWritten(P, sfx) {
   return true;
 }
 
-const screamAt = (lines) => lines.findIndex((l) => l.who === 'INTERN' && /^(A{3,}|AH|NO+)/i.test(l.text));
+const screamAt = (lines) => lines.findIndex((l) => l.who === 'INTERN' && /^(A{3,}|AH|NO+)/i.test(stripTags(l.text)));
 
 export function stop() {
   token++;
@@ -150,9 +153,8 @@ export async function playAsteroid(a, part = 'report', thr) {
   }
   const recorded = manifest?.asteroids?.[a.pdes];
   const lines = recorded?.[kind] || liveDialogue(P);
-  const tier = recorded?.tier || P.t;
   if (kind === 'whatif') return playDialogue(lines, { at: [screamAt(lines), 'impact'] });
-  return playDialogue(lines, { before: kind === 'report' && tier === 'screwed' ? 'alarm' : 'radio' });
+  return playDialogue(lines, { before: kind === 'report' && isPanic(P.r) ? 'alarm' : 'radio' });
 }
 
 // Your own asteroid from the sliders. risk01 = the in-browser model's score, sizeM / speedKms for the what-if.

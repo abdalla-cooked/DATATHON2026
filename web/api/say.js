@@ -5,10 +5,10 @@
 // Callers can't make it say anything else: template lines are rebuilt from validated numbers (dialogue.js),
 // and Claude-written lines must carry the server's signature (_sign.js).
 import L from '../src/lib/lines.js';
-import { buildLines, sanitize } from '../src/lib/dialogue.js';
+import { buildLines, sanitize, toneOf } from '../src/lib/dialogue.js';
 import { verify } from './_sign.js';
 
-const MODEL_ID = 'eleven_flash_v2_5';                       // lowest-latency ElevenLabs model
+const MODEL_ID = process.env.LIVE_VOICE_MODEL || 'eleven_v4_turbo'; // fast (~100 ms) AND acts out [delivery tags] like [panicking]
 const PER_IP_PER_MIN = Number(process.env.LIVE_LINES_PER_MIN || 40);
 const CHARS_PER_HOUR = Number(process.env.LIVE_CHARS_PER_HOUR || 20000);  // protects the quota per instance
 const hits = new Map();                                       // ip -> timestamps (best effort, per instance)
@@ -50,6 +50,7 @@ export default async function handler(req, res) {
   if (!line) return send(res, 400, 'bad request');
 
   const [who, text] = line;
+  tone = toneOf(who, text) || tone;  // the line's own [tag] picks the delivery; else the risk band's tone
   const key = process.env.ELEVENLABS_API_KEY;
   const voice = process.env[`${who}_VOICE_ID`];
   if (!key || !voice) return send(res, 503, 'live voice not configured');

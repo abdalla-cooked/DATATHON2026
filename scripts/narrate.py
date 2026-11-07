@@ -22,6 +22,7 @@ import hashlib
 import json
 import os
 import random
+import re
 import sys
 
 import pandas as pd
@@ -32,11 +33,26 @@ try:   # use the Windows certificate store, so antivirus HTTPS scanning (e.g. No
 except ImportError:
     pass
 
-MODEL_ID = "eleven_multilingual_v2"
+MODEL_ID = "eleven_v4"              # most expressive: acts out [delivery tags] like [panicking]
 SFX_MODEL_ID = "eleven_text_to_sound_v2"
 OUT_FORMAT = "mp3_44100_128"
 HIROSHIMA_MT = 0.015
 PRESETS = ["Apophis", "Bennu", "Didymos"]
+PANIC_OVER = 90                      # risk score over 90: the rookie panics and the alarm plays (same as dialogue.js)
+
+
+def tone_of(speaker, text):
+    """Python twin of dialogue.js toneOf: the line's [tag] picks the INTERN's voice settings."""
+    if speaker != "INTERN" or not text.startswith("["):
+        return ""
+    tag = text[1:text.find("]")].lower()
+    if re.search(r"panick|scream|hyperventil|whimper|horrified", tag):
+        return "panic"
+    if re.search(r"relie|sigh|exhale", tag):
+        return "relieved"
+    if re.search(r"nervous|anxious|uneasy|shak|voice crack", tag):
+        return "worried"
+    return ""
 
 
 # ------------------------------------------------------------------ spoken numbers
@@ -77,12 +93,14 @@ def short_name(full):
 # ------------------------------------------------------------------ dialogue builders
 def report(a, L, thr, rng):
     t = tier(a["pB"], thr)
+    risk = round(a["pB"] * 100)
+    panic = risk > PANIC_OVER
     why = rng.choice(L["why"].get(a["why"], ["of the shape of its orbit"]))
-    lines = [("CAPCOM", L["report"]["open"].format(name=short_name(a["name"]), risk=round(a["pB"] * 100))),
-             ("INTERN", rng.choice(L["report"]["react"][t])),
+    lines = [("CAPCOM", L["report"]["open"].format(name=short_name(a["name"]), risk=risk)),
+             ("INTERN", rng.choice(L["report"]["react"]["panic" if panic else t])),
              ("CAPCOM", L["report"]["because"].format(why=why))]
-    close = L["report"]["close"][t]
-    lines += close if t == "screwed" else [rng.choice(close)]
+    close = L["report"]["close"]
+    lines += close["panic"] if panic else close["screwed"] if t == "screwed" else [rng.choice(close[t])]
     if (t == "screwed") != (a["pha"] == 1):                   # the model disagrees with NASA
         lines += L["report"]["nasa_disagrees"]
     return t, [tuple(x) for x in lines]
@@ -114,12 +132,14 @@ def pick_asteroids(ast, metrics, limit):
 
 # ------------------------------------------------------------------ audio
 def clip_key(speaker, text):
-    return f"{speaker.lower()}_{hashlib.sha1(f'{speaker}|{text}'.encode()).hexdigest()[:10]}"
+    """The voice model is part of the key, so switching models re-records every line."""
+    return f"{speaker.lower()}_{hashlib.sha1(f'{MODEL_ID}|{speaker}|{text}'.encode()).hexdigest()[:10]}"
 
 
 class Studio:
-    def __init__(self, out_dir, voices, settings, dry):
+    def __init__(self, out_dir, voices, settings, dry, tones=None):
         self.out_dir, self.voices, self.settings, self.dry = out_dir, voices, settings, dry
+        self.tones = tones or {}
         self.todo, self.chars = {}, 0
         self.client = None
         if not dry:
@@ -150,7 +170,7 @@ class Studio:
         for n, (key, (speaker, text)) in enumerate(self.todo.items(), 1):
             audio = self.client.text_to_speech.convert(
                 self.voices[speaker], text=text, model_id=MODEL_ID, output_format=OUT_FORMAT,
-                voice_settings=VoiceSettings(**self.settings[speaker]))
+                voice_settings=VoiceSettings(**(self.tones.get(tone_of(speaker, text)) or self.settings[speaker])))
             with open(os.path.join(self.out_dir, f"{key}.mp3"), "wb") as f:
                 for chunk in audio:
                     f.write(chunk)
@@ -196,8 +216,10 @@ def main():
             sys.exit(f"asteroids.json has no '{col}' field. Rerun scripts/train.py first.")
     thr = metrics["B"]["threshold"]
     os.makedirs(args.out, exist_ok=True)
-    studio = Studio(args.out, None, L["voices"], args.dry_run)
-    fill = dict(hidden_count=metrics.get("hidden_hazards", {}).get("count", "hundreds of"))
+    studio = Studio(args.out, None, L["voices"], args.dry_run,
+                    {k: v for k, v in L.get("intern_tones", {}).items() if not k.startswith("_")})
+    hh = metrics.get("hidden_hazards", {})
+    fill = dict(hidden_count=hh.get("count", "hundreds of"), hidden_measured=hh.get("measured", "Dozens"))
 
     manifest = {"tiers": {"chill": 0.2, "screwed": thr},
                 "acts": {k: studio.dialogue([(s, x.format(**fill)) for s, x in v]) for k, v in L["acts"].items()},
@@ -233,6 +255,13 @@ def main():
     with open(os.path.join(args.out, "manifest.json"), "w", encoding="utf-8") as f:
         json.dump(manifest, f, indent=1, ensure_ascii=False)
     print(f"  {os.path.join(args.out, 'manifest.json')} written")
+
+    # delete line clips the new manifest no longer uses (old wording / old voice model); sound effects are kept
+    used = set(re.findall(r'audio/([\w.]+\.mp3)', json.dumps(manifest)))
+    stale = [f for f in os.listdir(args.out) if f.endswith(".mp3") and not f.startswith("sfx_") and f not in used]
+    for f in stale:
+        os.remove(os.path.join(args.out, f))
+    print(f"  removed {len(stale)} unused old clips")
 
 
 if __name__ == "__main__":

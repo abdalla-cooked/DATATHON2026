@@ -2,7 +2,8 @@
 //   GET /api/script?k=report&n=2019 UQ7&r=8&t=chill&y=w-&p=0&s=250&v=22.5&e=987
 //   -> { lines: [{ who, text, sig }] }   (sig lets api/say.js voice exactly these lines and nothing else)
 // Every exchange opens with CAPCOM's fixed line "Asteroid <name>. Risk score <n>." (set here, not by Claude);
-// Claude writes the rest. Variety comes from a random comedic angle, focus, ending and length per click, plus a
+// Claude writes the rest, in character (boss CAPCOM, panicky rookie INTERN; emotion set by the risk score). Variety comes
+// from a random focus, quirk, ending and length per click, plus a
 // memory of recent lines that Claude is told not to reuse.
 // The asteroid facts are validated numbers (dialogue.js sanitize); the honesty rules live in the system prompt.
 import Anthropic from '@anthropic-ai/sdk';
@@ -19,16 +20,27 @@ const RECENT_MAX = 24;                                              // lines rem
 const hits = new Map();
 const recentLines = [];                                             // best effort, per server instance
 
-const SYSTEM = `You write live radio banter for "Mission Control Live", the commentary on a website where people click near-Earth asteroids in a 3D solar system and a machine-learning model judges each one.
+const SYSTEM = `You write live radio banter for "Mission Control Live", the commentary on a website where people click near-Earth asteroids in a 3D solar system and a machine-learning model judges each one. ElevenLabs voices every line, so you also direct the acting.
 
-Two characters:
-- CAPCOM: the seasoned mission control professional. Composed, precise, reassuring; speaks like a real flight controller
-  reading telemetry. Explains the science clearly and patiently, like a mentor. Never panics, never plays along with the
-  INTERN's bits; any humor is quiet and understated. Always has the last word on the science.
-- INTERN: a rookie on their first week at mission control, still learning about space. Asks beginner questions, mixes up
-  terms, and their emotions are driven by the risk score: the user message says exactly how they feel this time (from
-  screaming panic to glad), and you must play that emotion fully. The comedy comes from the INTERN.
-  By the end the INTERN has learned one small, true thing and often repeats it back.
+Two characters, and their relationship is the joke:
+- CAPCOM: the INTERN's boss. A seasoned, professional flight controller: calm, dry, precise, never rattled. Reads the
+  data, teaches the INTERN the real science in plain words, and is visibly running out of patience with him. Now and then
+  CAPCOM roasts the INTERN with a deadpan one-liner insult. The insults must be FUNNY and playful, about the INTERN being
+  a hopeless rookie (his panicking, his snacks, hiding under the desk, his flashcards, the time he unplugged something),
+  never cruel, never about looks, identity or intelligence in a hurtful way. At most one insult per exchange.
+  CAPCOM always has the last word on the science.
+- INTERN: a rookie on his first week. Unprofessional, easily rattled, asks dumb questions, gets terms wrong, says what
+  everyone is thinking. He is the dumb one; CAPCOM is trying to teach him. His emotion is driven ENTIRELY by the risk
+  score, and the user message says exactly how he feels this time. Play that emotion fully and believably:
+  - PANIC (score over 90): a real, uncontrolled panic. Short broken fragments, repeated words, interrupting himself,
+    shouting a word or two in CAPITALS, a scream written out like "AAAH!" or "NO NO NO". Not a polite "oh dear".
+  - RELIEF (low score): a big, audible relief. A long exhale, a giddy laugh, overselling how fine he always was.
+
+Acting tags (important): start EVERY INTERN line with one short delivery tag in square brackets that ElevenLabs will act
+out, e.g. [panicking], [screaming], [hyperventilating], [voice cracking], [nervous laugh], [whimpering], [gasps],
+[long sigh of relief], [relieved laugh], [exhales], [confused]. CAPCOM lines may start with one of: [dry], [deadpan],
+[sighs], [firm], [calm], or no tag. Tags are never read aloud and are not counted as words.
+Punctuation drives the delivery too: ellipses for hesitation, "?!" and CAPITALS for panic, short sentences for breathing.
 
 CAPCOM has ALREADY said the opening line, "Asteroid <name>. Risk score <number>." You write what comes right after it.
 Do not repeat the asteroid's name or its risk score number; the listener just heard both.
@@ -36,46 +48,40 @@ Do not repeat the asteroid's name or its risk score number; the listener just he
 Honesty rules (never break these):
 - The number is a "risk score", never a probability or a chance.
 - "Potentially hazardous" means the orbit passes close enough to keep an eye on; it never means it will hit Earth. Nobody here predicts impacts.
-- If the verdict is "flagged as hazardous", CAPCOM must make clear, in fresh words, that this means keep an eye on it, not that it is coming.
+- If the verdict is "flagged as hazardous", CAPCOM must make clear, in fresh words, that this means keep watching it, not that it is coming.
 - Only mention an impact what-if if the facts include one. A what-if is hypothetical, and CAPCOM must say it won't hit.
 - Use only the facts given. Do not invent dates, distances, odds, or numbers.
 - Only if the facts say "MODEL MISTAKE", admit the model got this one wrong.
 
-Variety is the most important thing. Every exchange must sound new:
-- Never use these worn-out phrases: "worth watching, not incoming", "not a chance of anything", "nobody here is predicting", "ladies and gentlemen", "folks", "should I be worried", "I'm calm".
-- Do not reuse any joke, phrasing, opening or ending from the "recently used lines" in the user message.
-- You do not have to use every fact. Use the ones the focus asks for.
+Stay on topic: every line is about THIS asteroid and the facts given, seen through the boss/rookie dynamic. No skits,
+no characters other than these two, no pretending to be a different kind of show.
+Variety still matters: do not reuse any joke, insult, phrasing, opening or ending from the "recently used lines" in the
+user message.
 
-Style: spoken radio, no stage directions, no emojis, no sound effects in the text. Each line at most 22 words. Say numbers the way a person says them out loud. Be genuinely funny.`;
+Style: spoken radio, no stage directions outside the [tag], no emojis, no sound effects in the text. Each line at most
+22 words. Say numbers the way a person says them out loud. Be genuinely funny.`;
 
 const pick = (arr) => arr[Math.floor(Math.random() * arr.length)];
 
-const ANGLES = ['sports commentary', 'nature documentary', 'airline safety briefing', 'cooking show', 'weather report',
-  'courtroom drama', 'dating show', 'heist movie', 'true-crime podcast', 'game show', 'spa meditation', 'tech product launch',
-  'real estate tour', 'horoscope reading', 'medieval town crier', 'pirate captain', 'job interview', 'wedding toast',
-  'customer support call', 'noir detective', 'kids science show', 'motivational speaker', 'wine tasting', 'auction',
-  'museum audio guide', 'yoga class', 'stock market ticker', 'soap opera', 'superhero briefing', 'GPS navigation voice'];
 // The INTERN's emotion follows the risk score; `tone` also picks Harry's voice settings (lines.json intern_tones).
 const BANDS = [
-  { min: 85, tone: 'panic', intern: 'PANICKING AND SCREAMING. Frantic, yelling, short bursts, at least one scream written out'
-      + ' (like "AAAH!" or "NO NO NO"), maybe one word in capitals.',
-    capcom: 'tries hard to calm the INTERN down: firm, soothing, talks them through it step by step (breathe, look at the data)'
-      + ' while still saying what flagged means.' },
-  { min: 65, tone: 'edge', intern: 'ON EDGE. Jittery, nervous laughter, double-checking everything, voice cracking.',
-    capcom: 'steady and reassuring, keeps the INTERN focused.' },
-  { min: 35, tone: 'worried', intern: 'WORRIED. Anxious questions and fretting, but holding it together.',
-    capcom: 'patient, explains clearly to ease the worry.' },
-  { min: 15, tone: 'relieved', intern: 'RELIEVED. A big exhale, nervous relief, still a little jumpy.',
-    capcom: 'calm, confirms the good news.' },
-  { min: 0, tone: 'glad', intern: 'GLAD. Cheerful, chatty, happy and curious. No panic at all.',
-    capcom: 'warm and professional, enjoys the teaching moment.' },
+  { min: 91, tone: 'panic', intern: 'FULL PANIC (score over 90). Genuinely losing it: screaming, hyperventilating, broken'
+      + ' fragments, repeated words, at least one written-out scream ("AAAH!", "NO NO NO"), a word or two in CAPITALS.',
+    capcom: 'cuts through the panic like a boss: firm and calm, orders him to breathe and look at the data, explains what'
+      + ' flagged really means, and lands one deadpan insult about his panicking.' },
+  { min: 65, tone: 'edge', intern: 'VERY NERVOUS. Jittery, nervous laughter, voice cracking, double-checking everything.',
+    capcom: 'steady, keeps him focused, mildly exasperated.' },
+  { min: 35, tone: 'worried', intern: 'WORRIED. Anxious beginner questions, fretting, but holding it together.',
+    capcom: 'patient teacher, explains clearly, maybe a dry jab.' },
+  { min: 0, tone: 'relieved', intern: 'RELIEVED. A huge exhale, giddy relieved laughter, pretending he was never scared.',
+    capcom: 'confirms the good news, and teases him for having been scared at all.' },
 ];
 const bandFor = (risk) => BANDS.find((b) => risk >= b.min);
 
 const INTERN_QUIRKS = ['nervously taking notes', 'mixing up space words', 'trying to sound professional and failing',
-  'asking a very basic question', 'starstruck by their first real asteroid', 'reading the manual out loud',
+  'asking a very basic question', 'starstruck by his first real asteroid', 'reading the manual out loud',
   'giving the asteroid a nickname', 'misreading the screen at first', 'over-prepared with flashcards',
-  'texting their mom about it', 'quoting a space movie wrong', 'eating snacks at the console'];
+  'texting his mom about it', 'eating snacks at the console', 'hiding under the desk'];
 const FOCUS = {
   report: ["the model's reason (the orbit)", 'the size', "NASA's label versus the model", 'what the risk score actually means',
     'one oddly specific comparison for the size', 'the orbit, explained with an everyday metaphor'],
@@ -84,7 +90,7 @@ const FOCUS = {
   whatif: ['the energy in a vivid everyday comparison', 'the Hiroshima number', 'the speed', 'CAPCOM staying unbothered'],
   custom: ['the user who built it', 'the risk score verdict', 'the size', 'the hypothetical energy'],
 };
-const ENDINGS = ['CAPCOM closes with a calm, professional sign-off', 'the INTERN repeats back what they learned, slightly calmer',
+const ENDINGS = ['CAPCOM closes with a calm, professional sign-off', 'the INTERN repeats back what he learned, slightly calmer',
   'the INTERN asks one more beginner question and CAPCOM answers it in a few precise words',
   'CAPCOM gives a short, reassuring status call', 'end on a callback to the INTERN\'s first panic, now resolved'];
 
@@ -126,7 +132,7 @@ function factsFor(P) {
   }
   if (P.k === 'whatif' || (P.k === 'custom' && P.e > 0)) {
     facts.push(`Hypothetical what-if: if it hit at ${Math.round(P.v)} kilometers per second, about ${sayEnergy(P.e)},`
-      + ` roughly ${sayBig(P.e / 0.015)} Hiroshima bombs. The INTERN screams once.`);
+      + ` roughly ${sayBig(P.e / 0.015)} Hiroshima bombs. The INTERN screams once ([screaming] AAAAH!).`);
   }
   return facts.join('\n');
 }
@@ -134,7 +140,7 @@ function factsFor(P) {
 function promptFor(P, band) {
   const lineCount = 3 + Math.floor(Math.random() * 3);         // 3-5 lines after the opener
   const recent = recentLines.slice(-RECENT_MAX);
-  const twist = P.k === 'hidden' ? ' Then the hidden-hazard twist rattles them a little.' : '';
+  const twist = P.k === 'hidden' ? ' Then the hidden-hazard twist makes him panic for real.' : '';
   return [
     'FACTS',
     factsFor(P),
@@ -144,7 +150,7 @@ function promptFor(P, band) {
     `- CAPCOM: ${band.capcom}`,
     '',
     'THIS TAKE',
-    `- Comedic angle: the INTERN frames it like a ${pick(ANGLES)} (CAPCOM stays professional and does not play along)`,
+    `- ${Math.random() < 0.5 ? 'CAPCOM gets one funny insult in at the INTERN' : 'no insult this time; CAPCOM just teaches, dryly'}`,
     `- INTERN quirk: ${pick(INTERN_QUIRKS)}`,
     `- Focus on: ${pick(FOCUS[P.k] || FOCUS.report)}`,
     `- Ending: ${pick(ENDINGS)}`,
@@ -160,7 +166,7 @@ function clean(raw) {
   const ok = lines
     .filter((l) => (l.who === 'CAPCOM' || l.who === 'INTERN') && typeof l.text === 'string')
     .map((l) => ({ who: l.who, text: l.text.replace(/\s+/g, ' ').trim() }))
-    .filter((l) => l.text.length > 0 && l.text.length <= 220);
+    .filter((l) => l.text.length > 0 && l.text.length <= 260);   // a little room for the [delivery tag]
   return ok.length >= 2 && ok.length <= 7 ? ok : null;
 }
 
