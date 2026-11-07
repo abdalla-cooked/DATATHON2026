@@ -9,7 +9,7 @@ import { CSS2DRenderer, CSS2DObject } from 'three/examples/jsm/renderers/CSS2DRe
 import { orbitLine, positionAt, makeOrbitCloud } from './kepler.js';
 import { planetElementsAt } from './planets.js';
 import { addPlanets, addSunAndLights, loader, BG_COLOR } from './bodies.js';
-import { mattersToStory, sampled, SAMPLE_EVERY } from './cloudFilter.js';
+import { ALWAYS_SHOW, sampled, SAMPLE_EVERY } from './cloudFilter.js';
 import { replay, revealOf, REPLAY_GREY, SPREAD } from '../lib/replay.js';
 import { MAX_JD, jdFromDate, meanAnomalyAt } from './time.js';
 import TimeControls from './TimeControls.jsx';
@@ -90,7 +90,7 @@ export default function SolarSystem({ asteroids, metrics, view, onSelect, pickRe
   const sceneRef = useRef(null); // { scene, camera, points, shown, cloud, ... } shared by the effects below
   // Shared clock (see TimeControls.jsx). Starts paused at today.
   const timeRef = useRef({ jd: jdFromDate(new Date()), playing: false, speed: 30, dirty: true, onTick: null });
-  const [showAll, setShowAll] = useState(false);              // false = thinned cloud (see mattersToStory)
+  const [showAll, setShowAll] = useState(false);              // false = thinned cloud (see cloudFilter.js)
   // false = plain rock; true = red high risk / blue low risk. On after "Watch the AI learn", so the replay
   // reveals the model's verdicts instead of turning grey dots into rock-colored ones.
   const [highlightRisk, setHighlightRisk] = useState(() => replay.mode !== 'off');
@@ -257,7 +257,8 @@ export default function SolarSystem({ asteroids, metrics, view, onSelect, pickRe
     // normal mode → most hazardous on top; mistakes mode → misses on top of false alarms on top of the faded rest.
     const pool = asteroids.filter((a) => a.e < 1 && (!view.testOnly || a.test)); // bound orbits only
     const list = pool
-      .filter((a) => showAll || mattersToStory(a, metrics) || sampled(String(a.pdes)))
+      .filter((a) => showAll || ALWAYS_SHOW.has(String(a.pdes)) || sampled(String(a.pdes))
+        || (mistakes && kindOf(a) !== 0) || (hiddenMode && isMeasuredHidden(a)))
       .sort(hiddenMode ? (x, y) => isMeasuredHidden(x) - isMeasuredHidden(y)
         : mistakes ? (x, y) => kindOf(x) - kindOf(y) : (x, y) => (x[key] ?? 0) - (y[key] ?? 0));
     setCounts({ shown: list.length, total: pool.length, hidden: list.filter(isMeasuredHidden).length });
@@ -468,7 +469,9 @@ export default function SolarSystem({ asteroids, metrics, view, onSelect, pickRe
             </label>
             <small>
               Showing {counts.shown.toLocaleString()} of {counts.total.toLocaleString()}
-              {!showAll && <><br />every hazard and every mistake included;<br />1 in {SAMPLE_EVERY} of the clearly safe rest</>}
+              {!showAll && (view.showHidden ? <><br />every hidden hazard included;<br />1 in {SAMPLE_EVERY} of the rest</>
+                : view.showMistakes ? <><br />every mistake included;<br />1 in {SAMPLE_EVERY} of the rest</>
+                : <><br />1 in {SAMPLE_EVERY} of every asteroid,<br />high and low risk alike</>)}
             </small>
             {view.showHidden && (
               <p className="hidden-card">
