@@ -1,6 +1,11 @@
 /* P3 owns this file. Essentials from PLAN.md §7 step 2 — polish later. */
 * { box-sizing: border-box; }
-body { margin: 0; background: #05060a; color: #dde; font-family: system-ui, sans-serif; }
+:root {
+  --bg: #05060a; --text: #dde3f0; --accent: #5aa2ff; --hazard: #ff3030; --muted: #8b96ad;
+  --font-display: 'Space Grotesk', system-ui, sans-serif;
+  --font-body: 'Inter', system-ui, sans-serif;
+}
+body { margin: 0; background: var(--bg); color: var(--text); font-family: var(--font-body); }
 
 #scene { position: fixed; inset: 0; width: 100vw; height: 100vh; display: block; }
 
@@ -79,14 +84,50 @@ pre { margin: 0; padding: 8px; background: #0e1627; font-size: 11px; overflow: a
 .slider { display: grid; grid-template-columns: 80px 1fr 50px; align-items: center; gap: 8px; margin: 6px 0; }
 .slider input { width: 100%; } .slider output { text-align: right; font-variant-numeric: tabular-nums; }
 .verdict { margin-top: 14px; padding: 12px; background: #0e1627; border-radius: 8px; }
-#intro { position: fixed; inset: 0; display: grid; place-items: center; background: rgba(5, 6, 10, .7); z-index: 30; padding: 16px; }
-#intro .card { max-width: 560px; text-align: center; }
-#intro h2 { font-size: 28px; line-height: 1.2; }
-.kicker { color: #5aa2ff; font-size: 12px; text-transform: uppercase; letter-spacing: 1px; }
-#explore { margin-top: 10px; padding: 10px 28px; font-size: 16px; background: #5aa2ff; color: #031022; border: 0; border-radius: 8px; font-weight: 700; cursor: pointer; }
 #mockBanner { position: fixed; left: 50%; transform: translateX(-50%); bottom: 50px; padding: 4px 12px; background: #3a3110; color: #ffd75a; border-radius: 6px; font-size: 12px; z-index: 6; }
 
+/* UI slides in when the "Watch the AI learn" replay finishes (App .ui-out while it runs). */
+#topbar, #panel, #legend, .time-controls, .view-buttons {
+  transition: transform .7s cubic-bezier(.2, .8, .2, 1), opacity .7s ease;
+}
+#panel { transition-delay: .12s; } #legend, .time-controls { transition-delay: .24s; } .view-buttons { transition-delay: .18s; }
+.ui-out #topbar { transform: translateY(-100%); opacity: 0; pointer-events: none; }
+.ui-out #panel { transform: translateX(105%); opacity: 0; pointer-events: none; }
+.ui-out #legend, .ui-out .time-controls { transform: translateY(24px); opacity: 0; pointer-events: none; }
+.ui-out .view-buttons { transform: translateX(24px); opacity: 0; pointer-events: none; }
+#topbar .replay-intro { margin-left: auto; color: #8b96ad; font-size: 13px; background: none; border: 0; cursor: pointer; font-family: inherit; white-space: nowrap; padding: 6px 0; }
+#topbar .replay-intro:hover { color: #5aa2ff; }
+@media (prefers-reduced-motion: reduce) {
+  #topbar, #panel, #legend, .time-controls, .view-buttons { transition-duration: .01s; transition-delay: 0s; }
+}
+
+/* Root: intro layer over the app during hand-offs. */
+.intro-layer { position: relative; z-index: 40; opacity: 1; transition-property: opacity; transition-timing-function: ease; }
+.intro-layer.faded { opacity: 0; pointer-events: none; }
+
+/* "Watch the AI learn" counters (components/ReplayHud.jsx). */
+#replayHud {
+  position: fixed; left: 50%; bottom: 28px; transform: translateX(-50%); z-index: 8;
+  width: min(560px, calc(100vw - 32px)); padding: 14px 18px 12px;
+  background: rgba(10, 14, 25, .78); backdrop-filter: blur(6px); border: 1px solid #23304a; border-radius: 12px;
+  transition: opacity .6s ease 1.4s, transform .6s ease 1.4s;
+}
+#replayHud.done { opacity: 0; transform: translateX(-50%) translateY(12px); }
+#replayHud .rh-title { margin: 0 0 8px; font-size: 11px; text-transform: uppercase; letter-spacing: 1.2px; color: #5aa2ff; }
+#replayHud dl { display: grid; grid-template-columns: 1fr 1.25fr .7fr; gap: 12px; margin: 0; }
+#replayHud dl > div { display: flex; flex-direction: column; } #replayHud dd { margin-top: auto !important; padding-top: 4px; }
+#replayHud dt { font-size: 12px; color: #8b96ad; } #replayHud dt small { font-size: 10px; display: block; }
+#replayHud dd { margin: 4px 0 0; font-size: 13px; color: #8b96ad; font-variant-numeric: tabular-nums; white-space: nowrap; }
+#replayHud dd b { font-size: 20px; color: #dde3f0; font-weight: 600; }
+#replayHud .rh-bar { margin-top: 10px; height: 2px; background: #1a2233; border-radius: 2px; overflow: hidden; }
+#replayHud .rh-bar i { display: block; height: 100%; background: #5aa2ff; transform-origin: left; transform: scaleX(0); }
+
 @media (max-width: 760px) {
+  #replayHud { bottom: 16px; padding: 12px 14px 10px; }
+  #replayHud dl { grid-template-columns: 1fr 1fr; row-gap: 10px; } #replayHud dl > div:last-child { grid-column: span 2; }
+  #replayHud dd b { font-size: 17px; }
+  .ui-out #panel { transform: translateY(105%); }
+  #topbar .replay-intro { position: absolute; top: 8px; right: 16px; margin: 0; }
   #panel { border-radius: 10px 10px 0 0; border-right: 1px solid #23304a; }
   #mockBanner { display: none; }
   #topbar { flex-wrap: wrap; padding: 8px 16px; }

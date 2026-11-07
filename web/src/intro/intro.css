@@ -1,0 +1,185 @@
+/* Scroll intro (ScrollIntro.jsx). Only transform and opacity are animated. */
+
+html.lenis, html.lenis body { height: auto; }
+.lenis.lenis-smooth { scroll-behavior: auto !important; }
+.lenis.lenis-stopped { overflow: hidden; }
+
+.intro { position: relative; color: var(--text); font-family: var(--font-body); }
+.intro-canvas { position: fixed; inset: 0; width: 100vw; height: 100vh; display: block; z-index: 0; }
+.intro-scrim {
+  position: fixed; inset: 0; z-index: 1; pointer-events: none; opacity: 0;
+  background: linear-gradient(90deg, rgba(5, 6, 10, .82) 0%, rgba(5, 6, 10, .5) 34%, rgba(5, 6, 10, 0) 58%);
+}
+.intro-labels { position: fixed; inset: 0; z-index: 2; overflow: hidden; pointer-events: none; }
+.intro-scroll { position: relative; z-index: 3; }
+.intro-stage { position: relative; height: 100vh; width: 100%; overflow: hidden; }
+
+.intro-skip {
+  position: fixed; top: 16px; right: 16px; z-index: 5;
+  background: rgba(5, 6, 10, .45); border: 1px solid rgba(139, 150, 173, .35); color: var(--muted);
+  border-radius: 999px; padding: 7px 15px; cursor: pointer; font: 500 13px/1 var(--font-body);
+  backdrop-filter: blur(4px); transition: color .2s, border-color .2s;
+}
+.intro-skip:hover, .intro-skip:focus-visible { color: var(--text); border-color: var(--accent); }
+
+/* 3D labels: JS sets transform (screen position) and opacity each frame */
+.intro-label {
+  position: absolute; left: 0; top: 0; margin: -12px 0 0 16px; opacity: 0; will-change: transform, opacity;
+  padding: 5px 9px 6px; border-left: 2px solid var(--hazard); background: rgba(5, 6, 10, .62);
+  font-size: 12px; line-height: 1.3; white-space: nowrap;
+}
+.intro-label b { display: block; font: 600 13px/1.25 var(--font-display); color: var(--text); }
+.intro-label span { color: var(--muted); }
+.intro-label.apophis { border-left-color: #ffc7a0; }
+.intro-label.flip { border-left: 0; border-right: 2px solid var(--hazard); text-align: right; }
+.intro-label.apophis.flip { border-right-color: #ffc7a0; }
+
+/* ---- sections: stacked absolute layers that crossfade ---- */
+.sec {
+  position: absolute; inset: 0; display: flex; align-items: center; justify-content: flex-start;
+  padding: 0 max(16px, 6vw);
+}
+.sec-body { position: relative; max-width: 100%; }
+.side .sec-body { max-width: min(560px, 42vw); }
+.sec p, .sec h1, .sec h2 { margin: 0; }
+
+.line { display: block; overflow: hidden; padding-bottom: .12em; margin-bottom: -.12em; }
+.line-inner { display: block; will-change: transform; }
+
+.kicker, .act {
+  font: 600 12px/1.2 var(--font-body); letter-spacing: .18em; text-transform: uppercase; color: var(--accent);
+  margin-bottom: 18px !important;
+}
+.sec h1, .sec h2 { font-family: var(--font-display); font-weight: 600; letter-spacing: -.02em; }
+.sec h2 { font-size: clamp(30px, 3.6vw, 54px); line-height: 1.06; margin-bottom: 16px; }
+.lede { font-size: clamp(17px, 1.45vw, 22px); line-height: 1.45; color: rgba(221, 227, 240, .86); }
+.lede.strong { color: var(--text); font-family: var(--font-display); font-size: clamp(22px, 2.3vw, 34px); line-height: 1.2; }
+.hot { color: var(--hazard); font-style: normal; }
+.big-num {
+  font: 600 clamp(64px, 10vw, 150px)/1 var(--font-display); letter-spacing: -.04em;
+  font-variant-numeric: tabular-nums; margin-bottom: 8px !important;
+}
+.note { border-left: 2px solid var(--hazard); padding-left: 12px; color: var(--muted); font-size: 15px; margin-top: 22px !important; }
+.sec { text-shadow: 0 1px 18px rgba(5, 6, 10, .65); }
+
+/* hero */
+.sec-hero { justify-content: center; align-items: flex-start; padding-top: 16vh; text-align: center; }
+.hero-title { font-size: clamp(46px, 8.4vw, 118px); line-height: .96; margin-bottom: 22px !important; }
+.hero-sub { font-size: clamp(16px, 1.4vw, 20px); color: var(--muted); max-width: 34em; margin: 0 auto !important; }
+.scroll-cue {
+  position: absolute; left: 50%; bottom: 26px; transform: translateX(-50%);
+  display: flex; flex-direction: column; align-items: center; gap: 10px;
+  font: 600 11px/1 var(--font-body); letter-spacing: .2em; text-transform: uppercase; color: var(--muted);
+  opacity: 0; animation: cue-in .8s ease 1.1s forwards;
+}
+.scroll-cue i { width: 1px; height: 40px; background: linear-gradient(var(--accent), transparent); transform-origin: top; animation: cue 1.8s ease-in-out infinite; }
+@keyframes cue-in { to { opacity: 1; } }
+@keyframes cue { 0% { transform: scaleY(0); } 50% { transform: scaleY(1); } 100% { transform: scaleY(1); opacity: 0; } }
+
+/* scale */
+.sec-scale { justify-content: center; text-align: center; }
+.beat-rate { margin-top: 30px; }
+
+/* NASA rule */
+.figs { display: grid; gap: 26px; margin: 30px 0; }
+.fig-num { font: 600 clamp(40px, 4.6vw, 68px)/1 var(--font-display); color: var(--accent); letter-spacing: -.02em; }
+.fig-rule { display: block; width: 64px; height: 1px; margin: 12px 0; background: var(--accent); transform-origin: left; }
+.fig-text { font-size: clamp(15px, 1.2vw, 18px); line-height: 1.45; color: rgba(221, 227, 240, .86); }
+.rule-end { font: 600 clamp(20px, 1.9vw, 28px)/1.2 var(--font-display); }
+
+/* Act 1: copy left, tree right */
+.sec-act1 .two-col { display: flex; align-items: center; justify-content: space-between; gap: 40px; width: 100%; max-width: none; }
+.sec-act1 .copy { max-width: min(520px, 40vw); }
+.tree-wrap { width: 340px; flex: none; }
+.tree { display: flex; flex-direction: column; align-items: flex-start; }
+.tree .node {
+  border: 1px solid rgba(90, 162, 255, .5); background: rgba(5, 6, 10, .7); border-radius: 10px; padding: 10px 14px;
+  text-shadow: none;
+}
+.tree .node b { display: block; font: 600 18px/1.2 var(--font-display); font-variant-numeric: tabular-nums; }
+.tree .node span { font-size: 12px; color: var(--muted); }
+.tree .node.leaf { border-color: var(--hazard); }
+.tree .node.leaf b { color: var(--hazard); }
+.tree .conn { display: block; width: 1px; height: 26px; margin-left: 24px; background: var(--accent); transform-origin: top; }
+.tree-caption { margin-top: 20px !important; font-size: 14px; line-height: 1.5; color: var(--muted); }
+.tree-caption .line:last-child { color: var(--text); font-weight: 600; }
+
+/* Act 2 */
+.stats { display: grid; grid-template-columns: repeat(3, auto); gap: 28px; margin: 34px 0 0; justify-content: start; }
+.stat dt { font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; }
+.stat dd { margin: 0; font: 600 clamp(28px, 2.8vw, 42px)/1 var(--font-display); font-variant-numeric: tabular-nums; }
+.stat dd small { display: block; margin-top: 6px; font: 400 13px/1.3 var(--font-body); color: var(--muted); }
+
+/* Act 4: beats share one grid cell */
+.beats { display: grid; }
+.beat { grid-area: 1 / 1; }
+
+/* finale: launch screen, then credits slide up under it */
+.finale { position: absolute; inset: 0; }
+.sec-launch { justify-content: center; text-align: center; }
+.launch-title { font-size: clamp(40px, 6vw, 88px) !important; line-height: 1; margin-bottom: 34px !important; }
+.launch-btn {
+  padding: 16px 34px; font: 600 17px/1 var(--font-display); letter-spacing: .01em;
+  background: var(--accent); color: #031022; border: 0; border-radius: 999px; cursor: pointer;
+  box-shadow: 0 0 0 0 rgba(90, 162, 255, .5), 0 10px 40px rgba(90, 162, 255, .25);
+  transition: transform .2s ease, box-shadow .3s ease;
+}
+.launch-btn:hover, .launch-btn:focus-visible { transform: translateY(-1px); box-shadow: 0 0 0 6px rgba(90, 162, 255, .18), 0 14px 46px rgba(90, 162, 255, .35); }
+.launch-btn:disabled { cursor: default; }
+.sec-credits { top: 100%; bottom: auto; justify-content: center; align-items: flex-start; }
+.credits-card {
+  width: min(640px, 100%); padding: 28px 30px; text-align: center; text-shadow: none;
+  background: rgba(5, 6, 10, .74); border: 1px solid #23304a; border-radius: 16px; backdrop-filter: blur(8px);
+}
+.credits-card ul { list-style: none; margin: 0; padding: 0; }
+.names { margin-bottom: 22px !important; }
+.name { font: 600 clamp(20px, 2vw, 26px)/1.35 var(--font-display); }
+.chips { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-bottom: 10px !important; }
+.chips li { padding: 5px 11px; border: 1px solid #2a3858; border-radius: 999px; font-size: 13px; color: var(--muted); }
+.credits-foot { margin-top: 18px; font-size: 13px; line-height: 1.6; color: var(--muted); }
+.credits-foot p { margin: 0; }
+.credits-foot .links { display: flex; justify-content: center; gap: 18px; flex-wrap: wrap; margin: 12px 0 20px; }
+.credits-foot a { color: var(--accent); text-decoration: none; }
+.credits-foot a:hover { text-decoration: underline; }
+
+/* after "Watch the AI learn": the copy clears, the canvas carries on into the app */
+.intro-stage, .intro-skip, .intro-labels, .intro-scrim { transition: opacity .5s ease; }
+.intro.launched .intro-stage, .intro.launched .intro-skip, .intro.launched .intro-labels, .intro.launched .intro-scrim {
+  opacity: 0 !important; pointer-events: none;
+}
+
+/* portrait: the scene slides down (scene.js), the copy sits on top */
+@media (max-aspect-ratio: 1/1) {
+  .intro-scrim { background: linear-gradient(180deg, rgba(5, 6, 10, .86) 0%, rgba(5, 6, 10, .55) 34%, rgba(5, 6, 10, 0) 58%); }
+  .side { align-items: flex-start; padding-top: 68px; }
+  .side .sec-body { max-width: 100%; }
+  .sec-act1 .two-col { flex-direction: column; align-items: flex-start; gap: 18px; }
+  .sec-act1 .copy { max-width: 100%; }
+  .tree-wrap { width: 100%; }
+  .tree .node { padding: 7px 11px; }
+  .tree .node b { font-size: 15px; }
+  .tree .conn { height: 16px; }
+  .figs { gap: 16px; margin: 20px 0; }
+  .stats { grid-template-columns: repeat(3, 1fr); gap: 14px; }
+  .stat dt { font-size: 10px; }
+  .sec-hero { padding-top: 14vh; }
+  .credits-card { padding: 22px 18px; }
+}
+@media (max-width: 480px) {
+  .line { white-space: normal; }
+  .note { font-size: 14px; }
+  /* keep each masked lede line on one row at phone width (about 45 characters in 358px) */
+  .lede { font-size: clamp(14px, 3.9vw, 17px); }
+}
+
+/* reduced motion: no scrub, no pin; sections sit in normal flow and fade in when reached */
+.intro.reduced .intro-scrim { opacity: 1; background: rgba(5, 6, 10, .6); }
+.intro.reduced .intro-stage { height: auto; overflow: visible; }
+.intro.reduced .finale { position: static; }
+.intro.reduced .sec {
+  position: relative; inset: auto; min-height: 100vh; padding-top: 72px; padding-bottom: 72px;
+  opacity: 0; transition: opacity .6s ease;
+}
+.intro.reduced .sec.in { opacity: 1; }
+.intro.reduced .beat { grid-area: auto; margin-bottom: 32px; }
+.intro.reduced .scroll-cue { display: none; }

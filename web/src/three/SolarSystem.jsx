@@ -4,9 +4,12 @@
 import { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
-import { CSS2DRenderer, CSS2DObject } from 'three/examples/jsm/renderers/CSS2DRenderer.js';
+import { CSS2DRenderer } from 'three/examples/jsm/renderers/CSS2DRenderer.js';
 import { orbitLine, positionAt, makeOrbitCloud } from './kepler.js';
-import { BODIES, planetElementsAt } from './planets.js';
+import { planetElementsAt } from './planets.js';
+import { addPlanets, addSunAndLights, BG_COLOR } from './bodies.js';
+import { mattersToStory, sampled, SAMPLE_EVERY } from './cloudFilter.js';
+import { replay, revealOf, REPLAY_GREY, SPREAD } from '../lib/replay.js';
 import { MAX_JD, jdFromDate, meanAnomalyAt } from './time.js';
 import TimeControls from './TimeControls.jsx';
 import ViewButtons from './ViewButtons.jsx';
@@ -43,63 +46,11 @@ export const VIEWS = {
 };
 const LABEL_MIN_PX = 26; // hide a body's label when it sits closer than this to the Sun on screen (zoomed far out)
 
-// Planets + dwarf planets: sphere + label + orbit ring. Sizes are exaggerated (true scale would be invisible).
-function addPlanets(scene, jd) {
-  return BODIES.map((p) => {
-    const isEarth = p.name === 'Earth';
-    const isDwarf = !!p.dwarf;
-    const ringColor = isEarth ? 0x33ff99 : isDwarf ? 0x8a7f6a : 0x666666;
-    const ringOpacity = isEarth ? 0.9 : p.faint ? 0.25 : isDwarf ? 0.4 : 0.6;
-    scene.add(orbitLine(planetElementsAt(p, jd), ringColor, ringOpacity));
-
-    const body = new THREE.Mesh(
-      new THREE.SphereGeometry(p.radius, 32, 16),
-      new THREE.MeshStandardMaterial({ color: p.color, roughness: 0.9, metalness: 0 }),
-    );
-    if (p.ring) { // Saturn's rings, tilted ~27°
-      const ring = new THREE.Mesh(
-        new THREE.RingGeometry(p.radius * 1.3, p.radius * 2.3, 64),
-        new THREE.MeshBasicMaterial({ color: 0xcdbb8a, side: THREE.DoubleSide, transparent: true, opacity: 0.55 }),
-      );
-      ring.rotation.x = -Math.PI / 2 + 0.47;
-      body.add(ring);
-    }
-    scene.add(body);
-
-    const tag = document.createElement('div');
-    tag.textContent = p.name;
-    Object.assign(tag.style, {
-      font: '11px system-ui, sans-serif', color: isDwarf ? '#a9a291' : '#cfd6e6', letterSpacing: '0.04em',
-      textShadow: '0 0 4px #000', whiteSpace: 'nowrap', opacity: p.faint ? '0.7' : '1',
-    });
-    const label = new CSS2DObject(tag);
-    label.position.set(0, p.radius + 0.35, 0);
-    body.add(label);
-    return { planet: p, body, label };
-  });
-}
-
 const ease = (t) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
 
-// Thinning the cloud: everything that matters to the story is always drawn; only "boring" asteroids
-// (not hazardous AND below both models' thresholds) are sampled, 1 in SAMPLE_EVERY.
-const SAMPLE_EVERY = 5;
-const ALWAYS_SHOW = new Set(['99942', '101955', '65803']); // Apophis, Bennu, Didymos (the UI presets)
-
-// Stable pseudo-random pick per asteroid (FNV-1a hash of its designation), so the same dots stay
-// put across model toggles, mistakes mode and the time slider.
-function sampled(pdes) {
-  let h = 0x811c9dc5;
-  for (let k = 0; k < pdes.length; k++) { h ^= pdes.charCodeAt(k); h = Math.imul(h, 0x01000193); }
-  return (h >>> 0) % SAMPLE_EVERY === 0;
-}
-
-function mattersToStory(a, metrics) {
-  const thrA = metrics?.A?.threshold ?? 0.5, thrB = metrics?.B?.threshold ?? 0.5;
-  return a.pha === 1 || (a.pA ?? 0) >= thrA || (a.pB ?? 0) >= thrB || ALWAYS_SHOW.has(String(a.pdes));
-}
-
-export default function SolarSystem({ asteroids, metrics, view, onSelect, pickRequest, custom }) {
+export default function SolarSystem({ asteroids, metrics, view, onSelect, pickRequest, custom, onReady }) {
+  const onReadyRef = useRef(onReady);
+  onReadyRef.current = onReady;
   const canvasRef = useRef(null);
   const sceneRef = useRef(null); // { scene, camera, points, shown, cloud, ... } shared by the effects below
   // Shared clock (see TimeControls.jsx). Starts paused at today.
@@ -115,7 +66,7 @@ export default function SolarSystem({ asteroids, metrics, view, onSelect, pickRe
     renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
 
     const scene = new THREE.Scene();
-    scene.background = new THREE.Color(0x05060a);
+    scene.background = new THREE.Color(BG_COLOR);
 
     const camera = new THREE.PerspectiveCamera(55, 1, 0.1, 5000);
     camera.position.set(...VIEWS.earth.pos);
@@ -125,10 +76,7 @@ export default function SolarSystem({ asteroids, metrics, view, onSelect, pickRe
     controls.minDistance = 2;
     controls.maxDistance = 2000; // Eris's far end is ~98 AU = 980 units
 
-    // Sun: glowing sphere + a light at its center so the planets are lit from the right side.
-    scene.add(new THREE.Mesh(new THREE.SphereGeometry(0.4, 32, 16), new THREE.MeshBasicMaterial({ color: 0xffcc55 })));
-    scene.add(new THREE.PointLight(0xffffff, 3, 0, 0)); // decay 0: same brightness at every distance
-    scene.add(new THREE.AmbientLight(0xffffff, 0.25));  // so the night sides aren't pitch black
+    addSunAndLights(scene);
 
     // Planet names are HTML labels drawn by a second renderer layered over the canvas.
     const labelRenderer = new CSS2DRenderer();
@@ -146,7 +94,10 @@ export default function SolarSystem({ asteroids, metrics, view, onSelect, pickRe
     addEventListener('resize', resize);
     resize();
 
-    const ctx = { scene, camera, points: null, shown: [], cloud: null, pulse: false, selected: null, marker: null };
+    // replayU: 0..1 progress of the "Watch the AI learn" replay (1 = every dot in its model color).
+    const ctx = { scene, camera, points: null, shown: [], cloud: null, pulse: false, selected: null, marker: null,
+      replayU: { value: replay.progress() } };
+    let readySent = false;
     sceneRef.current = ctx;
 
     // Move everything to Julian Date `jd`.
@@ -217,8 +168,12 @@ export default function SolarSystem({ asteroids, metrics, view, onSelect, pickRe
       if (ctx.points) {
         ctx.points.material.size = ctx.pulse ? 1 + PULSE * (1 + Math.sin(now / 200)) / 2 : 1;
       }
+      ctx.replayU.value = replay.progress(now);
       renderer.render(scene, camera);
       labelRenderer.render(scene, camera);
+      // Tell the page once the first frame with the asteroid cloud is on screen (the intro waits for this
+      // before it crossfades away, so there is never an empty frame).
+      if (!readySent && ctx.points) { readySent = true; onReadyRef.current?.(); }
     });
 
     return () => {
@@ -226,6 +181,7 @@ export default function SolarSystem({ asteroids, metrics, view, onSelect, pickRe
       renderer.setAnimationLoop(null);
       controls.dispose();
       renderer.dispose();
+      renderer.forceContextLoss(); // free the WebGL context now (the intro can be replayed many times)
       labelRenderer.domElement.remove();
     };
   }, []);
@@ -267,25 +223,34 @@ export default function SolarSystem({ asteroids, metrics, view, onSelect, pickRe
 
     const col = new Float32Array(list.length * 3);
     const px = new Float32Array(list.length);
+    const rev = new Float32Array(list.length); // when the replay reveals this dot (lib/replay.js)
     const c = new THREE.Color();
-    list.forEach((a, k) => { colorOf(a, c).toArray(col, k * 3); px[k] = sizeOf(a); });
+    list.forEach((a, k) => { colorOf(a, c).toArray(col, k * 3); px[k] = sizeOf(a); rev[k] = revealOf(a.pdes); });
 
     const geometry = new THREE.BufferGeometry();
     geometry.setAttribute('position', new THREE.BufferAttribute(new Float32Array(list.length * 3), 3));
     geometry.setAttribute('color', new THREE.BufferAttribute(col, 3));
     geometry.setAttribute('dotSize', new THREE.BufferAttribute(px, 1));
+    geometry.setAttribute('reveal', new THREE.BufferAttribute(rev, 1));
     const material = new THREE.PointsMaterial({
       size: 1, // multiplier on each dot's own size; the pulse animates it
       sizeAttenuation: false, vertexColors: true, map: DOT, alphaTest: 0.5, transparent: true,
       depthTest: false, depthWrite: false, // stack by draw order (above), not by distance
     });
     // three's PointsMaterial gives every dot the same size; this patches its shader to read `dotSize` per dot.
+    // It also runs the replay: until the replay reaches a dot's `reveal` value the dot is grey at the
+    // safe size, then it fades into its real color and size.
     material.onBeforeCompile = (shader) => {
+      shader.uniforms.uReplay = ctx.replayU;
+      shader.uniforms.uGrey = { value: new THREE.Color(REPLAY_GREY) };
       shader.vertexShader = shader.vertexShader
-        .replace('void main() {', 'attribute float dotSize;\nvoid main() {')
-        .replace('gl_PointSize = size;', 'gl_PointSize = size * dotSize;');
+        .replace('void main() {', `attribute float dotSize;\nattribute float reveal;\nuniform float uReplay;\nuniform vec3 uGrey;\nvoid main() {`)
+        .replace('#include <color_vertex>', `#include <color_vertex>
+          float seen = smoothstep(reveal, reveal + ${SPREAD.toFixed(3)}, uReplay * ${(1 + SPREAD).toFixed(3)});
+          vColor.rgb = mix(uGrey, vColor.rgb, seen);`)
+        .replace('gl_PointSize = size;', `gl_PointSize = size * mix(${SIZE.safe.toFixed(1)}, dotSize, seen);`);
     };
-    material.customProgramCacheKey = () => 'per-dot-size';
+    material.customProgramCacheKey = () => 'per-dot-size-replay';
     const points = new THREE.Points(geometry, material);
     points.frustumCulled = false; // the dots move, so the bounding sphere computed at build time goes stale
     ctx.scene.add(points);

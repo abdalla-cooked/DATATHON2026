@@ -1,14 +1,16 @@
 import { useEffect, useState } from 'react';
+import { getApproaches, getAsteroids, getMetrics } from './dataCache.js';
 
-// Loads the JSON contracts from public/data/ (mock now, P1's real exports later — same shape).
-// Paths are relative (no leading slash) so they work on GitHub Pages.
+// Loads the JSON contracts from public/data/ through the shared cache (lib/dataCache.js),
+// so files the intro already fetched are not downloaded twice.
 export function useData() {
   const [data, setData] = useState({ asteroids: null, metrics: null, approaches: null, error: null });
   useEffect(() => {
-    const get = (f) => fetch(`data/${f}`).then((r) => { if (!r.ok) throw new Error(`${f}: ${r.status}`); return r.json(); });
-    Promise.all([get('asteroids.json'), get('metrics.json'), get('approaches.json')])
-      .then(([asteroids, metrics, approaches]) => setData({ asteroids, metrics, approaches, error: null }))
-      .catch((error) => setData((d) => ({ ...d, error })));
+    let live = true;
+    Promise.all([getAsteroids(), getMetrics(), getApproaches()])
+      .then(([asteroids, metrics, approaches]) => live && setData({ asteroids, metrics, approaches, error: null }))
+      .catch((error) => live && setData((d) => ({ ...d, error })));
+    return () => { live = false; };
   }, []);
   return data;
 }

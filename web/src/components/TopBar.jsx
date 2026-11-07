@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import { narration } from '../lib/narration.js';
 
-export default function TopBar({ view, setView }) {
+export default function TopBar({ view, setView, onReplayIntro }) {
   const [voice, setVoice] = useState(false);
   const set = (patch) => setView((v) => { const n = { ...v, ...patch }; narration.view(n); return n; });
   return (
@@ -21,6 +21,7 @@ export default function TopBar({ view, setView }) {
           Narration: {voice ? 'on' : 'off'}
         </button>
       </div>
+      {onReplayIntro && <button type="button" className="replay-intro" onClick={onReplayIntro}>Replay intro</button>}
     </header>
   );
 }
