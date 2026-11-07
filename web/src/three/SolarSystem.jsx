@@ -4,7 +4,9 @@
 import { useEffect, useRef } from 'react';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
+import { CSS2DRenderer, CSS2DObject } from 'three/examples/jsm/renderers/CSS2DRenderer.js';
 import { orbitLine, positionAt } from './kepler.js';
+import { PLANETS, planetElementsAt } from './planets.js';
 
 const COLD = new THREE.Color(0x3a7bff); // p = 0, safe
 const HOT = new THREE.Color(0xff3030);  // p = 1, hazardous
@@ -35,12 +37,33 @@ const RING = (() => {
 
 const PICK_RADIUS = 10; // pixels: how close a click must be to a dot to select it
 
-const PLANETS = [
-  { name: 'Mercury', a: 0.387, e: 0.206, i: 7.0, om: 48.3, w: 29.1 },
-  { name: 'Venus',   a: 0.723, e: 0.007, i: 3.4, om: 76.7, w: 54.9 },
-  { name: 'Earth',   a: 1.000, e: 0.017, i: 0.0, om: 0.0,  w: 102.9 },
-  { name: 'Mars',    a: 1.524, e: 0.093, i: 1.8, om: 49.6, w: 286.5 },
-];
+// Planets are drawn where they really are today. Sizes are exaggerated (true scale would be invisible).
+function addPlanets(scene, date) {
+  const labels = [];
+  for (const p of PLANETS) {
+    const el = planetElementsAt(p, date);
+    scene.add(orbitLine(el, p.name === 'Earth' ? 0x33ff99 : 0x666666, p.name === 'Earth' ? 0.9 : 0.6));
+
+    const body = new THREE.Mesh(
+      new THREE.SphereGeometry(p.radius, 32, 16),
+      new THREE.MeshStandardMaterial({ color: p.color, roughness: 0.9, metalness: 0 }),
+    );
+    body.position.copy(positionAt(el));
+    scene.add(body);
+
+    const tag = document.createElement('div');
+    tag.textContent = p.name;
+    Object.assign(tag.style, {
+      font: '11px system-ui, sans-serif', color: '#cfd6e6', letterSpacing: '0.04em',
+      textShadow: '0 0 4px #000', whiteSpace: 'nowrap',
+    });
+    const label = new CSS2DObject(tag);
+    label.position.set(0, p.radius + 0.35, 0);
+    body.add(label);
+    labels.push(label);
+  }
+  return labels;
+}
 
 export default function SolarSystem({ asteroids, metrics, view, onSelect }) {
   const canvasRef = useRef(null);
@@ -61,12 +84,21 @@ export default function SolarSystem({ asteroids, metrics, view, onSelect }) {
     const controls = new OrbitControls(camera, canvas);
     controls.enableDamping = true;
 
-    scene.add(new THREE.Mesh(new THREE.SphereGeometry(0.4), new THREE.MeshBasicMaterial({ color: 0xffcc55 }))); // Sun
-    PLANETS.forEach((p) => scene.add(orbitLine(p, p.name === 'Earth' ? 0x33ff99 : 0x666666, 0.9)));
+    // Sun: glowing sphere + a light at its center so the planets are lit from the right side.
+    scene.add(new THREE.Mesh(new THREE.SphereGeometry(0.4, 32, 16), new THREE.MeshBasicMaterial({ color: 0xffcc55 })));
+    scene.add(new THREE.PointLight(0xffffff, 3, 0, 0)); // decay 0: same brightness at every distance
+    scene.add(new THREE.AmbientLight(0xffffff, 0.25));  // so the night sides aren't pitch black
+
+    // Planet names are HTML labels drawn by a second renderer layered over the canvas.
+    const labelRenderer = new CSS2DRenderer();
+    Object.assign(labelRenderer.domElement.style, { position: 'fixed', inset: '0', pointerEvents: 'none', zIndex: '1' });
+    canvas.parentElement.appendChild(labelRenderer.domElement);
+    addPlanets(scene, new Date());
 
     function resize() {
       const w = canvas.clientWidth, h = canvas.clientHeight;
       renderer.setSize(w, h, false);
+      labelRenderer.setSize(w, h);
       camera.aspect = w / h;
       camera.updateProjectionMatrix();
     }
@@ -81,6 +113,7 @@ export default function SolarSystem({ asteroids, metrics, view, onSelect }) {
         ctx.points.material.size = ctx.pulse ? POINT_SIZE + 2.5 * (1 + Math.sin(performance.now() / 200)) : POINT_SIZE;
       }
       renderer.render(scene, camera);
+      labelRenderer.render(scene, camera);
     });
 
     return () => {
@@ -88,6 +121,7 @@ export default function SolarSystem({ asteroids, metrics, view, onSelect }) {
       renderer.setAnimationLoop(null);
       controls.dispose();
       renderer.dispose();
+      labelRenderer.domElement.remove();
     };
   }, []);
 
