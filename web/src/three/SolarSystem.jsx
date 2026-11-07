@@ -22,7 +22,8 @@ const LIME_HEX = 0x9dff3a;
 // Dot sizes in screen pixels (sizeAttenuation off), tuned for the real ~43k asteroids.
 // Normal mode: grows from `safe` (score 0) to `hazard` (score 1). Mistakes mode: by kind.
 const SIZE = { safe: 3, hazard: 5, correct: 2, falseAlarm: 4, miss: 5, hidden: 8 };
-const PULSE = 0.3;                       // dots swell by up to 30% while pulsing in mistakes mode
+const PULSE = 0.3;                       // dots swell by up to 30% while pulsing (mistakes + hidden-hazards modes)
+const HIDDEN_TAGS = 5;                   // Act 4: name tags on this many of the biggest hidden hazards
 const MARKER_SIZE = 18;                  // pixels: white ring around the selected asteroid
 const PICK_RADIUS = 10;                  // pixels: how close a click must be to a dot to select it
 
@@ -153,7 +154,7 @@ export default function SolarSystem({ asteroids, metrics, view, onSelect }) {
     addEventListener('resize', resize);
     resize();
 
-    const ctx = { scene, camera, points: null, shown: [], cloud: null, pulse: false, selected: null, marker: null };
+    const ctx = { scene, camera, points: null, shown: [], cloud: null, pulse: false, selected: null, marker: null, hiddenTags: [] };
     sceneRef.current = ctx;
 
     // Move everything to Julian Date `jd`.
@@ -167,6 +168,9 @@ export default function SolarSystem({ asteroids, metrics, view, onSelect }) {
         const attr = ctx.points.geometry.attributes.position;
         ctx.cloud(jd, attr.array);
         attr.needsUpdate = true;
+      }
+      for (const { a, obj } of ctx.hiddenTags) {   // Act 4 name tags ride along with their asteroids
+        positionAt(a, meanAnomalyAt(a, jd), obj.position);
       }
       if (ctx.selected && ctx.marker) {
         positionAt(ctx.selected, meanAnomalyAt(ctx.selected, jd), tmp);
@@ -302,7 +306,7 @@ export default function SolarSystem({ asteroids, metrics, view, onSelect }) {
     ctx.points = points;
     ctx.shown = list;              // index in the cloud → asteroid object (for click-to-inspect)
     ctx.cloud = makeOrbitCloud(list);
-    ctx.pulse = mistakes;          // the animation loop makes the dots pulse while mistakes mode is on
+    ctx.pulse = mistakes || hiddenMode; // the animation loop makes the dots pulse in mistakes and hidden-hazards modes
     timeRef.current.dirty = true;  // place the new dots at the current date on the next frame
 
     return () => {
@@ -323,9 +327,29 @@ export default function SolarSystem({ asteroids, metrics, view, onSelect }) {
       .filter((a) => isMeasuredHidden(a) && a.e < 1 && (!view.testOnly || a.test))
       .map((a) => orbitLine(a, LIME_HEX, 0.35));
     ctx.scene.add(...lines);
+
+    // Name tags on the biggest ones (by measured size), so judges can read who they are.
+    const biggest = asteroids
+      .filter((a) => isMeasuredHidden(a) && a.e < 1 && (!view.testOnly || a.test))
+      .sort((x, y) => y.D_meas - x.D_meas)
+      .slice(0, HIDDEN_TAGS);
+    ctx.hiddenTags = biggest.map((a) => {
+      const tag = document.createElement('div');
+      tag.textContent = `${a.name.replace(/^\d+\s+/, '')} · ${Math.round(a.D_meas)} m`;
+      Object.assign(tag.style, {
+        font: '600 12px system-ui, sans-serif', color: '#9dff3a', whiteSpace: 'nowrap',
+        textShadow: '0 0 4px #000, 0 0 8px #000', transform: 'translate(10px, -14px)',
+      });
+      const obj = new CSS2DObject(tag);
+      ctx.scene.add(obj);
+      return { a, obj };
+    });
+    timeRef.current.dirty = true; // place the tags at the current date on the next frame
     ctx.flyTo('earth');
     return () => {
       for (const l of lines) { ctx.scene.remove(l); l.geometry.dispose(); l.material.dispose(); }
+      for (const { obj } of ctx.hiddenTags) ctx.scene.remove(obj); // CSS2DObject removes its own <div>
+      ctx.hiddenTags = [];
     };
   }, [asteroids, view.showHidden, view.testOnly]);
 
