@@ -6,9 +6,10 @@ import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { CSS2DRenderer, CSS2DObject } from 'three/examples/jsm/renderers/CSS2DRenderer.js';
 import { orbitLine, positionAt, makeOrbitCloud } from './kepler.js';
-import { PLANETS, planetElementsAt } from './planets.js';
+import { BODIES, planetElementsAt } from './planets.js';
 import { MAX_JD, jdFromDate, meanAnomalyAt } from './time.js';
 import TimeControls from './TimeControls.jsx';
+import ViewButtons from './ViewButtons.jsx';
 
 const COLD = new THREE.Color(0x3a7bff); // p = 0, safe
 const HOT = new THREE.Color(0xff3030);  // p = 1, hazardous
@@ -30,30 +31,51 @@ function sprite(draw) {
   return new THREE.CanvasTexture(cv);
 }
 
-// Planets: sphere + label + orbit ring. Sizes are exaggerated (true scale would be invisible).
+// Camera presets for the view buttons (1 AU = 10 units). Real distances throughout, no squashed scale.
+export const VIEWS = {
+  earth: { label: "Earth's neighborhood", pos: [0, 25, 35] },     // out to Mars: where the hazard story is
+  inner: { label: 'Inner planets + belt', pos: [0, 75, 105] },    // out to Jupiter, incl. the main belt / Ceres
+  outer: { label: 'Whole solar system', pos: [0, 430, 610] },     // out to Neptune and Pluto
+};
+const LABEL_MIN_PX = 26; // hide a body's label when it sits closer than this to the Sun on screen (zoomed far out)
+
+// Planets + dwarf planets: sphere + label + orbit ring. Sizes are exaggerated (true scale would be invisible).
 function addPlanets(scene, jd) {
-  return PLANETS.map((p) => {
+  return BODIES.map((p) => {
     const isEarth = p.name === 'Earth';
-    scene.add(orbitLine(planetElementsAt(p, jd), isEarth ? 0x33ff99 : 0x666666, isEarth ? 0.9 : 0.6));
+    const isDwarf = !!p.dwarf;
+    const ringColor = isEarth ? 0x33ff99 : isDwarf ? 0x8a7f6a : 0x666666;
+    const ringOpacity = isEarth ? 0.9 : p.faint ? 0.25 : isDwarf ? 0.4 : 0.6;
+    scene.add(orbitLine(planetElementsAt(p, jd), ringColor, ringOpacity));
 
     const body = new THREE.Mesh(
       new THREE.SphereGeometry(p.radius, 32, 16),
       new THREE.MeshStandardMaterial({ color: p.color, roughness: 0.9, metalness: 0 }),
     );
+    if (p.ring) { // Saturn's rings, tilted ~27°
+      const ring = new THREE.Mesh(
+        new THREE.RingGeometry(p.radius * 1.3, p.radius * 2.3, 64),
+        new THREE.MeshBasicMaterial({ color: 0xcdbb8a, side: THREE.DoubleSide, transparent: true, opacity: 0.55 }),
+      );
+      ring.rotation.x = -Math.PI / 2 + 0.47;
+      body.add(ring);
+    }
     scene.add(body);
 
     const tag = document.createElement('div');
     tag.textContent = p.name;
     Object.assign(tag.style, {
-      font: '11px system-ui, sans-serif', color: '#cfd6e6', letterSpacing: '0.04em',
-      textShadow: '0 0 4px #000', whiteSpace: 'nowrap',
+      font: '11px system-ui, sans-serif', color: isDwarf ? '#a9a291' : '#cfd6e6', letterSpacing: '0.04em',
+      textShadow: '0 0 4px #000', whiteSpace: 'nowrap', opacity: p.faint ? '0.7' : '1',
     });
     const label = new CSS2DObject(tag);
     label.position.set(0, p.radius + 0.35, 0);
     body.add(label);
-    return { planet: p, body };
+    return { planet: p, body, label };
   });
 }
+
+const ease = (t) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
 
 export default function SolarSystem({ asteroids, metrics, view, onSelect }) {
   const canvasRef = useRef(null);
@@ -72,10 +94,12 @@ export default function SolarSystem({ asteroids, metrics, view, onSelect }) {
     scene.background = new THREE.Color(0x05060a);
 
     const camera = new THREE.PerspectiveCamera(55, 1, 0.1, 5000);
-    camera.position.set(0, 25, 35);
+    camera.position.set(...VIEWS.earth.pos);
 
     const controls = new OrbitControls(camera, canvas);
     controls.enableDamping = true;
+    controls.minDistance = 2;
+    controls.maxDistance = 2000; // Eris's far end is ~98 AU = 980 units
 
     // Sun: glowing sphere + a light at its center so the planets are lit from the right side.
     scene.add(new THREE.Mesh(new THREE.SphereGeometry(0.4, 32, 16), new THREE.MeshBasicMaterial({ color: 0xffcc55 })));
@@ -122,6 +146,30 @@ export default function SolarSystem({ asteroids, metrics, view, onSelect }) {
     }
     ctx.placeAll = placeAll;
 
+    // Smooth camera glide to a preset (view buttons). Always ends looking at the Sun.
+    let flight = null;
+    const ORIGIN = new THREE.Vector3();
+    ctx.flyTo = (name) => {
+      const v = VIEWS[name];
+      if (!v) return;
+      const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+      flight = {
+        from: camera.position.clone(), to: new THREE.Vector3(...v.pos),
+        fromT: controls.target.clone(), start: performance.now(), dur: reduce ? 1 : 1400,
+      };
+    };
+
+    // Hide labels of bodies that sit almost on top of the Sun on screen (e.g. Mercury–Mars in the wide view).
+    const sunPx = new THREE.Vector3(), bodyPx = new THREE.Vector3();
+    function updateLabels() {
+      const w = canvas.clientWidth, h = canvas.clientHeight;
+      sunPx.set(0, 0, 0).project(camera);
+      for (const { body, label } of planets) {
+        bodyPx.copy(body.position).project(camera);
+        label.visible = Math.hypot((bodyPx.x - sunPx.x) * w / 2, (bodyPx.y - sunPx.y) * h / 2) >= LABEL_MIN_PX;
+      }
+    }
+
     let last = performance.now();
     renderer.setAnimationLoop((now) => {
       const dt = Math.min((now - last) / 1000, 0.1); // seconds; capped so a background tab doesn't jump years
@@ -134,7 +182,14 @@ export default function SolarSystem({ asteroids, metrics, view, onSelect }) {
       }
       if (time.dirty) { placeAll(time.jd); time.dirty = false; }
 
+      if (flight) {
+        const t = Math.min((now - flight.start) / flight.dur, 1), k = ease(t);
+        camera.position.lerpVectors(flight.from, flight.to, k);
+        controls.target.lerpVectors(flight.fromT, ORIGIN, k);
+        if (t >= 1) flight = null;
+      }
       controls.update();
+      updateLabels();
       if (ctx.points) {
         ctx.points.material.size = ctx.pulse ? POINT_SIZE + 2.5 * (1 + Math.sin(now / 200)) : POINT_SIZE;
       }
@@ -268,6 +323,7 @@ export default function SolarSystem({ asteroids, metrics, view, onSelect }) {
     <>
       <canvas id="scene" ref={canvasRef} />
       <TimeControls time={timeRef} />
+      <ViewButtons views={VIEWS} initial="earth" onView={(name) => sceneRef.current?.flyTo(name)} />
     </>
   );
 }
