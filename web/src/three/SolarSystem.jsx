@@ -141,8 +141,8 @@ function addPlanets(scene, jd) {
 
 const ease = (t) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
 
-// Thinning the cloud: everything that matters to the story is always drawn; only "boring" asteroids
-// (not hazardous AND below both models' thresholds) are sampled, 1 in SAMPLE_EVERY.
+// Thinning the cloud: 1 in SAMPLE_EVERY of ALL asteroids, so high- and low-risk dots are thinned at the same ratio.
+// Exceptions (see `keep` in the cloud effect): the UI presets, and the dots a mode is about (mistakes, hidden hazards).
 const SAMPLE_EVERY = 5;
 const ALWAYS_SHOW = new Set(['99942', '101955', '65803']); // Apophis, Bennu, Didymos (the UI presets)
 
@@ -158,17 +158,12 @@ function sampled(pdes) {
 // measured it at >= 140 m. Dark surfaces make them look faint (H > 22), so the brightness rule misses them.
 export const isMeasuredHidden = (a) => !!a.hidden && (a.D_meas ?? 0) >= 140;
 
-function mattersToStory(a, metrics) {
-  const thrA = metrics?.A?.threshold ?? 0.5, thrB = metrics?.B?.threshold ?? 0.5;
-  return a.pha === 1 || a.hidden || (a.pA ?? 0) >= thrA || (a.pB ?? 0) >= thrB || ALWAYS_SHOW.has(String(a.pdes));
-}
-
 export default function SolarSystem({ asteroids, metrics, view, onSelect }) {
   const canvasRef = useRef(null);
   const sceneRef = useRef(null); // { scene, camera, points, shown, cloud, ... } shared by the effects below
   // Shared clock (see TimeControls.jsx). Starts paused at today.
   const timeRef = useRef({ jd: jdFromDate(new Date()), playing: false, speed: 30, dirty: true, onTick: null });
-  const [showAll, setShowAll] = useState(false);              // false = thinned cloud (see mattersToStory)
+  const [showAll, setShowAll] = useState(false);              // false = thinned cloud (see SAMPLE_EVERY)
   const [highlightRisk, setHighlightRisk] = useState(false);  // false = plain rock; true = red high risk / blue low risk
   const [counts, setCounts] = useState({ shown: 0, total: 0, hidden: 0 }); // for the "Showing X of Y" caption
 
@@ -331,7 +326,8 @@ export default function SolarSystem({ asteroids, metrics, view, onSelect }) {
     // normal mode → most hazardous on top; mistakes mode → misses on top of false alarms on top of the faded rest.
     const pool = asteroids.filter((a) => a.e < 1 && (!view.testOnly || a.test)); // bound orbits only
     const list = pool
-      .filter((a) => showAll || mattersToStory(a, metrics) || sampled(String(a.pdes)))
+      .filter((a) => showAll || ALWAYS_SHOW.has(String(a.pdes)) || sampled(String(a.pdes))
+        || (mistakes && kindOf(a) !== 0) || (hiddenMode && isMeasuredHidden(a)))
       .sort(hiddenMode ? (x, y) => isMeasuredHidden(x) - isMeasuredHidden(y)
         : mistakes ? (x, y) => kindOf(x) - kindOf(y) : (x, y) => (x[key] ?? 0) - (y[key] ?? 0));
     setCounts({ shown: list.length, total: pool.length, hidden: list.filter(isMeasuredHidden).length });
@@ -490,7 +486,9 @@ export default function SolarSystem({ asteroids, metrics, view, onSelect }) {
             </label>
             <small>
               Showing {counts.shown.toLocaleString()} of {counts.total.toLocaleString()}
-              {!showAll && <><br />every hazard and every mistake included;<br />1 in {SAMPLE_EVERY} of the clearly safe rest</>}
+              {!showAll && (view.showHidden ? <><br />every hidden hazard included;<br />1 in {SAMPLE_EVERY} of the rest</>
+                : view.showMistakes ? <><br />every mistake included;<br />1 in {SAMPLE_EVERY} of the rest</>
+                : <><br />1 in {SAMPLE_EVERY} of every asteroid,<br />high and low risk alike</>)}
             </small>
             {view.showHidden && (
               <p className="hidden-card">
