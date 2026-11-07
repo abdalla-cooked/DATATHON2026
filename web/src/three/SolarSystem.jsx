@@ -16,7 +16,11 @@ const HOT = new THREE.Color(0xff3030);  // p = 1, hazardous
 const MISS = new THREE.Color(0xff00ff);        // mistakes mode: real hazard the model missed
 const FALSE_ALARM = new THREE.Color(0xffd400); // mistakes mode: flagged but not actually hazardous
 const DIM = new THREE.Color(0x2a3550);         // mistakes mode: correct prediction, faded out
-const POINT_SIZE = 6;                    // pixels on screen (sizeAttenuation off). Try 3 once the real ~30k points load.
+// Dot sizes in screen pixels (sizeAttenuation off), tuned for the real ~43k asteroids.
+// Normal mode: grows from `safe` (score 0) to `hazard` (score 1). Mistakes mode: by kind.
+const SIZE = { safe: 3, hazard: 5, correct: 2, falseAlarm: 4, miss: 5 };
+const PULSE = 0.3;                       // dots swell by up to 30% while pulsing in mistakes mode
+const MARKER_SIZE = 18;                  // pixels: white ring around the selected asteroid
 const PICK_RADIUS = 10;                  // pixels: how close a click must be to a dot to select it
 
 // Round dot sprite, so points render as circles instead of squares.
@@ -191,7 +195,7 @@ export default function SolarSystem({ asteroids, metrics, view, onSelect }) {
       controls.update();
       updateLabels();
       if (ctx.points) {
-        ctx.points.material.size = ctx.pulse ? POINT_SIZE + 2.5 * (1 + Math.sin(now / 200)) : POINT_SIZE;
+        ctx.points.material.size = ctx.pulse ? 1 + PULSE * (1 + Math.sin(now / 200)) / 2 : 1;
       }
       renderer.render(scene, camera);
       labelRenderer.render(scene, camera);
@@ -218,27 +222,49 @@ export default function SolarSystem({ asteroids, metrics, view, onSelect }) {
     const thr = metrics?.[view.model]?.threshold;
     const mistakes = view.showMistakes && thr != null; // needs the model's threshold from metrics.json
 
-    const list = asteroids.filter((a) => a.e < 1 && (!view.testOnly || a.test)); // bound orbits only
+    // Kind of dot: 0 = correct (mistakes mode), 1 = false alarm, 2 = missed hazard.
+    const kindOf = (a) => {
+      const flagged = (a[key] ?? 0) >= thr;
+      return a.pha === 1 && !flagged ? 2 : a.pha === 0 && flagged ? 1 : 0;
+    };
+    // Draw order = stacking order (depth test is off for the cloud), so the dots that matter go last and sit on top:
+    // normal mode → most hazardous on top; mistakes mode → misses on top of false alarms on top of the faded rest.
+    const list = asteroids
+      .filter((a) => a.e < 1 && (!view.testOnly || a.test)) // bound orbits only
+      .sort(mistakes ? (x, y) => kindOf(x) - kindOf(y) : (x, y) => (x[key] ?? 0) - (y[key] ?? 0));
 
     const colorOf = (a, out) => {
-      const p = a[key] ?? 0;
-      if (!mistakes) return out.copy(COLD).lerp(HOT, p);
-      const flagged = p >= thr;
-      if (a.pha === 1 && !flagged) return out.copy(MISS);
-      if (a.pha === 0 && flagged) return out.copy(FALSE_ALARM);
-      return out.copy(DIM);
+      if (!mistakes) return out.copy(COLD).lerp(HOT, a[key] ?? 0);
+      return out.copy([DIM, FALSE_ALARM, MISS][kindOf(a)]);
     };
 
+    // Size per dot (pixels): normal mode grows with the hazard score, mistakes mode by kind.
+    const sizeOf = (a) => (mistakes
+      ? [SIZE.correct, SIZE.falseAlarm, SIZE.miss][kindOf(a)]
+      : SIZE.safe + (SIZE.hazard - SIZE.safe) * (a[key] ?? 0));
+
     const col = new Float32Array(list.length * 3);
+    const px = new Float32Array(list.length);
     const c = new THREE.Color();
-    list.forEach((a, k) => colorOf(a, c).toArray(col, k * 3));
+    list.forEach((a, k) => { colorOf(a, c).toArray(col, k * 3); px[k] = sizeOf(a); });
 
     const geometry = new THREE.BufferGeometry();
     geometry.setAttribute('position', new THREE.BufferAttribute(new Float32Array(list.length * 3), 3));
     geometry.setAttribute('color', new THREE.BufferAttribute(col, 3));
-    const points = new THREE.Points(geometry, new THREE.PointsMaterial({
-      size: POINT_SIZE, sizeAttenuation: false, vertexColors: true, map: DOT, alphaTest: 0.5, transparent: true,
-    }));
+    geometry.setAttribute('dotSize', new THREE.BufferAttribute(px, 1));
+    const material = new THREE.PointsMaterial({
+      size: 1, // multiplier on each dot's own size; the pulse animates it
+      sizeAttenuation: false, vertexColors: true, map: DOT, alphaTest: 0.5, transparent: true,
+      depthTest: false, depthWrite: false, // stack by draw order (above), not by distance
+    });
+    // three's PointsMaterial gives every dot the same size; this patches its shader to read `dotSize` per dot.
+    material.onBeforeCompile = (shader) => {
+      shader.vertexShader = shader.vertexShader
+        .replace('void main() {', 'attribute float dotSize;\nvoid main() {')
+        .replace('gl_PointSize = size;', 'gl_PointSize = size * dotSize;');
+    };
+    material.customProgramCacheKey = () => 'per-dot-size';
+    const points = new THREE.Points(geometry, material);
     points.frustumCulled = false; // the dots move, so the bounding sphere computed at build time goes stale
     ctx.scene.add(points);
     ctx.points = points;
@@ -301,7 +327,7 @@ export default function SolarSystem({ asteroids, metrics, view, onSelect }) {
       selectedLine = orbitLine(a, 0xffffff, 1);
       ctx.marker = new THREE.Points(
         new THREE.BufferGeometry().setFromPoints([new THREE.Vector3()]),
-        new THREE.PointsMaterial({ size: POINT_SIZE * 2.5, sizeAttenuation: false, map: RING, transparent: true, depthTest: false }),
+        new THREE.PointsMaterial({ size: MARKER_SIZE, sizeAttenuation: false, map: RING, transparent: true, depthTest: false }),
       );
       ctx.marker.frustumCulled = false;
       ctx.selected = a;
