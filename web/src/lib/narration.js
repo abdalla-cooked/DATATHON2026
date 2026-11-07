@@ -173,3 +173,16 @@ export async function sfx(key) {
   await ready;
   if (on && manifest?.sfx?.[key]) return playClip(load(manifest.sfx[key]), '', token);
 }
+
+// Hooks for the side-panel tabs and the "Try one" sliders.
+let lastTier = null;
+export const narration = {
+  tab(t) { if (t === 'learned') playAct('act1'); else if (t === 'custom') playAct('custom'); },
+  // speak when the tier changes, not on every slider tick
+  custom({ pB, thr = 0.6, sizeM, speedKms, energyMt }) {
+    const t = pB < 0.2 ? 'chill' : pB < thr ? 'sus' : 'screwed';
+    if (t === lastTier) return;
+    lastTier = t;
+    playCustom({ risk01: pB, thr, sizeM, speedKms, energyMt });
+  },
+};

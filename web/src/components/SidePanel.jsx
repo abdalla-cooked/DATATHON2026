@@ -1,30 +1,27 @@
-// P3 owns this file. Info / results / "what did it learn" sections (PLAN.md §7 steps 4–6).
-// Split into InfoPanel.jsx, ResultsPanel.jsx, LearnedPanel.jsx as they grow.
-export default function SidePanel({ selected, metrics, view }) {
+// P3 owns this file. Tabbed side panel: Asteroid / Results / What it learned / Try one (PLAN.md section 7 steps 4 to 6).
+import InfoPanel from './InfoPanel.jsx';
+import ResultsPanel from './ResultsPanel.jsx';
+import LearnedPanel from './LearnedPanel.jsx';
+import CustomPanel from './CustomPanel.jsx';
+import { narration } from '../lib/narration.js';
+
+const TABS = [['info', 'Asteroid'], ['results', 'Results'], ['learned', 'What it learned'], ['custom', 'Try one']];
+
+export default function SidePanel({ tab, setTab, selected, asteroids, metrics, view, onPick, onCustom }) {
+  const go = (t) => { setTab(t); narration.tab(t); };
   return (
     <aside id="panel">
-      <section id="info">
-        <h2>{selected ? selected.name : 'Click an asteroid'}</h2>
-        {selected?.hidden && selected.D_meas >= 140 && (
-          <p className="lime">
-            🕵️ Hidden hazard: measured {Math.round(selected.D_meas)} m wide, passes {selected.moid} AU from Earth's orbit,
-            but its brightness (H {selected.H}) is past NASA's H ≤ 22 cutoff, so it isn't listed as hazardous.
-          </p>
-        )}
-      </section>
-      <section id="results">
-        <h2>How well does it do?</h2>
-        {metrics && (
-          <small>
-            Model {view.model}: recall {(metrics[view.model].recall * 100).toFixed(1)}% · ROC-AUC{' '}
-            {metrics[view.model].roc_auc.toFixed(3)} · tested on {metrics.counts.test.toLocaleString()} unseen asteroids
-            {metrics._mock && ' (mock data)'}
-          </small>
-        )}
-      </section>
-      <section id="learned">
-        <h2>What did it learn?</h2>
-      </section>
+      <nav id="tabs">
+        {TABS.map(([id, label]) => (
+          <button key={id} className={tab === id ? 'on' : ''} onClick={() => go(id)}>{label}</button>
+        ))}
+      </nav>
+      <div className="tab">
+        {tab === 'info' && <InfoPanel selected={selected} onPick={onPick} />}
+        {tab === 'results' && metrics && <ResultsPanel metrics={metrics} model={view.model} />}
+        {tab === 'learned' && metrics && <LearnedPanel metrics={metrics} onPick={onPick} />}
+        {tab === 'custom' && <CustomPanel asteroids={asteroids} onCustom={onCustom} />}
+      </div>
     </aside>
   );
 }

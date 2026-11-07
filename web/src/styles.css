@@ -1,6 +1,11 @@
 /* P3 owns this file. Essentials from PLAN.md §7 step 2 — polish later. */
 * { box-sizing: border-box; }
-body { margin: 0; background: #05060a; color: #dde; font-family: system-ui, sans-serif; }
+:root {
+  --bg: #05060a; --text: #dde3f0; --accent: #5aa2ff; --hazard: #ff3030; --muted: #8b96ad;
+  --font-display: 'Space Grotesk', system-ui, sans-serif;
+  --font-body: 'Inter', system-ui, sans-serif;
+}
+body { margin: 0; background: var(--bg); color: var(--text); font-family: var(--font-body); }
 
 #scene { position: fixed; inset: 0; width: 100vw; height: 100vh; display: block; }
 
@@ -18,16 +23,17 @@ body { margin: 0; background: #05060a; color: #dde; font-family: system-ui, sans
 #toggles button.on { background: #3a7bff; border-color: #3a7bff; color: #fff; }
 
 #panel {
-  position: fixed; right: 0; top: 60px; width: 360px; max-height: calc(100vh - 70px);
-  overflow: auto; padding: 12px 16px;
+  position: fixed; right: 0; top: 60px; width: 380px; max-height: calc(100vh - 70px);
+  overflow: auto; padding: 0; border: 1px solid #23304a; border-right: 0; border-radius: 10px 0 0 10px;
   background: rgba(10, 14, 25, .85); backdrop-filter: blur(6px); z-index: 5;
 }
 #panel h2 { font-size: 15px; margin: 12px 0 8px; }
 
 #legend {
-  position: fixed; left: 16px; bottom: 16px; font-size: 12px; padding: 6px 10px;
-  background: rgba(10, 14, 25, .85); border-radius: 6px; z-index: 5;
+  position: fixed; left: 16px; bottom: 16px; font-size: 12px; padding: 6px 10px; color: #8b96ad;
+  background: rgba(10, 14, 25, .85); border-radius: 6px; z-index: 5; display: flex; gap: 12px; flex-wrap: wrap;
 }
+#legend i { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 5px; vertical-align: -1px; }
 .mag { color: #ff00ff; }
 .yel { color: #ffd400; }
 .lime { color: #9dff3a; }
@@ -39,10 +45,95 @@ body { margin: 0; background: #05060a; color: #dde; font-family: system-ui, sans
 
 /* confusion matrix: 3×3 grid */
 .cm { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px; font-size: 12px; text-align: center; }
-.cm > div { padding: 4px; background: #111827; }
+.cm > div { padding: 8px 4px; background: #0e1627; }
+.cm > .h { color: #8b96ad; background: transparent; }
+
+/* ---- P3 panel UI ---- */
+.seg { display: inline-flex; gap: 0; }
+.seg button { border-radius: 0 !important; }
+.seg button:first-child { border-radius: 6px 0 0 6px !important; }
+.seg button:last-child { border-radius: 0 6px 6px 0 !important; }
+#panel button { background: #1a2233; color: #dde; border: 1px solid #334; border-radius: 6px; padding: 6px 10px; cursor: pointer; font: inherit; }
+#tabs { position: sticky; top: 0; display: flex; background: #0b1120; border-bottom: 1px solid #23304a; z-index: 1; }
+#panel #tabs button { flex: 1; padding: 10px 4px; background: transparent; border: 0; border-bottom: 2px solid transparent; border-radius: 0; color: #8b96ad; }
+#panel #tabs button.on { color: #dde; border-bottom-color: #5aa2ff; }
+.tab { padding: 12px 16px 20px; font-size: 14px; line-height: 1.45; }
+#panel h2 { font-size: 17px; margin: 4px 0 8px; }
+#panel h3 { font-size: 12px; margin: 16px 0 6px; color: #8b96ad; text-transform: uppercase; letter-spacing: .5px; }
+.muted { color: #8b96ad; } .small { font-size: 12px; } .hot { color: #ff7a7a; }
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+td, th { padding: 4px 6px; border-bottom: 1px solid #23304a; text-align: right; }
+td:first-child, th:first-child { text-align: left; }
+.chartbox { position: relative; height: 200px; } .chartbox.tall { height: 240px; }
+.big { font-size: 26px; font-weight: 700; }
+.scores2 { display: flex; gap: 20px; margin: 10px 0; }
+.kv { display: grid; grid-template-columns: auto 1fr; gap: 2px 10px; font-size: 13px; }
+.kv span:nth-child(odd) { color: #8b96ad; }
+.presets { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 10px; }
+.badge { display: inline-block; padding: 2px 8px; border-radius: 99px; font-size: 12px; font-weight: 700; }
+.badge.chill { background: #12351f; color: #6ff0a0; } .badge.sus { background: #3a3110; color: #ffd75a; } .badge.screwed { background: #3d1010; color: #ff7a7a; }
+.act { border-top: 1px solid #23304a; padding-top: 10px; margin-top: 12px; }
+.actnum { font-size: 11px; color: #5aa2ff; text-transform: uppercase; letter-spacing: 1px; }
+#panel .act h3 { color: #dde; text-transform: none; letter-spacing: 0; font-size: 15px; margin: 2px 0 8px; }
+.rulepair { display: grid; grid-template-columns: 1fr 120px; gap: 8px; }
+pre { margin: 0; padding: 8px; background: #0e1627; font-size: 11px; overflow: auto; }
+.nasa { padding: 8px; border: 1px solid #5aa2ff; border-radius: 6px; font-size: 12px; }
+.ab { display: flex; gap: 8px; } .ab > div { flex: 1; padding: 10px; background: #0e1627; border-radius: 6px; text-align: center; }
+.ab b { display: block; font-size: 22px; }
+.misses { padding-left: 18px; } .misses li { cursor: pointer; margin-bottom: 6px; } .misses li:hover { color: #5aa2ff; }
+.note { font-size: 12px; color: #8b96ad; border-left: 3px solid #ffd400; padding-left: 8px; }
+.slider { display: grid; grid-template-columns: 80px 1fr 50px; align-items: center; gap: 8px; margin: 6px 0; }
+.slider input { width: 100%; } .slider output { text-align: right; font-variant-numeric: tabular-nums; }
+.verdict { margin-top: 14px; padding: 12px; background: #0e1627; border-radius: 8px; }
+#mockBanner { position: fixed; left: 50%; transform: translateX(-50%); bottom: 50px; padding: 4px 12px; background: #3a3110; color: #ffd75a; border-radius: 6px; font-size: 12px; z-index: 6; }
+
+/* UI slides in when the "Watch the AI learn" replay finishes (App .ui-out while it runs). */
+#topbar, #panel, #legend, .time-controls, .view-buttons, .mc-toggle {
+  transition: transform .7s cubic-bezier(.2, .8, .2, 1), opacity .7s ease;
+}
+#panel { transition-delay: .12s; } #legend, .time-controls, .mc-toggle { transition-delay: .24s; } .view-buttons { transition-delay: .18s; }
+.ui-out #topbar { transform: translateY(-100%); opacity: 0; pointer-events: none; }
+.ui-out #panel { transform: translateX(105%); opacity: 0; pointer-events: none; }
+.ui-out #legend, .ui-out .time-controls, .ui-out .mc-toggle { transform: translateY(24px); opacity: 0; pointer-events: none; }
+.ui-out .view-buttons { transform: translateX(24px); opacity: 0; pointer-events: none; }
+#topbar .replay-intro { margin-left: auto; color: #8b96ad; font-size: 13px; background: none; border: 0; cursor: pointer; font-family: inherit; white-space: nowrap; padding: 6px 0; }
+#topbar .replay-intro:hover { color: #5aa2ff; }
+@media (prefers-reduced-motion: reduce) {
+  #topbar, #panel, #legend, .time-controls, .view-buttons, .mc-toggle { transition-duration: .01s; transition-delay: 0s; }
+}
+
+/* Root: intro layer over the app during hand-offs. */
+.intro-layer { position: relative; z-index: 40; opacity: 1; transition-property: opacity; transition-timing-function: ease; }
+.intro-layer.faded { opacity: 0; pointer-events: none; }
+
+/* "Watch the AI learn" counters (components/ReplayHud.jsx). */
+#replayHud {
+  position: fixed; left: 50%; bottom: 28px; transform: translateX(-50%); z-index: 8;
+  width: min(560px, calc(100vw - 32px)); padding: 14px 18px 12px;
+  background: rgba(10, 14, 25, .78); backdrop-filter: blur(6px); border: 1px solid #23304a; border-radius: 12px;
+  transition: opacity .6s ease 1.4s, transform .6s ease 1.4s;
+}
+#replayHud.done { opacity: 0; transform: translateX(-50%) translateY(12px); }
+#replayHud .rh-title { margin: 0 0 8px; font-size: 11px; text-transform: uppercase; letter-spacing: 1.2px; color: #5aa2ff; }
+#replayHud dl { display: grid; grid-template-columns: 1fr 1.25fr .7fr; gap: 12px; margin: 0; }
+#replayHud dl > div { display: flex; flex-direction: column; } #replayHud dd { margin-top: auto !important; padding-top: 4px; }
+#replayHud dt { font-size: 12px; color: #8b96ad; } #replayHud dt small { font-size: 10px; display: block; }
+#replayHud dd { margin: 4px 0 0; font-size: 13px; color: #8b96ad; font-variant-numeric: tabular-nums; white-space: nowrap; }
+#replayHud dd b { font-size: 20px; color: #dde3f0; font-weight: 600; }
+#replayHud .rh-bar { margin-top: 10px; height: 2px; background: #1a2233; border-radius: 2px; overflow: hidden; }
+#replayHud .rh-bar i { display: block; height: 100%; background: #5aa2ff; transform-origin: left; transform: scaleX(0); }
 
 @media (max-width: 760px) {
+  #replayHud { bottom: 16px; padding: 12px 14px 10px; }
+  #replayHud dl { grid-template-columns: 1fr 1fr; row-gap: 10px; } #replayHud dl > div:last-child { grid-column: span 2; }
+  #replayHud dd b { font-size: 17px; }
+  .ui-out #panel { transform: translateY(105%); }
+  #topbar .replay-intro { position: absolute; top: 8px; right: 16px; margin: 0; }
+  #panel { border-radius: 10px 10px 0 0; border-right: 1px solid #23304a; }
+  #mockBanner { display: none; }
   #topbar { flex-wrap: wrap; padding: 8px 16px; }
   #panel { top: auto; bottom: 0; width: 100%; max-height: 45vh; }
   #legend { bottom: calc(45vh + 8px); }
+  body .mc-toggle { bottom: calc(45vh + 96px); left: auto; right: 16px; }
+  body .mc-caption { bottom: calc(45vh + 140px); }
 }
