@@ -1,0 +1,23 @@
+# Secrets — NEVER commit
+.env
+
+# Python
+.venv/
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+
+# Raw data (large; share over Drive). Keep the folder itself.
+data/raw/*
+!data/raw/.gitkeep
+data/train.csv
+data/test.csv
+
+# Node (the built site in docs/ IS committed — GitHub Pages serves it)
+node_modules/
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

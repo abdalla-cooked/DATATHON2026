@@ -6,6 +6,12 @@
 > test it on asteroids it has never seen, check it against real close approaches to Earth, and show every
 > prediction — including its mistakes — as real orbits in a live 3D solar system.
 
+> **⚠️ Stack change (Nov 7):** the website is now **React + Vite** (source in `web/`, `npm run build` → `docs/`).
+> Path mapping for the steps below: `docs/data/*.json` → `web/public/data/`, `docs/audio/` → `web/public/audio/`,
+> `docs/model/*.js` → `web/src/model/`, `main.js`+`kepler.js` → `web/src/three/SolarSystem.jsx`+`kepler.js`,
+> `ui.js`/`charts.js` → React components in `web/src/components/`. The window events of Contract 4 become shared
+> state in `web/src/App.jsx`. The JSON contracts are unchanged. Run with `cd web && npm run dev`. See README.md.
+
 **How to use this doc:** everyone reads sections 1–4 (10 min). Then each person goes to **their own section**
 (5, 6 or 7) and works through it **in order**. Every step ends with a ✅ **Check**. Don't move on until it passes.
 Section 8 (ElevenLabs narration) is shared and happens **tomorrow morning**. Section 9 is the two-day schedule.

@@ -1,0 +1,47 @@
+/* P3 owns this file. Essentials from PLAN.md §7 step 2 — polish later. */
+* { box-sizing: border-box; }
+body { margin: 0; background: #05060a; color: #dde; font-family: system-ui, sans-serif; }
+
+#scene { position: fixed; inset: 0; width: 100vw; height: 100vh; display: block; }
+
+#topbar {
+  position: fixed; top: 0; left: 0; right: 0; min-height: 60px;
+  display: flex; align-items: center; gap: 16px; padding: 0 16px;
+  background: rgba(10, 14, 25, .85); backdrop-filter: blur(6px); z-index: 10;
+}
+#topbar h1 { font-size: 18px; margin: 0; white-space: nowrap; }
+#toggles { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; font-size: 13px; }
+#toggles button {
+  background: #1a2233; color: #dde; border: 1px solid #334; border-radius: 6px;
+  padding: 6px 10px; cursor: pointer; font: inherit;
+}
+#toggles button.on { background: #3a7bff; border-color: #3a7bff; color: #fff; }
+
+#panel {
+  position: fixed; right: 0; top: 60px; width: 360px; max-height: calc(100vh - 70px);
+  overflow: auto; padding: 12px 16px;
+  background: rgba(10, 14, 25, .85); backdrop-filter: blur(6px); z-index: 5;
+}
+#panel h2 { font-size: 15px; margin: 12px 0 8px; }
+
+#legend {
+  position: fixed; left: 16px; bottom: 16px; font-size: 12px; padding: 6px 10px;
+  background: rgba(10, 14, 25, .85); border-radius: 6px; z-index: 5;
+}
+.mag { color: #ff00ff; }
+.yel { color: #ffd400; }
+
+.error {
+  position: fixed; left: 50%; top: 80px; transform: translateX(-50%); z-index: 20;
+  background: #5a1020; color: #fff; padding: 8px 14px; border-radius: 6px; font-size: 13px;
+}
+
+/* confusion matrix: 3×3 grid */
+.cm { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px; font-size: 12px; text-align: center; }
+.cm > div { padding: 4px; background: #111827; }
+
+@media (max-width: 760px) {
+  #topbar { flex-wrap: wrap; padding: 8px 16px; }
+  #panel { top: auto; bottom: 0; width: 100%; max-height: 45vh; }
+  #legend { bottom: calc(45vh + 8px); }
+}
