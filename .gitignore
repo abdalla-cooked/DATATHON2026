@@ -18,6 +18,10 @@ node_modules/
 web/dist/
 .vercel/
 
+# Generated ElevenLabs audio (scripts/narrate.py). Regenerate locally; live voice covers deploys without it.
+web/public/audio/
+docs/audio/
+
 # OS / editor
 .DS_Store
 Thumbs.db
