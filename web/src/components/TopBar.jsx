@@ -1,10 +1,7 @@
-// P3 owns this file. Model / test-set / mistakes toggles (PLAN.md section 7 step 3) + narration toggle.
-import { useState } from 'react';
-import { narration } from '../lib/narration.js';
-
+// P3 owns this file. Model / test-set / mistakes / hidden-hazards toggles (PLAN.md section 7 step 3).
+// Narration on/off lives in MissionControl.jsx; App.jsx plays the commentary when the view changes.
 export default function TopBar({ view, setView, onReplayIntro }) {
-  const [voice, setVoice] = useState(false);
-  const set = (patch) => setView((v) => { const n = { ...v, ...patch }; narration.view(n); return n; });
+  const set = (patch) => setView((v) => ({ ...v, ...patch }));
   return (
     <header id="topbar">
       <h1>Is It Coming For Us?</h1>
@@ -17,9 +14,7 @@ export default function TopBar({ view, setView, onReplayIntro }) {
         </div>
         <label><input type="checkbox" checked={view.testOnly} onChange={(e) => set({ testOnly: e.target.checked })} /> Unseen test set only</label>
         <label><input type="checkbox" checked={view.showMistakes} onChange={(e) => set({ showMistakes: e.target.checked })} /> Show mistakes</label>
-        <button className={'voice' + (voice ? ' on' : '')} onClick={() => { setVoice(!voice); narration.setOn(!voice); }}>
-          Narration: {voice ? 'on' : 'off'}
-        </button>
+        <label className="lime"><input type="checkbox" id="showHidden" checked={!!view.showHidden} onChange={(e) => set({ showHidden: e.target.checked })} /> 🕵️ Hidden hazards</label>
       </div>
       {onReplayIntro && <button type="button" className="replay-intro" onClick={onReplayIntro}>Replay intro</button>}
     </header>

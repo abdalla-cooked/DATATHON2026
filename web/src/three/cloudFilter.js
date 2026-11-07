@@ -16,7 +16,7 @@ export function sampled(pdes) {
 
 export function mattersToStory(a, metrics) {
   const thrA = metrics?.A?.threshold ?? 0.5, thrB = metrics?.B?.threshold ?? 0.5;
-  return a.pha === 1 || (a.pA ?? 0) >= thrA || (a.pB ?? 0) >= thrB || ALWAYS_SHOW.has(String(a.pdes));
+  return a.pha === 1 || a.hidden || (a.pA ?? 0) >= thrA || (a.pB ?? 0) >= thrB || ALWAYS_SHOW.has(String(a.pdes));
 }
 
 // The app's default list: bound orbits, thinned. Sorted the way the app sorts Model A (most hazardous last).

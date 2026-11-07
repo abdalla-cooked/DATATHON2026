@@ -1,7 +1,7 @@
 // P3 owns this file.
 const ITEMS = [
   ['#3a7bff', 'low risk'], ['#ff3030', 'high risk'], ['#ff00ff', 'missed hazard'],
-  ['#ffd400', 'false alarm'], ['#33ff99', "Earth's orbit"],
+  ['#ffd400', 'false alarm'], ['#9dff3a', 'hidden hazard'], ['#33ff99', "Earth's orbit"],
 ];
 export default function Legend() {
   return (

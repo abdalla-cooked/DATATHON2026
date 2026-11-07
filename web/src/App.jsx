@@ -1,7 +1,8 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useData } from './lib/useData.js';
-import { narration } from './lib/narration.js';
+import { playAct, playAsteroid } from './lib/narration.js';
 import { replay as replayStore } from './lib/replay.js';
+import MissionControl from './components/MissionControl.jsx';
 import SolarSystem from './three/SolarSystem.jsx';
 import TopBar from './components/TopBar.jsx';
 import SidePanel from './components/SidePanel.jsx';
@@ -21,7 +22,7 @@ import ReplayHud from './components/ReplayHud.jsx';
 //   onReplayIntro  sends the viewer back to the scroll intro (TopBar link).
 export default function App({ replay = false, onReady, onReplayIntro }) {
   const { asteroids, metrics, error } = useData();
-  const [view, setView] = useState({ model: 'A', testOnly: false, showMistakes: false });
+  const [view, setView] = useState({ model: 'A', testOnly: false, showMistakes: false, showHidden: false });
   const [selected, setSelected] = useState(null);
   const [tab, setTab] = useState('info');
   const [pickRequest, setPickRequest] = useState(null);
@@ -35,8 +36,26 @@ export default function App({ replay = false, onReady, onReplayIntro }) {
     return replayStore.onDone(() => setUiIn(true));
   }, [replay]);
 
-  const onSelect = useCallback((a) => { setSelected(a); setTab('info'); narration.asteroid(a); }, []);
+  // Mission Control Live: the commentators react to every click, straight from the click handler
+  // (so clicking the same asteroid again comments again, and the browser counts it as a user gesture).
+  const viewRef = useRef(view);
+  viewRef.current = view;
+  const onSelect = useCallback((a) => {
+    setSelected(a);
+    setTab('info');
+    const part = viewRef.current.showHidden && a.hidden ? 'hidden' : 'report';
+    playAsteroid(a, part, metrics?.B?.threshold);
+  }, [metrics]);
   const onPick = useCallback((q) => setPickRequest({ q, t: Date.now() }), []);
+
+  const prevView = useRef(view);
+  useEffect(() => {
+    const was = prevView.current;
+    prevView.current = view;
+    if (view.showHidden && !was.showHidden) playAct('act4');
+    else if (view.showMistakes && !was.showMistakes) playAct('mistakes');
+    else if (view.model !== was.model) playAct(view.model === 'B' ? 'act2' : 'act1');
+  }, [view]);
 
   return (
     <div className={'app' + (uiIn ? '' : ' ui-out')}>
@@ -46,6 +65,7 @@ export default function App({ replay = false, onReady, onReplayIntro }) {
       <SidePanel tab={tab} setTab={setTab} selected={selected} asteroids={asteroids} metrics={metrics} view={view}
         onPick={onPick} onCustom={setCustom} />
       <Legend />
+      <MissionControl />
       {replay && <ReplayHud asteroids={asteroids} metrics={metrics} />}
       {metrics?._mock && <div id="mockBanner">Mock data. Real model results load when ML pushes the exports.</div>}
       {error && <div className="error">Couldn't load data: {String(error.message)}</div>}

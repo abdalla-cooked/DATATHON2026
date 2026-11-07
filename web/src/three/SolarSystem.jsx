@@ -1,35 +1,66 @@
 // P2 owns this file. The Three.js scene, mounted once inside React (PLAN.md §6).
-// Steps done: 1 bare scene · 2 orbits · 3 asteroid cloud · 4 toggles · 5 click to inspect · planets · time slider.
+// Steps done: 1 bare scene · 2 orbits · 3 asteroid cloud · 4 toggles · 5 click to inspect · planets · time slider ·
+// Act 4 hidden hazards.
 // Props replace the window events of PLAN.md Contract 4.
 import { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
-import { CSS2DRenderer } from 'three/examples/jsm/renderers/CSS2DRenderer.js';
+import { CSS2DRenderer, CSS2DObject } from 'three/examples/jsm/renderers/CSS2DRenderer.js';
 import { orbitLine, positionAt, makeOrbitCloud } from './kepler.js';
 import { planetElementsAt } from './planets.js';
-import { addPlanets, addSunAndLights, BG_COLOR } from './bodies.js';
+import { addPlanets, addSunAndLights, loader, BG_COLOR } from './bodies.js';
 import { mattersToStory, sampled, SAMPLE_EVERY } from './cloudFilter.js';
 import { replay, revealOf, REPLAY_GREY, SPREAD } from '../lib/replay.js';
 import { MAX_JD, jdFromDate, meanAnomalyAt } from './time.js';
 import TimeControls from './TimeControls.jsx';
 import ViewButtons from './ViewButtons.jsx';
 
-const COLD = new THREE.Color(0x2b5cc0); // p = 0, safe (a quieter blue, so the safe crowd reads as background)
-const HOT = new THREE.Color(0xff3030);  // p = 1, hazardous
+const ROCK = new THREE.Color(0xa89a88); // default: plain rock, no risk coloring
+const COLD = new THREE.Color(0x3d7bff); // "Highlight risk" on: below the model's threshold (low risk)
+const HOT = new THREE.Color(0xff3030);  // "Highlight risk" on: at or above the threshold (high risk)
 const MISS = new THREE.Color(0xff00ff);        // mistakes mode: real hazard the model missed
 const FALSE_ALARM = new THREE.Color(0xffd400); // mistakes mode: flagged but not actually hazardous
 const DIM = new THREE.Color(0x2a3550);         // mistakes mode: correct prediction, faded out
+const LIME = new THREE.Color(0x9dff3a);        // hidden-hazards mode: dark asteroid measured >= 140 m, not on NASA's list
+const LIME_HEX = 0x9dff3a;
 // Dot sizes in screen pixels (sizeAttenuation off), tuned for the real ~43k asteroids.
 // Normal mode: grows from `safe` (score 0) to `hazard` (score 1). Mistakes mode: by kind.
-const SIZE = { safe: 3, hazard: 5, correct: 2, falseAlarm: 4, miss: 5 };
-const PULSE = 0.3;                       // dots swell by up to 30% while pulsing in mistakes mode
+const SIZE = { safe: 3, hazard: 5, correct: 2, falseAlarm: 4, miss: 5, hidden: 8 };
+const PULSE = 0.3;                       // dots swell by up to 30% while pulsing (mistakes + hidden-hazards modes)
+const HIDDEN_TAGS = 5;                   // Act 4: name tags on this many of the biggest hidden hazards
 const MARKER_SIZE = 18;                  // pixels: white ring around the selected asteroid
 const PICK_RADIUS = 10;                  // pixels: how close a click must be to a dot to select it
 
-// Round dot sprite, so points render as circles instead of squares.
-const DOT = sprite((g, s) => { g.fillStyle = '#fff'; g.beginPath(); g.arc(s / 2, s / 2, s / 2 - 1, 0, Math.PI * 2); g.fill(); });
+// Asteroid sprite: a lumpy, lit rock with a few craters. Drawn in greys, so the per-dot color tints it.
+const DOT = sprite((g, s) => {
+  const c = s / 2, n = 14, rnd = mulberry(7);
+  g.beginPath();
+  for (let k = 0; k < n; k++) {
+    const t = (k / n) * Math.PI * 2, r = c * (0.78 + 0.2 * rnd());
+    g[k ? 'lineTo' : 'moveTo'](c + Math.cos(t) * r, c + Math.sin(t) * r);
+  }
+  g.closePath();
+  const lit = g.createRadialGradient(c * 0.7, c * 0.65, c * 0.1, c, c, c);
+  lit.addColorStop(0, '#fff'); lit.addColorStop(0.6, '#b8b8b8'); lit.addColorStop(1, '#5a5a5a');
+  g.fillStyle = lit;
+  g.fill();
+  g.clip();
+  for (const [x, y, r] of [[0.62, 0.42, 0.13], [1.25, 1.1, 0.18], [0.8, 1.3, 0.1], [1.3, 0.62, 0.08]]) {
+    g.fillStyle = 'rgba(0,0,0,0.28)'; g.beginPath(); g.arc(x * c, y * c, r * c, 0, Math.PI * 2); g.fill();
+    g.fillStyle = 'rgba(255,255,255,0.18)'; g.beginPath(); g.arc(x * c + r * c * 0.25, y * c + r * c * 0.25, r * c * 0.7, 0, Math.PI * 2); g.fill();
+  }
+});
 // White ring sprite that marks the selected asteroid.
 const RING = sprite((g, s) => { g.strokeStyle = '#fff'; g.lineWidth = 6; g.beginPath(); g.arc(s / 2, s / 2, s / 2 - 5, 0, Math.PI * 2); g.stroke(); });
+
+function mulberry(a) { // tiny seeded RNG, so the rock sprite looks the same on every load
+  return () => {
+    a = (a + 0x6d2b79f5) | 0;
+    let t = Math.imul(a ^ (a >>> 15), 1 | a);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
 
 function sprite(draw) {
   const s = 64, cv = document.createElement('canvas');
@@ -48,6 +79,10 @@ const LABEL_MIN_PX = 26; // hide a body's label when it sits closer than this to
 
 const ease = (t) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
 
+// Act 4 headline: near Earth's orbit (MOID <= 0.05 AU), NOT labeled hazardous, yet NASA's NEOWISE telescope
+// measured it at >= 140 m. Dark surfaces make them look faint (H > 22), so the brightness rule misses them.
+export const isMeasuredHidden = (a) => !!a.hidden && (a.D_meas ?? 0) >= 140;
+
 export default function SolarSystem({ asteroids, metrics, view, onSelect, pickRequest, custom, onReady }) {
   const onReadyRef = useRef(onReady);
   onReadyRef.current = onReady;
@@ -56,7 +91,10 @@ export default function SolarSystem({ asteroids, metrics, view, onSelect, pickRe
   // Shared clock (see TimeControls.jsx). Starts paused at today.
   const timeRef = useRef({ jd: jdFromDate(new Date()), playing: false, speed: 30, dirty: true, onTick: null });
   const [showAll, setShowAll] = useState(false);              // false = thinned cloud (see mattersToStory)
-  const [counts, setCounts] = useState({ shown: 0, total: 0 }); // for the "Showing X of Y" caption
+  // false = plain rock; true = red high risk / blue low risk. On after "Watch the AI learn", so the replay
+  // reveals the model's verdicts instead of turning grey dots into rock-colored ones.
+  const [highlightRisk, setHighlightRisk] = useState(() => replay.mode !== 'off');
+  const [counts, setCounts] = useState({ shown: 0, total: 0, hidden: 0 }); // for the "Showing X of Y" caption
 
   // Create the scene once; clean up on unmount.
   useEffect(() => {
@@ -66,7 +104,13 @@ export default function SolarSystem({ asteroids, metrics, view, onSelect, pickRe
     renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
 
     const scene = new THREE.Scene();
-    scene.background = new THREE.Color(BG_COLOR);
+    scene.background = new THREE.Color(BG_COLOR); // shown until the star map loads (the intro ends on this color)
+    loader.load('textures/8k_stars_milky_way.jpg', (t) => {
+      t.colorSpace = THREE.SRGBColorSpace;
+      t.mapping = THREE.EquirectangularReflectionMapping;
+      scene.background = t;
+      scene.backgroundIntensity = 0.55; // dimmed so the asteroid dots stay the brightest thing on screen
+    });
 
     const camera = new THREE.PerspectiveCamera(55, 1, 0.1, 5000);
     camera.position.set(...VIEWS.earth.pos);
@@ -76,7 +120,7 @@ export default function SolarSystem({ asteroids, metrics, view, onSelect, pickRe
     controls.minDistance = 2;
     controls.maxDistance = 2000; // Eris's far end is ~98 AU = 980 units
 
-    addSunAndLights(scene);
+    const sun = addSunAndLights(scene); // shared with the intro (bodies.js)
 
     // Planet names are HTML labels drawn by a second renderer layered over the canvas.
     const labelRenderer = new CSS2DRenderer();
@@ -95,7 +139,7 @@ export default function SolarSystem({ asteroids, metrics, view, onSelect, pickRe
     resize();
 
     // replayU: 0..1 progress of the "Watch the AI learn" replay (1 = every dot in its model color).
-    const ctx = { scene, camera, points: null, shown: [], cloud: null, pulse: false, selected: null, marker: null,
+    const ctx = { scene, camera, points: null, shown: [], cloud: null, pulse: false, selected: null, marker: null, hiddenTags: [],
       replayU: { value: replay.progress() } };
     let readySent = false;
     sceneRef.current = ctx;
@@ -111,6 +155,9 @@ export default function SolarSystem({ asteroids, metrics, view, onSelect, pickRe
         const attr = ctx.points.geometry.attributes.position;
         ctx.cloud(jd, attr.array);
         attr.needsUpdate = true;
+      }
+      for (const { a, obj } of ctx.hiddenTags) {   // Act 4 name tags ride along with their asteroids
+        positionAt(a, meanAnomalyAt(a, jd), obj.position);
       }
       if (ctx.selected && ctx.marker) {
         positionAt(ctx.selected, meanAnomalyAt(ctx.selected, jd), tmp);
@@ -165,6 +212,8 @@ export default function SolarSystem({ asteroids, metrics, view, onSelect, pickRe
       }
       controls.update();
       updateLabels();
+      sun.rotation.y += dt * 0.05; // slow cosmetic spin (not tied to the time slider)
+      for (const { globe } of planets) globe.rotation.y += dt * 0.15;
       if (ctx.points) {
         ctx.points.material.size = ctx.pulse ? 1 + PULSE * (1 + Math.sin(now / 200)) / 2 : 1;
       }
@@ -187,7 +236,7 @@ export default function SolarSystem({ asteroids, metrics, view, onSelect, pickRe
   }, []);
 
   // Steps 3–4: every asteroid as one point, moved along its orbit to the slider's date.
-  //   Normal mode:   blue (safe) → red (hazardous) by the selected model's probability.
+  //   Normal mode:   plain rock; with "Highlight risk" on, red if the model's score is at/above its threshold, else blue.
   //   Mistakes mode: magenta = real hazard the model missed, yellow = false alarm, everything correct fades out.
   //   testOnly:      only asteroids from the unseen test set.
   // Rebuilds whenever the data or any toggle changes.
@@ -196,28 +245,31 @@ export default function SolarSystem({ asteroids, metrics, view, onSelect, pickRe
     if (!ctx || !asteroids) return;
     const key = view.model === 'A' ? 'pA' : 'pB';
     const thr = metrics?.[view.model]?.threshold;
-    const mistakes = view.showMistakes && thr != null; // needs the model's threshold from metrics.json
+    const hiddenMode = !!view.showHidden;              // Act 4 overrides the other colorings
+    const mistakes = !hiddenMode && view.showMistakes && thr != null; // needs the model's threshold from metrics.json
 
     // Kind of dot: 0 = correct (mistakes mode), 1 = false alarm, 2 = missed hazard.
     const kindOf = (a) => {
       const flagged = (a[key] ?? 0) >= thr;
       return a.pha === 1 && !flagged ? 2 : a.pha === 0 && flagged ? 1 : 0;
     };
-    // Draw order = stacking order (depth test is off for the cloud), so the dots that matter go last and sit on top:
+    // Draw order = stacking order (the cloud doesn't write depth), so the dots that matter go last and sit on top:
     // normal mode → most hazardous on top; mistakes mode → misses on top of false alarms on top of the faded rest.
     const pool = asteroids.filter((a) => a.e < 1 && (!view.testOnly || a.test)); // bound orbits only
     const list = pool
       .filter((a) => showAll || mattersToStory(a, metrics) || sampled(String(a.pdes)))
-      .sort(mistakes ? (x, y) => kindOf(x) - kindOf(y) : (x, y) => (x[key] ?? 0) - (y[key] ?? 0));
-    setCounts({ shown: list.length, total: pool.length });
+      .sort(hiddenMode ? (x, y) => isMeasuredHidden(x) - isMeasuredHidden(y)
+        : mistakes ? (x, y) => kindOf(x) - kindOf(y) : (x, y) => (x[key] ?? 0) - (y[key] ?? 0));
+    setCounts({ shown: list.length, total: pool.length, hidden: list.filter(isMeasuredHidden).length });
 
     const colorOf = (a, out) => {
-      if (!mistakes) return out.copy(COLD).lerp(HOT, a[key] ?? 0);
+      if (hiddenMode) return out.copy(isMeasuredHidden(a) ? LIME : DIM);
+      if (!mistakes) return out.copy(!highlightRisk ? ROCK : (a[key] ?? 0) >= (thr ?? 0.5) ? HOT : COLD);
       return out.copy([DIM, FALSE_ALARM, MISS][kindOf(a)]);
     };
 
     // Size per dot (pixels): normal mode grows with the hazard score, mistakes mode by kind.
-    const sizeOf = (a) => (mistakes
+    const sizeOf = (a) => (hiddenMode ? (isMeasuredHidden(a) ? SIZE.hidden : SIZE.correct) : mistakes
       ? [SIZE.correct, SIZE.falseAlarm, SIZE.miss][kindOf(a)]
       : SIZE.safe + (SIZE.hazard - SIZE.safe) * (a[key] ?? 0));
 
@@ -235,7 +287,9 @@ export default function SolarSystem({ asteroids, metrics, view, onSelect, pickRe
     const material = new THREE.PointsMaterial({
       size: 1, // multiplier on each dot's own size; the pulse animates it
       sizeAttenuation: false, vertexColors: true, map: DOT, alphaTest: 0.5, transparent: true,
-      depthTest: false, depthWrite: false, // stack by draw order (above), not by distance
+      // depthTest on: the solid Sun/planets hide the dots behind them. depthWrite off: dots never hide each other
+      // by distance, so among themselves they still stack by draw order (above).
+      depthTest: true, depthWrite: false,
     });
     // three's PointsMaterial gives every dot the same size; this patches its shader to read `dotSize` per dot.
     // It also runs the replay: until the replay reaches a dot's `reveal` value the dot is grey at the
@@ -257,7 +311,7 @@ export default function SolarSystem({ asteroids, metrics, view, onSelect, pickRe
     ctx.points = points;
     ctx.shown = list;              // index in the cloud → asteroid object (for click-to-inspect)
     ctx.cloud = makeOrbitCloud(list);
-    ctx.pulse = mistakes;          // the animation loop makes the dots pulse while mistakes mode is on
+    ctx.pulse = mistakes || hiddenMode; // the animation loop makes the dots pulse in mistakes and hidden-hazards modes
     timeRef.current.dirty = true;  // place the new dots at the current date on the next frame
 
     return () => {
@@ -267,7 +321,42 @@ export default function SolarSystem({ asteroids, metrics, view, onSelect, pickRe
       ctx.points = null;
       ctx.cloud = null;
     };
-  }, [asteroids, metrics, view.model, view.testOnly, view.showMistakes, showAll]);
+  }, [asteroids, metrics, view.model, view.testOnly, view.showMistakes, view.showHidden, showAll, highlightRisk]);
+
+  // Act 4: draw the hidden hazards' orbits in lime, so judges see them all threading Earth's orbit,
+  // and glide to Earth's neighborhood where they live.
+  useEffect(() => {
+    const ctx = sceneRef.current;
+    if (!ctx || !asteroids || !view.showHidden) return;
+    const lines = asteroids
+      .filter((a) => isMeasuredHidden(a) && a.e < 1 && (!view.testOnly || a.test))
+      .map((a) => orbitLine(a, LIME_HEX, 0.35));
+    ctx.scene.add(...lines);
+
+    // Name tags on the biggest ones (by measured size), so judges can read who they are.
+    const biggest = asteroids
+      .filter((a) => isMeasuredHidden(a) && a.e < 1 && (!view.testOnly || a.test))
+      .sort((x, y) => y.D_meas - x.D_meas)
+      .slice(0, HIDDEN_TAGS);
+    ctx.hiddenTags = biggest.map((a) => {
+      const tag = document.createElement('div');
+      tag.textContent = `${a.name.replace(/^\d+\s+/, '')} · ${Math.round(a.D_meas)} m`;
+      Object.assign(tag.style, {
+        font: '600 12px system-ui, sans-serif', color: '#9dff3a', whiteSpace: 'nowrap',
+        textShadow: '0 0 4px #000, 0 0 8px #000', transform: 'translate(10px, -14px)',
+      });
+      const obj = new CSS2DObject(tag);
+      ctx.scene.add(obj);
+      return { a, obj };
+    });
+    timeRef.current.dirty = true; // place the tags at the current date on the next frame
+    ctx.flyTo('earth');
+    return () => {
+      for (const l of lines) { ctx.scene.remove(l); l.geometry.dispose(); l.material.dispose(); }
+      for (const { obj } of ctx.hiddenTags) ctx.scene.remove(obj); // CSS2DObject removes its own <div>
+      ctx.hiddenTags = [];
+    };
+  }, [asteroids, view.showHidden, view.testOnly]);
 
   // Step 5: click a dot → draw its orbit in white, mark it, and tell the app (onSelect → side panel).
   // Picking is done in screen space (nearest dot within PICK_RADIUS pixels), which works the same at
@@ -362,6 +451,17 @@ export default function SolarSystem({ asteroids, metrics, view, onSelect, pickRe
       <ViewButtons views={VIEWS} initial="earth" onView={(name) => sceneRef.current?.flyTo(name)}>
         {counts.total > 0 && (
           <div className="cloud-info">
+            <button
+              type="button" className={`risk-toggle${highlightRisk ? ' on' : ''}`} aria-pressed={highlightRisk}
+              onClick={() => setHighlightRisk((h) => !h)}
+              disabled={view.showMistakes || view.showHidden}
+              title={view.showMistakes || view.showHidden ? 'Mistakes / hidden-hazards mode uses its own colors' : undefined}
+            >
+              {highlightRisk ? 'Hide risk colors' : 'Highlight risk'}
+            </button>
+            {highlightRisk && !view.showMistakes && !view.showHidden && (
+              <small className="risk-key"><span className="hot">●</span> high risk · <span className="cold">●</span> low risk</small>
+            )}
             <label>
               <input type="checkbox" id="showAllAsteroids" checked={showAll} onChange={(e) => setShowAll(e.target.checked)} />
               {' '}Show all asteroids
@@ -370,6 +470,14 @@ export default function SolarSystem({ asteroids, metrics, view, onSelect, pickRe
               Showing {counts.shown.toLocaleString()} of {counts.total.toLocaleString()}
               {!showAll && <><br />every hazard and every mistake included;<br />1 in {SAMPLE_EVERY} of the clearly safe rest</>}
             </small>
+            {view.showHidden && (
+              <p className="hidden-card">
+                <b>{counts.hidden} hidden hazards</b><br />
+                Measured at 140 m or more by NASA's NEOWISE telescope, and their orbits pass within 0.05 AU of
+                Earth's. NASA doesn't list them as hazardous: its rule judges size by brightness, and these are
+                dark, so they look smaller than they are.
+              </p>
+            )}
           </div>
         )}
       </ViewButtons>

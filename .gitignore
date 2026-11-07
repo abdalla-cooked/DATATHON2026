@@ -15,9 +15,18 @@ data/test.csv
 
 # Node (the built site in docs/ IS committed — GitHub Pages serves it)
 node_modules/
+web/dist/
+.vercel/
+
+# Generated ElevenLabs audio (scripts/narrate.py). Regenerate locally; live voice covers deploys without it.
+web/public/audio/
+docs/audio/
 
 # OS / editor
 .DS_Store
 Thumbs.db
 .vscode/
 .idea/
+
+# Local-only certificates (e.g. Norton HTTPS scanning root for dev)
+.certs/

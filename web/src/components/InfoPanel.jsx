@@ -28,6 +28,12 @@ export default function InfoPanel({ selected: a, onPick }) {
         {a.pha ? <b className="hot">NASA: potentially hazardous</b> : 'NASA: not hazardous'}
         {' · '}class {a.class} · {a.test ? 'unseen test asteroid' : 'training asteroid'}
       </p>
+      {a.hidden && a.D_meas >= 140 && (
+        <p className="lime">
+          🕵️ Hidden hazard: measured {Math.round(a.D_meas)} m wide, passes {a.moid} AU from Earth's orbit,
+          but its brightness (H {a.H}) is past NASA's H ≤ 22 cutoff, so it isn't listed as hazardous.
+        </p>
+      )}
       <div className="scores2">
         <div>Model A risk score<div className="big">{score100(a.pA)}</div></div>
         <div>Model B risk score<div className="big">{score100(a.pB)}</div><Badge p={a.pB} /></div>

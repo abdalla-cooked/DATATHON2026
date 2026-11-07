@@ -51,7 +51,8 @@ export function orbitPoints(el, n = 180) {
 
 export function orbitLine(el, color = 0x4466aa, opacity = 0.6) {
   const g = new THREE.BufferGeometry().setFromPoints(orbitPoints(el));
-  return new THREE.Line(g, new THREE.LineBasicMaterial({ color, transparent: true, opacity }));
+  return new THREE.Line(g, new THREE.LineBasicMaterial({ color, transparent: true, opacity, depthWrite: false }));
+  // depthWrite off: lines are still hidden behind the Sun/planets, but don't punch holes in the asteroid dots
 }
 
 // Fast positions for many bodies at once (the ~30k asteroid cloud).

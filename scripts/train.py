@@ -10,6 +10,13 @@ Models (Model B+ is intentionally NOT included):
      (median + 5%/95% quantile regressors on log10 albedo, trained on every measured asteroid; size then comes
       from the physics formula. Predicting diameter directly failed: trees can't extrapolate to faint H.)
 
+Mission Control Live fields in asteroids.json (for narrate.py and the site):
+  why   = Model B's biggest reason for its verdict, from LightGBM's built-in SHAP values (pred_contrib),
+          as "<feature><+|->", e.g. "q+" = perihelion pushed the risk UP. Phrases live in narration/lines.json.
+  v_imp = hypothetical impact speed, km/s: sqrt(v_inf^2 + 11.2^2), v_inf = median from cad.csv (or the cad median)
+  E_mt  = hypothetical impact energy, megatons TNT, from best size (measured, else Act 4) and v_imp.
+          A what-if for the commentary, NOT a prediction that anything will hit.
+
 Changes from the PLAN.md snippets (agreed fixes):
   * Model B keeps H and drops only MOID, so Act 2 tests "can it work out Earth-crossing geometry
     from orbit shape?" instead of failing because it can't tell a 30 m rock from a 300 m one.
@@ -146,6 +153,21 @@ BASE_ALBEDO = 0.14                                          # the assumption beh
 def diameter_m(albedo, H):
     """Standard brightness -> size formula, in meters."""
     return 1329e3 / np.sqrt(albedo) * 10 ** (-H / 5)
+
+
+V_ESC = 11.2            # km/s, Earth's escape speed: anything that hits arrives at least this fast
+ROCK_DENSITY = 2000     # kg/m^3, a middle value between rubble piles (~1300) and solid stone (~3000)
+
+
+def impact_megatons(d_m, v_kms):
+    """Hypothetical impact energy in megatons of TNT: 1/2 m v^2 for a sphere of diameter d_m."""
+    mass = ROCK_DENSITY * np.pi / 6 * d_m ** 3
+    return 0.5 * mass * (v_kms * 1000) ** 2 / 4.184e15
+
+
+def sig3(x):
+    """3 significant figures, keeps the JSON small."""
+    return x.map(lambda v: float(f"{v:.3g}") if pd.notna(v) else None)
 
 
 def act4_hidden_hazards(sbdb_path, metrics):
@@ -367,6 +389,27 @@ def main():
             out[c] = df["spkid"].map(sz[c]).values
         out["hidden"] = out["hidden"].fillna(False).astype(bool)
         print(f"  size fields joined for {out['D_pred'].notna().mean():.1%} of asteroids")
+
+        # Mission Control Live: hypothetical impact energy (a what-if, not a prediction)
+        v_inf = pd.to_numeric(cad["v_inf"], errors="coerce")
+        typical = float(v_inf.median())
+        v = np.sqrt(df["pdes"].map(v_inf.groupby(cad["des"]).median()).fillna(typical) ** 2 + V_ESC ** 2)
+        out["v_imp"] = v.round(1).values
+        out["E_mt"] = sig3(pd.Series(impact_megatons(out["D_meas"].fillna(out["D_pred"]).values, v.values)))
+        metrics["impact"] = dict(density_kg_m3=ROCK_DENSITY, typical_v_inf_kms=round(typical, 1),
+                                 note="Hypothetical what-if energy for the commentary. Not a prediction of impact.")
+        print(f"  impact what-if: median {out['E_mt'].median():.3g} Mt | Apophis "
+              f"{out.loc[out['name'].str.contains('Apophis'), 'E_mt'].iloc[0]} Mt")
+
+    if HAVE_LGBM:
+        # Mission Control Live: Model B's biggest ORBIT reason, in the direction of its verdict.
+        # H is left out on purpose: it wins almost every time ("bright, so big") and would make every report the same.
+        orbit_feats = [f for f in FEAT_B if f != "H"]
+        contrib = fitted["B"].booster_.predict(df[FEAT_B], pred_contrib=True)[:, [FEAT_B.index(f) for f in orbit_feats]]
+        risky = (full["B"] >= thr["B"]).values
+        k = np.where(risky, contrib.argmax(axis=1), contrib.argmin(axis=1))
+        out["why"] = [orbit_feats[j] + ("+" if contrib[n, j] > 0 else "-") for n, j in enumerate(k)]
+        print("  why (top reasons):", out["why"].value_counts().head(5).to_dict())
     assert out.columns.is_unique
     path = os.path.join(args.data_out, "asteroids.json")
     out.to_json(path, orient="records")

@@ -21,7 +21,7 @@ export default function CustomPanel({ asteroids, onCustom }) {
     return { ...f, ...scoreBoth(f) };
   }, [el]);
 
-  useEffect(() => { onCustom(full); narration.custom(full.pB); }, [full]);
+  useEffect(() => { onCustom(full); narration.custom({ pB: full.pB }); }, [full]);
   useEffect(() => () => onCustom(null), []); // hide the cyan orbit when leaving the tab
 
   const load = (name) => {

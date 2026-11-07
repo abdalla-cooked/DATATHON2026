@@ -36,6 +36,7 @@ body { margin: 0; background: var(--bg); color: var(--text); font-family: var(--
 #legend i { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 5px; vertical-align: -1px; }
 .mag { color: #ff00ff; }
 .yel { color: #ffd400; }
+.lime { color: #9dff3a; }
 
 .error {
   position: fixed; left: 50%; top: 80px; transform: translateX(-50%); z-index: 20;
@@ -87,18 +88,18 @@ pre { margin: 0; padding: 8px; background: #0e1627; font-size: 11px; overflow: a
 #mockBanner { position: fixed; left: 50%; transform: translateX(-50%); bottom: 50px; padding: 4px 12px; background: #3a3110; color: #ffd75a; border-radius: 6px; font-size: 12px; z-index: 6; }
 
 /* UI slides in when the "Watch the AI learn" replay finishes (App .ui-out while it runs). */
-#topbar, #panel, #legend, .time-controls, .view-buttons {
+#topbar, #panel, #legend, .time-controls, .view-buttons, .mc-toggle {
   transition: transform .7s cubic-bezier(.2, .8, .2, 1), opacity .7s ease;
 }
-#panel { transition-delay: .12s; } #legend, .time-controls { transition-delay: .24s; } .view-buttons { transition-delay: .18s; }
+#panel { transition-delay: .12s; } #legend, .time-controls, .mc-toggle { transition-delay: .24s; } .view-buttons { transition-delay: .18s; }
 .ui-out #topbar { transform: translateY(-100%); opacity: 0; pointer-events: none; }
 .ui-out #panel { transform: translateX(105%); opacity: 0; pointer-events: none; }
-.ui-out #legend, .ui-out .time-controls { transform: translateY(24px); opacity: 0; pointer-events: none; }
+.ui-out #legend, .ui-out .time-controls, .ui-out .mc-toggle { transform: translateY(24px); opacity: 0; pointer-events: none; }
 .ui-out .view-buttons { transform: translateX(24px); opacity: 0; pointer-events: none; }
 #topbar .replay-intro { margin-left: auto; color: #8b96ad; font-size: 13px; background: none; border: 0; cursor: pointer; font-family: inherit; white-space: nowrap; padding: 6px 0; }
 #topbar .replay-intro:hover { color: #5aa2ff; }
 @media (prefers-reduced-motion: reduce) {
-  #topbar, #panel, #legend, .time-controls, .view-buttons { transition-duration: .01s; transition-delay: 0s; }
+  #topbar, #panel, #legend, .time-controls, .view-buttons, .mc-toggle { transition-duration: .01s; transition-delay: 0s; }
 }
 
 /* Root: intro layer over the app during hand-offs. */
@@ -133,4 +134,6 @@ pre { margin: 0; padding: 8px; background: #0e1627; font-size: 11px; overflow: a
   #topbar { flex-wrap: wrap; padding: 8px 16px; }
   #panel { top: auto; bottom: 0; width: 100%; max-height: 45vh; }
   #legend { bottom: calc(45vh + 8px); }
+  body .mc-toggle { bottom: calc(45vh + 96px); left: auto; right: 16px; }
+  body .mc-caption { bottom: calc(45vh + 140px); }
 }

@@ -2009,5 +2009,10 @@
   ],
   "measured": 34,
   "note": "Candidates for follow-up observation, not confirmed threats. 'measured' = already measured at >= 140 m by NEOWISE yet not labeled hazardous, because H > 22."
+ },
+ "impact": {
+  "density_kg_m3": 2000,
+  "typical_v_inf_kms": 9.6,
+  "note": "Hypothetical what-if energy for the commentary. Not a prediction of impact."
  }
 }
