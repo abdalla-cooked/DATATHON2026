@@ -42,7 +42,7 @@ const PLANETS = [
   { name: 'Mars',    a: 1.524, e: 0.093, i: 1.8, om: 49.6, w: 286.5 },
 ];
 
-export default function SolarSystem({ asteroids, metrics, view, onSelect }) {
+export default function SolarSystem({ asteroids, metrics, view, onSelect, pickRequest, custom }) {
   const canvasRef = useRef(null);
   const sceneRef = useRef(null); // { scene, camera, renderer } for later effects
 
@@ -180,7 +180,11 @@ export default function SolarSystem({ asteroids, metrics, view, onSelect }) {
       }
       if (best < 0) return;
 
-      const a = ctx.shown[best];
+      select(ctx.shown[best]);
+    };
+
+    // Also used by the UI (presets, worst-miss list) through the pickRequest prop below.
+    const select = (a) => {
       clearSelection();
       selectedLine = orbitLine(a, 0xffffff, 1);
       marker = new THREE.Points(
@@ -191,6 +195,7 @@ export default function SolarSystem({ asteroids, metrics, view, onSelect }) {
       onSelectRef.current?.(a);
     };
 
+    ctx.select = select;
     canvas.addEventListener('pointerdown', onPointerDown);
     canvas.addEventListener('pointerup', onPointerUp);
     return () => {
@@ -199,6 +204,24 @@ export default function SolarSystem({ asteroids, metrics, view, onSelect }) {
       clearSelection();
     };
   }, []);
+
+  // UI asked to select an asteroid by name or pdes (presets, worst misses).
+  useEffect(() => {
+    const ctx = sceneRef.current;
+    if (!ctx?.select || !pickRequest || !asteroids) return;
+    const q = pickRequest.q;
+    const a = asteroids.find((x) => x.pdes === q || x.name.includes(q));
+    if (a) ctx.select(a);
+  }, [pickRequest, asteroids]);
+
+  // "Design your own asteroid": draw the custom orbit in cyan.
+  useEffect(() => {
+    const ctx = sceneRef.current;
+    if (!ctx || !custom) return;
+    const line = orbitLine(custom, 0x00ffff, 1);
+    ctx.scene.add(line);
+    return () => { ctx.scene.remove(line); line.geometry.dispose(); line.material.dispose(); };
+  }, [custom]);
 
   return <canvas id="scene" ref={canvasRef} />;
 }
