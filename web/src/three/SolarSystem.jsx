@@ -1,7 +1,7 @@
 // P2 owns this file. The Three.js scene, mounted once inside React (PLAN.md §6).
 // Steps done: 1 bare scene · 2 orbits · 3 asteroid cloud · 4 toggles · 5 click to inspect · planets · time slider.
 // Props replace the window events of PLAN.md Contract 4.
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { CSS2DRenderer, CSS2DObject } from 'three/examples/jsm/renderers/CSS2DRenderer.js';
@@ -11,7 +11,7 @@ import { MAX_JD, jdFromDate, meanAnomalyAt } from './time.js';
 import TimeControls from './TimeControls.jsx';
 import ViewButtons from './ViewButtons.jsx';
 
-const COLD = new THREE.Color(0x3a7bff); // p = 0, safe
+const COLD = new THREE.Color(0x2b5cc0); // p = 0, safe (a quieter blue, so the safe crowd reads as background)
 const HOT = new THREE.Color(0xff3030);  // p = 1, hazardous
 const MISS = new THREE.Color(0xff00ff);        // mistakes mode: real hazard the model missed
 const FALSE_ALARM = new THREE.Color(0xffd400); // mistakes mode: flagged but not actually hazardous
@@ -81,11 +81,31 @@ function addPlanets(scene, jd) {
 
 const ease = (t) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
 
+// Thinning the cloud: everything that matters to the story is always drawn; only "boring" asteroids
+// (not hazardous AND below both models' thresholds) are sampled, 1 in SAMPLE_EVERY.
+const SAMPLE_EVERY = 5;
+const ALWAYS_SHOW = new Set(['99942', '101955', '65803']); // Apophis, Bennu, Didymos (the UI presets)
+
+// Stable pseudo-random pick per asteroid (FNV-1a hash of its designation), so the same dots stay
+// put across model toggles, mistakes mode and the time slider.
+function sampled(pdes) {
+  let h = 0x811c9dc5;
+  for (let k = 0; k < pdes.length; k++) { h ^= pdes.charCodeAt(k); h = Math.imul(h, 0x01000193); }
+  return (h >>> 0) % SAMPLE_EVERY === 0;
+}
+
+function mattersToStory(a, metrics) {
+  const thrA = metrics?.A?.threshold ?? 0.5, thrB = metrics?.B?.threshold ?? 0.5;
+  return a.pha === 1 || (a.pA ?? 0) >= thrA || (a.pB ?? 0) >= thrB || ALWAYS_SHOW.has(String(a.pdes));
+}
+
 export default function SolarSystem({ asteroids, metrics, view, onSelect }) {
   const canvasRef = useRef(null);
   const sceneRef = useRef(null); // { scene, camera, points, shown, cloud, ... } shared by the effects below
   // Shared clock (see TimeControls.jsx). Starts paused at today.
   const timeRef = useRef({ jd: jdFromDate(new Date()), playing: false, speed: 30, dirty: true, onTick: null });
+  const [showAll, setShowAll] = useState(false);              // false = thinned cloud (see mattersToStory)
+  const [counts, setCounts] = useState({ shown: 0, total: 0 }); // for the "Showing X of Y" caption
 
   // Create the scene once; clean up on unmount.
   useEffect(() => {
@@ -229,9 +249,11 @@ export default function SolarSystem({ asteroids, metrics, view, onSelect }) {
     };
     // Draw order = stacking order (depth test is off for the cloud), so the dots that matter go last and sit on top:
     // normal mode → most hazardous on top; mistakes mode → misses on top of false alarms on top of the faded rest.
-    const list = asteroids
-      .filter((a) => a.e < 1 && (!view.testOnly || a.test)) // bound orbits only
+    const pool = asteroids.filter((a) => a.e < 1 && (!view.testOnly || a.test)); // bound orbits only
+    const list = pool
+      .filter((a) => showAll || mattersToStory(a, metrics) || sampled(String(a.pdes)))
       .sort(mistakes ? (x, y) => kindOf(x) - kindOf(y) : (x, y) => (x[key] ?? 0) - (y[key] ?? 0));
+    setCounts({ shown: list.length, total: pool.length });
 
     const colorOf = (a, out) => {
       if (!mistakes) return out.copy(COLD).lerp(HOT, a[key] ?? 0);
@@ -280,7 +302,7 @@ export default function SolarSystem({ asteroids, metrics, view, onSelect }) {
       ctx.points = null;
       ctx.cloud = null;
     };
-  }, [asteroids, metrics, view.model, view.testOnly, view.showMistakes]);
+  }, [asteroids, metrics, view.model, view.testOnly, view.showMistakes, showAll]);
 
   // Step 5: click a dot → draw its orbit in white, mark it, and tell the app (onSelect → side panel).
   // Picking is done in screen space (nearest dot within PICK_RADIUS pixels), which works the same at
@@ -349,7 +371,20 @@ export default function SolarSystem({ asteroids, metrics, view, onSelect }) {
     <>
       <canvas id="scene" ref={canvasRef} />
       <TimeControls time={timeRef} />
-      <ViewButtons views={VIEWS} initial="earth" onView={(name) => sceneRef.current?.flyTo(name)} />
+      <ViewButtons views={VIEWS} initial="earth" onView={(name) => sceneRef.current?.flyTo(name)}>
+        {counts.total > 0 && (
+          <div className="cloud-info">
+            <label>
+              <input type="checkbox" id="showAllAsteroids" checked={showAll} onChange={(e) => setShowAll(e.target.checked)} />
+              {' '}Show all asteroids
+            </label>
+            <small>
+              Showing {counts.shown.toLocaleString()} of {counts.total.toLocaleString()}
+              {!showAll && <><br />every hazard and every mistake included;<br />1 in {SAMPLE_EVERY} of the clearly safe rest</>}
+            </small>
+          </div>
+        )}
+      </ViewButtons>
     </>
   );
 }

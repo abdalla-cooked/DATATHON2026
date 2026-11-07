@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import './ViewButtons.css';
 
-export default function ViewButtons({ views, initial, onView }) {
+export default function ViewButtons({ views, initial, onView, children }) {
   const [active, setActive] = useState(initial);
   return (
     <div className="view-buttons" role="group" aria-label="Camera view">
@@ -14,6 +14,7 @@ export default function ViewButtons({ views, initial, onView }) {
           {v.label}
         </button>
       ))}
+      {children}
     </div>
   );
 }
