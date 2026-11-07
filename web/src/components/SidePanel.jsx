@@ -5,6 +5,12 @@ export default function SidePanel({ selected, metrics, view }) {
     <aside id="panel">
       <section id="info">
         <h2>{selected ? selected.name : 'Click an asteroid'}</h2>
+        {selected?.hidden && selected.D_meas >= 140 && (
+          <p className="lime">
+            🕵️ Hidden hazard: measured {Math.round(selected.D_meas)} m wide, passes {selected.moid} AU from Earth's orbit,
+            but its brightness (H {selected.H}) is past NASA's H ≤ 22 cutoff, so it isn't listed as hazardous.
+          </p>
+        )}
       </section>
       <section id="results">
         <h2>How well does it do?</h2>

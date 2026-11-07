@@ -1,5 +1,6 @@
 // P2 owns this file. The Three.js scene, mounted once inside React (PLAN.md §6).
-// Steps done: 1 bare scene · 2 orbits · 3 asteroid cloud · 4 toggles · 5 click to inspect · planets · time slider.
+// Steps done: 1 bare scene · 2 orbits · 3 asteroid cloud · 4 toggles · 5 click to inspect · planets · time slider ·
+// Act 4 hidden hazards.
 // Props replace the window events of PLAN.md Contract 4.
 import { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
@@ -16,9 +17,11 @@ const HOT = new THREE.Color(0xff3030);  // p = 1, hazardous
 const MISS = new THREE.Color(0xff00ff);        // mistakes mode: real hazard the model missed
 const FALSE_ALARM = new THREE.Color(0xffd400); // mistakes mode: flagged but not actually hazardous
 const DIM = new THREE.Color(0x2a3550);         // mistakes mode: correct prediction, faded out
+const LIME = new THREE.Color(0x9dff3a);        // hidden-hazards mode: dark asteroid measured >= 140 m, not on NASA's list
+const LIME_HEX = 0x9dff3a;
 // Dot sizes in screen pixels (sizeAttenuation off), tuned for the real ~43k asteroids.
 // Normal mode: grows from `safe` (score 0) to `hazard` (score 1). Mistakes mode: by kind.
-const SIZE = { safe: 3, hazard: 5, correct: 2, falseAlarm: 4, miss: 5 };
+const SIZE = { safe: 3, hazard: 5, correct: 2, falseAlarm: 4, miss: 5, hidden: 8 };
 const PULSE = 0.3;                       // dots swell by up to 30% while pulsing in mistakes mode
 const MARKER_SIZE = 18;                  // pixels: white ring around the selected asteroid
 const PICK_RADIUS = 10;                  // pixels: how close a click must be to a dot to select it
@@ -94,9 +97,13 @@ function sampled(pdes) {
   return (h >>> 0) % SAMPLE_EVERY === 0;
 }
 
+// Act 4 headline: near Earth's orbit (MOID <= 0.05 AU), NOT labeled hazardous, yet NASA's NEOWISE telescope
+// measured it at >= 140 m. Dark surfaces make them look faint (H > 22), so the brightness rule misses them.
+export const isMeasuredHidden = (a) => !!a.hidden && (a.D_meas ?? 0) >= 140;
+
 function mattersToStory(a, metrics) {
   const thrA = metrics?.A?.threshold ?? 0.5, thrB = metrics?.B?.threshold ?? 0.5;
-  return a.pha === 1 || (a.pA ?? 0) >= thrA || (a.pB ?? 0) >= thrB || ALWAYS_SHOW.has(String(a.pdes));
+  return a.pha === 1 || a.hidden || (a.pA ?? 0) >= thrA || (a.pB ?? 0) >= thrB || ALWAYS_SHOW.has(String(a.pdes));
 }
 
 export default function SolarSystem({ asteroids, metrics, view, onSelect }) {
@@ -105,7 +112,7 @@ export default function SolarSystem({ asteroids, metrics, view, onSelect }) {
   // Shared clock (see TimeControls.jsx). Starts paused at today.
   const timeRef = useRef({ jd: jdFromDate(new Date()), playing: false, speed: 30, dirty: true, onTick: null });
   const [showAll, setShowAll] = useState(false);              // false = thinned cloud (see mattersToStory)
-  const [counts, setCounts] = useState({ shown: 0, total: 0 }); // for the "Showing X of Y" caption
+  const [counts, setCounts] = useState({ shown: 0, total: 0, hidden: 0 }); // for the "Showing X of Y" caption
 
   // Create the scene once; clean up on unmount.
   useEffect(() => {
@@ -240,7 +247,8 @@ export default function SolarSystem({ asteroids, metrics, view, onSelect }) {
     if (!ctx || !asteroids) return;
     const key = view.model === 'A' ? 'pA' : 'pB';
     const thr = metrics?.[view.model]?.threshold;
-    const mistakes = view.showMistakes && thr != null; // needs the model's threshold from metrics.json
+    const hiddenMode = !!view.showHidden;              // Act 4 overrides the other colorings
+    const mistakes = !hiddenMode && view.showMistakes && thr != null; // needs the model's threshold from metrics.json
 
     // Kind of dot: 0 = correct (mistakes mode), 1 = false alarm, 2 = missed hazard.
     const kindOf = (a) => {
@@ -252,16 +260,18 @@ export default function SolarSystem({ asteroids, metrics, view, onSelect }) {
     const pool = asteroids.filter((a) => a.e < 1 && (!view.testOnly || a.test)); // bound orbits only
     const list = pool
       .filter((a) => showAll || mattersToStory(a, metrics) || sampled(String(a.pdes)))
-      .sort(mistakes ? (x, y) => kindOf(x) - kindOf(y) : (x, y) => (x[key] ?? 0) - (y[key] ?? 0));
-    setCounts({ shown: list.length, total: pool.length });
+      .sort(hiddenMode ? (x, y) => isMeasuredHidden(x) - isMeasuredHidden(y)
+        : mistakes ? (x, y) => kindOf(x) - kindOf(y) : (x, y) => (x[key] ?? 0) - (y[key] ?? 0));
+    setCounts({ shown: list.length, total: pool.length, hidden: list.filter(isMeasuredHidden).length });
 
     const colorOf = (a, out) => {
+      if (hiddenMode) return out.copy(isMeasuredHidden(a) ? LIME : DIM);
       if (!mistakes) return out.copy(COLD).lerp(HOT, a[key] ?? 0);
       return out.copy([DIM, FALSE_ALARM, MISS][kindOf(a)]);
     };
 
     // Size per dot (pixels): normal mode grows with the hazard score, mistakes mode by kind.
-    const sizeOf = (a) => (mistakes
+    const sizeOf = (a) => (hiddenMode ? (isMeasuredHidden(a) ? SIZE.hidden : SIZE.correct) : mistakes
       ? [SIZE.correct, SIZE.falseAlarm, SIZE.miss][kindOf(a)]
       : SIZE.safe + (SIZE.hazard - SIZE.safe) * (a[key] ?? 0));
 
@@ -302,7 +312,22 @@ export default function SolarSystem({ asteroids, metrics, view, onSelect }) {
       ctx.points = null;
       ctx.cloud = null;
     };
-  }, [asteroids, metrics, view.model, view.testOnly, view.showMistakes, showAll]);
+  }, [asteroids, metrics, view.model, view.testOnly, view.showMistakes, view.showHidden, showAll]);
+
+  // Act 4: draw the hidden hazards' orbits in lime, so judges see them all threading Earth's orbit,
+  // and glide to Earth's neighborhood where they live.
+  useEffect(() => {
+    const ctx = sceneRef.current;
+    if (!ctx || !asteroids || !view.showHidden) return;
+    const lines = asteroids
+      .filter((a) => isMeasuredHidden(a) && a.e < 1 && (!view.testOnly || a.test))
+      .map((a) => orbitLine(a, LIME_HEX, 0.35));
+    ctx.scene.add(...lines);
+    ctx.flyTo('earth');
+    return () => {
+      for (const l of lines) { ctx.scene.remove(l); l.geometry.dispose(); l.material.dispose(); }
+    };
+  }, [asteroids, view.showHidden, view.testOnly]);
 
   // Step 5: click a dot → draw its orbit in white, mark it, and tell the app (onSelect → side panel).
   // Picking is done in screen space (nearest dot within PICK_RADIUS pixels), which works the same at
@@ -382,6 +407,14 @@ export default function SolarSystem({ asteroids, metrics, view, onSelect }) {
               Showing {counts.shown.toLocaleString()} of {counts.total.toLocaleString()}
               {!showAll && <><br />every hazard and every mistake included;<br />1 in {SAMPLE_EVERY} of the clearly safe rest</>}
             </small>
+            {view.showHidden && (
+              <p className="hidden-card">
+                <b>{counts.hidden} hidden hazards</b><br />
+                Measured at 140 m or more by NASA's NEOWISE telescope, and their orbits pass within 0.05 AU of
+                Earth's. NASA doesn't list them as hazardous: its rule judges size by brightness, and these are
+                dark, so they look smaller than they are.
+              </p>
+            )}
           </div>
         )}
       </ViewButtons>

@@ -30,6 +30,7 @@ body { margin: 0; background: #05060a; color: #dde; font-family: system-ui, sans
 }
 .mag { color: #ff00ff; }
 .yel { color: #ffd400; }
+.lime { color: #9dff3a; }
 
 .error {
   position: fixed; left: 50%; top: 80px; transform: translateX(-50%); z-index: 20;
