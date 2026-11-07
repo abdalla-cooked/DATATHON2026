@@ -1888,5 +1888,126 @@
    "class": "APO",
    "why": "high inclination (26 deg)"
   }
- ]
+ ],
+ "size": {
+  "n_test": 361,
+  "median_err_model": 0.35,
+  "median_err_baseline": 0.381,
+  "interval_coverage": 0.795,
+  "interval": "from the 5%-95% albedo quantiles",
+  "baseline": "D = 1329 km / sqrt(0.14) * 10^(-H/5)"
+ },
+ "hidden_hazards": {
+  "count": 462,
+  "strong": 34,
+  "validation": {
+   "true_hidden_in_test": 9,
+   "caught": 4,
+   "caught_by_formula": 1
+  },
+  "top": [
+   {
+    "name": "(2016 LF2)",
+    "H": 22.42,
+    "moid": 0.0206,
+    "D_pred": 299.0,
+    "D_lo": 104.0,
+    "D_hi": 413.0,
+    "D_meas": 204.0,
+    "strong": true
+   },
+   {
+    "name": "(2010 LV108)",
+    "H": 22.36,
+    "moid": 0.00216,
+    "D_pred": 228.0,
+    "D_lo": 103.0,
+    "D_hi": 363.0,
+    "D_meas": 234.0,
+    "strong": true
+   },
+   {
+    "name": "(2014 JL25)",
+    "H": 22.65,
+    "moid": 0.0134,
+    "D_pred": 236.0,
+    "D_lo": 95.0,
+    "D_hi": 350.0,
+    "D_meas": 228.0,
+    "strong": true
+   },
+   {
+    "name": "(2015 BW310)",
+    "H": 22.0,
+    "moid": 0.0274,
+    "D_pred": 223.0,
+    "D_lo": 92.0,
+    "D_hi": 380.0,
+    "D_meas": 146.0,
+    "strong": true
+   },
+   {
+    "name": "(2015 TE)",
+    "H": 22.5,
+    "moid": 0.00471,
+    "D_pred": 184.0,
+    "D_lo": 84.0,
+    "D_hi": 293.0,
+    "D_meas": 156.0,
+    "strong": true
+   },
+   {
+    "name": "411165 (2010 DF1)",
+    "H": 22.09,
+    "moid": 0.043,
+    "D_pred": 166.0,
+    "D_lo": 80.0,
+    "D_hi": 319.0,
+    "D_meas": 159.0,
+    "strong": true
+   },
+   {
+    "name": "475016 (2005 UO)",
+    "H": 22.06,
+    "moid": 0.00175,
+    "D_pred": 159.0,
+    "D_lo": 78.0,
+    "D_hi": 272.0,
+    "D_meas": 164.0,
+    "strong": true
+   },
+   {
+    "name": "469445 (2002 LT24)",
+    "H": 22.14,
+    "moid": 0.0113,
+    "D_pred": 127.0,
+    "D_lo": 76.0,
+    "D_hi": 292.0,
+    "D_meas": 143.0,
+    "strong": true
+   },
+   {
+    "name": "(2015 SS20)",
+    "H": 22.12,
+    "moid": 0.029,
+    "D_pred": 194.0,
+    "D_lo": 75.0,
+    "D_hi": 314.0,
+    "D_meas": 256.0,
+    "strong": true
+   },
+   {
+    "name": "(2016 FC13)",
+    "H": 22.07,
+    "moid": 0.0312,
+    "D_pred": 144.0,
+    "D_lo": 74.0,
+    "D_hi": 274.0,
+    "D_meas": 186.0,
+    "strong": true
+   }
+  ],
+  "measured": 34,
+  "note": "Candidates for follow-up observation, not confirmed threats. 'measured' = already measured at >= 140 m by NEOWISE yet not labeled hazardous, because H > 22."
+ }
 }

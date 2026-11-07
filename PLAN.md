@@ -26,9 +26,14 @@ Section 8 (ElevenLabs narration) is shared and happens **tomorrow morning**. Sec
    (a, e, i, Ω, ω, …) and has to work out Earth-crossing geometry for itself.
 3. **Act 3: reality check.** We check Model B's warnings against NASA's record of real close approaches
    to Earth, data the model never saw.
-4. **See it.** Every asteroid in 3D, colored by predicted risk, with mistakes highlighted and live predictions
+4. **⭐ Act 4: hidden hazards (THE HEADLINE).** NASA uses brightness (H ≤ 22) as a stand-in for "140 m or bigger,"
+   because most asteroids have never had their size measured. But a **dark** asteroid can be big and still look faint.
+   We train a size model on asteroids whose diameter *was* measured, apply it to the ones that weren't, and flag
+   near-Earth asteroids that are **probably big enough to be hazardous but slip past the brightness cutoff**.
+   That's a new, specific list that no formula gives you, and it's our answer to *"why machine learning?"*
+5. **See it.** Every asteroid in 3D, colored by predicted risk, with mistakes highlighted and live predictions
    for any orbit you type in.
-5. **Hear it.** An ElevenLabs "mission control" voice narrates the three acts and reads out the model's verdict
+6. **Hear it.** An ElevenLabs "mission control" voice narrates the four acts and reads out the model's verdict
    on the asteroids you click.
 
 ---
@@ -37,7 +42,7 @@ Section 8 (ElevenLabs narration) is shared and happens **tomorrow morning**. Sec
 
 | File (put in `data/raw/`) | What it is | Used for |
 |---|---|---|
-| `sbdb.csv` (dataset 1: `spkid, full_name, pdes, name, neo, pha, class, H, diameter, albedo, e, a, q, ad, i, om, w, ma, per_y, moid, moid_jup, t_jup, …`) | JPL Small-Body Database, every known asteroid | **Training and testing** |
+| `sbdb.csv` (dataset 1: `spkid, full_name, pdes, name, neo, pha, class, H, diameter, albedo, e, a, q, ad, i, om, w, ma, per_y, moid, moid_jup, t_jup, …`) | JPL Small-Body Database, every known asteroid | **Training and testing** (Acts 1–2) + **size model** (Act 4, uses the measured `diameter`) |
 | `cad.csv` (dataset 2: `des, orbit_id, jd, cd, dist, dist_min, dist_max, v_rel, v_inf, t_sigma_f, h, diameter, fullname`) | JPL close approaches to Earth since 1900 | **Act 3 reality check** + **3D flybys**. **Never a training feature** (it's basically MOID again) |
 
 ⚠️ **Rules for the data:**
@@ -139,10 +144,14 @@ asteroid-hazard/
 { "name": "99942 Apophis (2004 MN4)", "pdes": "99942", "class": "ATE",
   "a": 0.9224, "e": 0.1911, "i": 3.34, "om": 203.96, "w": 126.60, "ma": 142.0,
   "q": 0.746, "ad": 1.099, "H": 19.09, "moid": 0.0003,
-  "pha": 1, "pA": 0.99, "pB": 0.87, "test": true, "closeApproach": 0.0002 }
+  "pha": 1, "pA": 0.99, "pB": 0.87, "test": true, "closeApproach": 0.0002,
+  "D_pred": 370, "D_lo": 290, "D_hi": 460, "D_meas": 340, "hidden": false }
 ```
 `pA`/`pB` = hazard probability from Model A/B. `test` = asteroid was in the unseen test set.
 `closeApproach` = closest recorded approach to Earth in AU from `cad.csv` (or `null`).
+`D_pred` / `D_lo` / `D_hi` = Act 4 size estimate in meters with an 80% range. `D_meas` = measured diameter in meters (or `null`).
+`hidden` = Act 4 hidden hazard (orbit close to Earth's, officially not hazardous, but probably ≥ 140 m).
+These five fields arrive with **handoff #2** (Person 1, step 10b). Until then the site must work without them.
 
 ### Contract 2 — `docs/data/metrics.json`
 ```json
@@ -156,6 +165,10 @@ asteroid-hazard/
   "tree_rules": "|--- moid <= 0.05\n|   |--- H <= 22.0 -> PHA ...",
   "reality_check": { "flagged_with_approach_lt_005": 0.0, "not_flagged_with_approach_lt_005": 0.0 },
   "worst_misses": [ { "name": "", "pA": 0, "pB": 0, "class": "", "why": "" } ],
+  "size": { "n_test": 0, "median_err_model": 0.0, "median_err_baseline": 0.0, "interval_coverage": 0.0 },
+  "hidden_hazards": { "count": 0, "strong": 0,
+                      "validation": { "true_hidden_in_test": 0, "caught": 0 },
+                      "top": [ { "name": "", "H": 0, "moid": 0, "D_pred": 0, "D_lo": 0, "D_hi": 0 } ] },
   "counts": { "train": 0, "test": 0, "pha_rate": 0 }
 }
 ```
@@ -170,7 +183,7 @@ asteroid-hazard/
 | Event | Fired by | Listened to by | `detail` |
 |---|---|---|---|
 | `asteroid-selected` | P2 (click in 3D) | P3 (info panel) | an asteroid object (Contract 1) |
-| `view-changed` | P3 (toggles) | P2 | `{ model: "A"\|"B", testOnly: bool, showMistakes: bool }` |
+| `view-changed` | P3 (toggles) | P2 | `{ model: "A"\|"B", testOnly: bool, showMistakes: bool, showHidden: bool }` |
 | `custom-asteroid` | P3 (sliders) | P2 | `{ a, e, i, om, w, H, moid }` |
 | `custom-scored` | P2 | P3 | `{ pA, pB }` |
 
@@ -388,6 +401,92 @@ json.dump(metrics, open("docs/data/metrics.json", "w"), indent=1, default=float)
 
 Push, then **tell P2 and P3 in the group chat: "real data is in."**
 
+### Step 10b — ⭐ Act 4: estimate size, find hidden hazards (+1:30 → +3:00) → **push = handoff #2**
+**This is the headline result. Do it before the notebook or B+.**
+
+**The idea in one line:** brightness depends on size *and* how dark the surface is. NASA's H ≤ 22 cutoff assumes an
+average darkness. We learn size properly from asteroids that were actually measured, then look for big, dark near-Earth
+asteroids that the cutoff misses.
+
+**Important:** albedo (darkness) is only known for the *measured* asteroids, so it **can't be an input**. The model has to infer it
+from brightness, orbit and orbit class, which is exactly the part with no formula.
+
+**Where it goes in our `scripts/train.py`:** add the function below, call it in `main()` right **before** the `"6. Export"` block,
+and add its columns to `out` before `asteroids.json` is written:
+```python
+# in main(), before print("6. Export"):
+sz = act4_hidden_hazards("data/raw/sbdb.csv", metrics)          # indexed by spkid
+# after `out = pd.DataFrame({...})`:
+for c in ["D_pred", "D_lo", "D_hi", "D_meas", "hidden"]:
+    out[c] = df["spkid"].map(sz[c]).values
+```
+The function:
+```python
+SIZE_FEATS = ["H", "a", "e", "i", "q", "ad", "moid_jup", "t_jup", "cls"]
+
+def act4_hidden_hazards(sbdb_path, metrics):
+    # spkid as str, same as load() in train.py, or the join back onto `out` silently matches nothing
+    full = pd.read_csv(sbdb_path, dtype={"pdes": str, "spkid": str}, low_memory=False)
+    numc = ["H", "a", "e", "i", "q", "ad", "moid", "moid_jup", "t_jup", "diameter"]
+    full[numc] = full[numc].apply(pd.to_numeric, errors="coerce")
+    full = full.dropna(subset=["H", "a", "e", "i", "q", "ad"])
+    full["cls"] = full["class"].astype("category")            # same categories everywhere
+
+    meas = full[full["diameter"] > 0].copy()                   # asteroids with a measured size
+    meas["logD"] = np.log10(meas["diameter"] * 1000)          # km -> m, then log (sizes span 1000x)
+    s_test = meas[meas["neo"] == "Y"].sample(frac=0.3, random_state=42)   # test on measured NEOs: who we apply it to
+    s_train = meas.drop(s_test.index)
+
+    sp = dict(n_estimators=400, learning_rate=0.05, num_leaves=31, random_state=42, verbose=-1)
+    med = lgb.LGBMRegressor(**sp).fit(s_train[SIZE_FEATS], s_train["logD"])
+    lo  = lgb.LGBMRegressor(objective="quantile", alpha=0.1, **sp).fit(s_train[SIZE_FEATS], s_train["logD"])
+    hi  = lgb.LGBMRegressor(objective="quantile", alpha=0.9, **sp).fit(s_train[SIZE_FEATS], s_train["logD"])
+
+    true_D = 10 ** s_test["logD"]
+    pred_D = 10 ** med.predict(s_test[SIZE_FEATS])
+    base_D = 1329e3 / np.sqrt(0.14) * 10 ** (-s_test["H"] / 5)   # the standard formula, assuming average albedo 0.14
+    lo_D, hi_D = 10 ** lo.predict(s_test[SIZE_FEATS]), 10 ** hi.predict(s_test[SIZE_FEATS])
+    err = lambda p: round(float(np.median(abs(p - true_D) / true_D)), 3)
+
+    # validation: measured NEOs that ARE >=140 m but faint (H > 22), i.e. real hidden hazards. Does the model catch them?
+    truly_hidden = (true_D >= 140) & (s_test["H"] > 22)
+    metrics["size"] = dict(n_test=len(s_test), median_err_model=err(pred_D), median_err_baseline=err(base_D),
+                           interval_coverage=round(float(((true_D >= lo_D) & (true_D <= hi_D)).mean()), 3))
+    val = dict(true_hidden_in_test=int(truly_hidden.sum()), caught=int((truly_hidden & (pred_D >= 140)).sum()))
+    print("  size:", metrics["size"], "| validation:", val)
+
+    # apply to every NEO
+    neos = full[full["neo"] == "Y"].copy()
+    neos["D_pred"] = (10 ** med.predict(neos[SIZE_FEATS])).round()
+    neos["D_lo"]   = (10 ** lo.predict(neos[SIZE_FEATS])).round()
+    neos["D_hi"]   = (10 ** hi.predict(neos[SIZE_FEATS])).round()
+    neos["D_meas"] = (neos["diameter"] * 1000).round()
+    best = neos["D_meas"].fillna(neos["D_pred"])               # trust a real measurement over our estimate
+    neos["hidden"] = (neos["moid"] <= 0.05) & (neos["pha"] == "N") & (best >= 140)
+    strong = neos["hidden"] & (neos["D_meas"].notna() | (neos["D_lo"] >= 140))
+
+    top = neos[neos["hidden"]].sort_values("D_lo", ascending=False).head(10)
+    metrics["hidden_hazards"] = dict(count=int(neos["hidden"].sum()), strong=int(strong.sum()), validation=val,
+        top=[dict(name=r.full_name.strip(), H=float(r.H), moid=float(r.moid),
+                  D_pred=float(r.D_pred), D_lo=float(r.D_lo), D_hi=float(r.D_hi)) for _, r in top.iterrows()])
+    print(f"  hidden hazards: {metrics['hidden_hazards']['count']} ({metrics['hidden_hazards']['strong']} strong)")
+    return neos.set_index("spkid")[["D_pred", "D_lo", "D_hi", "D_meas", "hidden"]]
+```
+
+✅ **Checks:**
+- **The model beats the formula:** `median_err_model` < `median_err_baseline`. This is the "why machine learning" number.
+  If the model *doesn't* win, try adding `per_y` and `moid` to `SIZE_FEATS`. If it still doesn't win, say so honestly: that's a result too.
+- **The ranges are honest:** `interval_coverage` is about 0.8 (80% of real sizes fall inside our 80% range).
+- **Validation:** `caught / true_hidden_in_test` is how many *real* big-but-faint NEOs the model spots. Report it even if the numbers are small.
+- **Hidden hazard count** is a believable number (tens to a few hundred), not thousands. If it's huge, check the km → m conversion.
+- **Spot check:** Apophis's `D_pred` (or `D_meas`) is about 340 m. The top hidden hazards mostly have **H between 22 and 23.5** (just past the cutoff).
+- `asteroids.json` has the five new fields and is still under about 10 MB.
+
+Rerun `train.py`, push, then tell the team **"Act 4 data is in."**
+
+**Caveats to state in the README and the demo:** the training data is mostly main-belt asteroids, so the size model may be less accurate for
+NEOs (that's why the test set is NEOs only). A "hidden hazard" is a **candidate for follow-up**, not a confirmed threat.
+
 ### Step 11 — Notebook (+1:30 → +2:30)
 Copy `train.py` into `notebooks/train.ipynb` cell by cell and add plots: class balance bar, ROC/PR curves A vs B,
 the tree diagram (`sklearn.tree.plot_tree`), feature importance, and a SHAP summary
@@ -396,7 +495,8 @@ the tree diagram (`sklearn.tree.plot_tree`), feature importance, and a SHAP summ
 ### Step 12 — README results section (+3:15 → +4:15)
 Write: data source and filtering, the train/test method (stratified 80/20, threshold picked by CV, test set never touched),
 a metrics table (LogReg / A / B / B+), **what the model learned** (the tree rules vs NASA's rule, the importances,
-the Act 3 reality check, the worst misses), and **limitations** (the label is defined by MOID/H, PHAs are rare,
+the Act 3 reality check, the worst misses, and **Act 4 as the headline**: size error vs the standard formula, interval coverage,
+the validation catch rate, the number of hidden hazards and the top-10 table with size ranges), and **limitations** (the label is defined by MOID/H, PHAs are rare,
 orbits change over time).
 
 ### Step 13 — QA (+4:15 → +5:00)
@@ -546,12 +646,14 @@ smooth (FPS fine) with the real ~30k points.
 P3's toggle bar fires `view-changed`. You redraw:
 ```js
 const MAGENTA = new THREE.Color(0xff00ff), YELLOW = new THREE.Color(0xffd400), DIM = new THREE.Color(0x1a2233);
-let view = { model: 'A', testOnly: false, showMistakes: false };
+const LIME = new THREE.Color(0x7dff3a);
+let view = { model: 'A', testOnly: false, showMistakes: false, showHidden: false };
 
 function redraw() {
   const key = view.model === 'A' ? 'pA' : 'pB';
   const thr = metrics[view.model].threshold;
   const list = view.testOnly ? asteroids.filter(a => a.test) : asteroids;
+  if (view.showHidden) return buildPoints(list, a => a.hidden ? LIME : DIM);   // Act 4: hidden hazards glow lime
   const colorFn = !view.showMistakes ? byProb(key) : a => {
     const pred = a[key] >= thr;
     if (a.pha === 1 && !pred) return MAGENTA;   // missed a real hazard
@@ -564,7 +666,12 @@ addEventListener('view-changed', ev => { view = { ...view, ...ev.detail }; redra
 ```
 Pulsing for misses (optional): `points.material.size = 0.12 + 0.05 * Math.sin(performance.now() / 200)` in the animation loop while `showMistakes` is on.
 
+**Act 4 (React: `web/src/three/SolarSystem.jsx`, `showHidden` comes from the shared state in `App.jsx`):** while
+`showHidden` is on, also draw a second small `THREE.Points` with only the `hidden` asteroids at `size: 0.3`, so they stand out
+against the dimmed cloud.
+
 ✅ **Check:** with mistakes on and Model B selected, you can see magenta dots (misses) and yellow dots (false alarms).
+With `showHidden` on (after handoff #2), a small number of lime dots, all sitting near Earth's orbit.
 Fire the event by hand in the console to test before P3's UI exists:
 `dispatchEvent(new CustomEvent('view-changed', { detail: { model: 'B', showMistakes: true } }))`.
 
@@ -661,6 +768,7 @@ Push, then tell P2.
       <button data-model="B">Model B · orbit only</button>
       <label><input type="checkbox" id="testOnly"> Unseen test set only</label>
       <label><input type="checkbox" id="showMistakes"> Show mistakes</label>
+      <label><input type="checkbox" id="showHidden"> 🕵️ Hidden hazards</label>
     </div>
   </header>
 
@@ -673,7 +781,7 @@ Push, then tell P2.
     <section id="learned"><h2>What did it learn?</h2></section>
   </aside>
 
-  <div id="legend">🔵 safe → 🔴 hazardous · <span class="mag">■</span> missed hazard · <span class="yel">■</span> false alarm</div>
+  <div id="legend">🔵 safe → 🔴 hazardous · <span class="mag">■</span> missed hazard · <span class="yel">■</span> false alarm · <span class="lime">■</span> hidden hazard</div>
   <div id="intro"> <!-- title card, step 7 --> </div>
 
   <script type="module" src="main.js"></script>
@@ -699,7 +807,9 @@ document.querySelectorAll('[data-model]').forEach(b => b.onclick = () => {
 });
 testOnly.onchange = e => { state.testOnly = e.target.checked; send(); };
 showMistakes.onchange = e => { state.showMistakes = e.target.checked; send(); };
+showHidden.onchange = e => { state.showHidden = e.target.checked; send(); };
 ```
+(React: add `showHidden` to the view state in `App.jsx` and a "🕵️ Hidden hazards" toggle in `TopBar.jsx`. Add the lime swatch to `Legend.jsx`.)
 ✅ **Check:** clicking a toggle changes P2's view. Before that's wired, `addEventListener('view-changed', e => console.log(e.detail))` should log it.
 
 ### Step 4 — Results charts (45 min) → `charts.js`
@@ -747,6 +857,15 @@ Show, in this order (this panel is what the brief means by "tell us what the mod
 4. **Worst misses:** a list of `m.worst_misses` (name, pB, why). Clicking one fires `asteroid-selected` with the matching
    object from `asteroids.json`.
 
+5. **⭐ Act 4: hidden hazards (make this the biggest, last section; React: `SidePanel.jsx`):**
+   - Headline: *"Our model found **{m.hidden_hazards.count}** near-Earth asteroids that are probably big enough to be hazardous
+     but slip past NASA's brightness cutoff."* ({m.hidden_hazards.strong} are strong candidates: even our low estimate is ≥ 140 m.)
+   - Proof it's better than the standard approach: size error, model `m.size.median_err_model` vs formula `m.size.median_err_baseline`,
+     as two bars. Plus *"80% ranges contained the true size {m.size.interval_coverage} of the time"* and the validation catch rate.
+   - Top-10 table: name, H, size range (`D_lo`–`D_hi` m). Clicking a row selects that asteroid.
+   - The caveat line: *"Candidates for follow-up observation, not confirmed threats."*
+   - If `m.hidden_hazards` is missing (before handoff #2), show "Act 4 loading…" instead of crashing.
+
 ✅ **Check:** someone who's never seen the project can read this panel and explain the result in one sentence.
 
 ### Step 6 — Info panel + sliders + presets (30 min) → `ui.js`
@@ -758,6 +877,8 @@ addEventListener('asteroid-selected', ({ detail: a }) => {
     <p>Class ${a.class} · ${a.pha ? '⚠️ NASA: hazardous' : 'NASA: not hazardous'} · ${a.test ? 'unseen test asteroid' : 'training asteroid'}</p>
     <p>Model A: <b>${(a.pA * 100).toFixed(0)}%</b> · Model B: <b>${(a.pB * 100).toFixed(0)}%</b></p>
     <p>a ${a.a} AU · e ${a.e} · i ${a.i}° · MOID ${a.moid} AU · H ${a.H}</p>
+    ${a.D_pred != null ? `<p>Size: ${a.D_meas != null ? `${a.D_meas} m (measured)` : `~${a.D_pred} m (model: ${a.D_lo}–${a.D_hi} m)`}</p>` : ''}
+    ${a.hidden ? `<p class="lime">🕵️ Hidden hazard: officially not hazardous, but probably big enough to be.</p>` : ''}
     ${a.closeApproach != null ? `<p>Closest recorded approach: ${(a.closeApproach * 389).toFixed(1)} lunar distances</p>` : ''}`;
 });
 
@@ -804,6 +925,9 @@ ElevenLabs voice becomes the voiceover. 90-second script:
 2. (20s) Model A + the "what it learned" panel. *"It rediscovered NASA's rule."*
 3. (25s) Switch to Model B and turn on **Show mistakes**. Click a magenta miss. *"Without the answer key, here's where it fails, and why."*
 4. (15s) Act 3 bars. *"Its warnings match real close approaches it never saw."*
+4b. (25s) ⭐ Turn on **🕵️ Hidden hazards**. Lime dots light up. Click one and play its voice report.
+   *"And here's what no formula could tell us: N asteroids that are probably big enough to be dangerous, hiding because they're dark."*
+   (This makes the video about 2 minutes. Trim step 5 if you need to.)
 5. (20s) Apophis preset, then drag the sliders. *"Try your own asteroid."*
 
 Take 3 screenshots: the main view, mistakes mode, the learned panel.
@@ -846,7 +970,8 @@ For "click any asteroid," we pre-generate clips for the ~60 most interesting ast
   "intro":  "Thirty-five thousand rocks cross near Earth's orbit. Which ones should we worry about? We taught a machine to decide.",
   "act1":   "First, we gave the model everything. On its own, it rediscovered NASA's exact rule for hazardous asteroids.",
   "act2":   "Then we took away the answer key. With only the shape of each orbit, it has to work out the geometry for itself.",
-  "act3":   "Finally, a reality check. Asteroids the model warned about really did pass closer to Earth.",
+  "act3":   "Then, a reality check. Asteroids the model warned about really did pass closer to Earth.",
+  "act4":   "And now the fun part. NASA judges size by brightness. But some asteroids are dark. Our model went looking for big ones hiding in plain sight. It found some.",
   "mistakes": "Magenta dots are real hazards the model missed. Yellow dots are false alarms.",
   "custom": "Design your own asteroid, and the model will judge it live.",
 
@@ -902,7 +1027,8 @@ ast = pd.DataFrame(json.load(open("docs/data/asteroids.json")))
 metrics = json.load(open("docs/data/metrics.json"))
 picks = ast[ast["name"].str.contains("Apophis|Bennu|Didymos")]
 picks = pd.concat([picks, ast[ast["name"].isin([m["name"] for m in metrics["worst_misses"]])],
-                   ast[(ast["test"]) & (ast["pha"] == 1)].nlargest(50, "pB")]).drop_duplicates("pdes")
+                   ast[ast["hidden"] == True].nlargest(15, "D_lo"),          # Act 4 hidden hazards
+                   ast[(ast["test"]) & (ast["pha"] == 1)].nlargest(40, "pB")]).drop_duplicates("pdes")
 
 import random
 random.seed(42)
@@ -923,6 +1049,10 @@ for _, a in picks.iterrows():
     text = f"Asteroid {name}. Hazard probability: {round(a.pB * 100)} percent. {random.choice(JOKES[t])} {nasa}"
     if t == "screwed":
         text += TAG
+    if a["hidden"] == True:                                   # Act 4 gets its own script
+        text = (f"Asteroid {name}. Officially harmless. Our model thinks it's about {int(round(a.D_pred, -1))} meters "
+                f"of dark space rock, which is big enough to count. Somebody tell NASA.")
+        t = "hidden"
     key = "ast_" + str(a.pdes).replace(" ", "_")
     speak(key, text)
     manifest[a.pdes] = {"src": f"audio/{key}.mp3", "tier": t}
@@ -966,7 +1096,8 @@ addEventListener('custom-scored', ({ detail }) => {
   say(`audio/tier_${t}_${1 + Math.floor(Math.random() * 3)}.mp3`);
 });
 addEventListener('view-changed', ({ detail: v }) => {
-  if (v.showMistakes) say('audio/mistakes.mp3');
+  if (v.showHidden) say('audio/act4.mp3');
+  else if (v.showMistakes) say('audio/mistakes.mp3');
   else if (v.model === 'B') say('audio/act2.mp3');
 });
 ```
@@ -994,11 +1125,11 @@ The hour-by-hour build is the same as before. There's just more breathing room, 
 | 0:35–1:15 | S3–S6 models + thresholds | S2 kepler.js + planets | S2 layout |
 | 1:15–1:30 | S7–S10 metrics, reality check, **export ⇢ push** | S3 points (mock) | S3 toggles |
 | **1:30** | **🔁 Handoff #1: real data in** | swap to real | swap to real |
-| 1:30–2:30 | S5 B+ stretch, S11 notebook | S3–S4 points + toggles | S4 charts |
-| 2:30–3:00 | S11 cont. + **N1 ElevenLabs key** | S4 mistakes | S5 learned panel |
-| **3:00** | **🔁 Integration check + deploy (P3 S7)** | | |
-| 3:00–3:30 | S12 README draft | S5 click to inspect | S6 info + sliders |
-| 3:30–4:30 | S12 cont. | S6 custom asteroid | S8 intro + polish, **N2 write lines** |
+| 1:30–2:30 | ⭐ **S10b Act 4 size model** | S3–S4 points + toggles | S4 charts |
+| 2:30–3:00 | S10b checks + **export ⇢ push** + N1 ElevenLabs key | S4 mistakes + hidden toggle | S5 learned panel |
+| **3:00** | **🔁 Handoff #2 (Act 4 data in) + integration check + deploy (P3 S7)** | | |
+| 3:00–3:30 | S11 notebook | S5 click to inspect | S5 Act 4 section + S6 info + sliders |
+| 3:30–4:30 | S12 README draft, S5 B+ if time | S6 custom asteroid | S8 intro + polish, **N2 write lines** |
 | **4:30** | **🧊 Freeze the models.** No retraining after tonight (the narration reads these numbers) | | |
 | 4:30–5:00 | **N3 generate audio** | S7 flyby timeline | review the live site together |
 
@@ -1014,9 +1145,9 @@ The hour-by-hour build is the same as before. There's just more breathing room, 
 | 10:45–11:30 | final checks | final checks | **S10 SUBMIT** |
 | 11:30–12:00 | **Buffer. Do not plan anything here.** | | |
 
-**If you fall behind, cut in this order:** flyby timeline → asteroid narration clips (keep the 6 act clips) →
+**If you fall behind, cut in this order:** Model B+ → flyby timeline → asteroid narration clips (keep the 7 act clips) →
 custom-asteroid sliders → notebook plots.
-**Never cut:** the test-set metrics, the "what did it learn" panel, the deployed link.
+**Never cut:** Act 4 (hidden hazards), the test-set metrics, the "what did it learn" panel, the deployed link.
 
 ---
 
@@ -1035,6 +1166,10 @@ custom-asteroid sliders → notebook plots.
 | ElevenLabs quota runs out | `narrate.py` skips clips that already exist, so reruns cost nothing. Cut asteroid clips to the top 20 |
 | Narration numbers don't match the site | Models were retrained after the audio was made. Delete `docs/audio/ast_*.mp3` and rerun `narrate.py` |
 | Audio doesn't play | Browsers block sound before a click. That's why narration starts behind the toggle button |
+| Size model doesn't beat the formula | Try adding `per_y` and `moid` as features. If it still doesn't win, report it honestly and lean on the hidden-hazard list + validation |
+| `diameter` mostly empty for NEOs | Expected (only a small share of NEOs have measured sizes). Training uses all measured asteroids, testing uses measured NEOs only |
+| Thousands of "hidden hazards" | Probably a units bug: SBDB `diameter` is in **km**, the code converts to meters. Check Apophis ≈ 340 m |
+| A judge asks "is it really hazardous?" | "It's a candidate for follow-up observation, and here's its size range." Never claim a confirmed threat |
 
 ---
 
@@ -1043,6 +1178,7 @@ custom-asteroid sliders → notebook plots.
 - [ ] Live site URL (GitHub Pages) opens on a phone
 - [ ] Public GitHub repo
 - [ ] README: problem, data (both datasets), method, **metrics on unseen test data**, **what the model learned**, limitations
+- [ ] ⭐ Act 4 in README and on the site: size error vs formula, coverage, validation, hidden-hazard count + top 10
 - [ ] Narration toggle works on the live site, and `.env` is **not** in the repo
 - [ ] 90-second demo video with ElevenLabs voiceover (link in README)
 - [ ] 3 screenshots

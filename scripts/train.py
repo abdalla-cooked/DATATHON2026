@@ -6,6 +6,9 @@ Models (Model B+ is intentionally NOT included):
   2. Decision tree depth 2  FEAT_A   readable rules            -> metrics.json "tree_rules"
   3. Model A  LightGBM      FEAT_A   Act 1 (rediscovers NASA)  -> "A", pA, web/src/model/model_A.js
   4. Model B  LightGBM      FEAT_B   Act 2 (no MOID)           -> "B", pB, web/src/model/model_B.js
+  5. Albedo model LightGBM  SIZE_FEATS Act 4 (hidden hazards)  -> "size", "hidden_hazards", D_* / hidden
+     (median + 5%/95% quantile regressors on log10 albedo, trained on every measured asteroid; size then comes
+      from the physics formula. Predicting diameter directly failed: trees can't extrapolate to faint H.)
 
 Changes from the PLAN.md snippets (agreed fixes):
   * Model B keeps H and drops only MOID, so Act 2 tests "can it work out Earth-crossing geometry
@@ -134,6 +137,89 @@ def explain_miss(r):
     return "; ".join(reasons) or "orbit shape looks like many safe NEOs"
 
 
+# ------------------------------------------------------------------ step 10b: Act 4 size model
+SIZE_FEATS = ["H", "a", "e", "i", "q", "ad", "moid_jup", "t_jup", "cls"]   # no albedo: unknown for unmeasured rocks
+SIZE_COLS = ["D_pred", "D_lo", "D_hi", "D_meas", "hidden"]
+BASE_ALBEDO = 0.14                                          # the assumption behind NASA's H <= 22 ~ 140 m
+
+
+def diameter_m(albedo, H):
+    """Standard brightness -> size formula, in meters."""
+    return 1329e3 / np.sqrt(albedo) * 10 ** (-H / 5)
+
+
+def act4_hidden_hazards(sbdb_path, metrics):
+    """Learn albedo from measured asteroids, flag NEOs that are probably >= 140 m but fail NASA's H <= 22 cutoff.
+
+    Returns a frame indexed by spkid with SIZE_COLS (meters). Fills metrics["size"] and metrics["hidden_hazards"].
+    """
+    # spkid as str, same as load(), or the join back onto `out` silently matches nothing
+    full = pd.read_csv(sbdb_path, dtype={"pdes": str, "spkid": str}, low_memory=False)
+    numc = ["H", "a", "e", "i", "q", "ad", "moid", "moid_jup", "t_jup", "diameter", "albedo"]
+    full[numc] = full[numc].apply(pd.to_numeric, errors="coerce")
+    full = full.dropna(subset=["H", "a", "e", "i", "q", "ad"])
+    full["cls"] = full["class"].astype("category")            # same categories everywhere
+
+    meas = full[(full["diameter"] > 0) & (full["albedo"] > 0)].copy()
+    meas["logp"] = np.log10(meas["albedo"])                    # learn darkness; the formula handles brightness
+    s_test = meas[meas["neo"] == "Y"].sample(frac=0.3, random_state=SEED)   # test on measured NEOs only
+    s_train = meas.drop(s_test.index)
+    print(f"  measured sizes: {len(meas):,} ({(meas['neo'] == 'Y').sum():,} NEOs) | "
+          f"train {len(s_train):,} | test {len(s_test):,} NEOs")
+
+    sp = dict(n_estimators=400, learning_rate=0.05, num_leaves=31, random_state=SEED, verbose=-1)
+    med = lgb.LGBMRegressor(**sp).fit(s_train[SIZE_FEATS], s_train["logp"])
+    p_lo = lgb.LGBMRegressor(objective="quantile", alpha=0.05, **sp).fit(s_train[SIZE_FEATS], s_train["logp"])
+    p_hi = lgb.LGBMRegressor(objective="quantile", alpha=0.95, **sp).fit(s_train[SIZE_FEATS], s_train["logp"])
+    sizes = lambda X: (diameter_m(10 ** med.predict(X[SIZE_FEATS]), X["H"]),
+                       diameter_m(10 ** p_hi.predict(X[SIZE_FEATS]), X["H"]),     # brighter surface -> smaller
+                       diameter_m(10 ** p_lo.predict(X[SIZE_FEATS]), X["H"]))     # darker surface -> bigger
+
+    true_d = s_test["diameter"] * 1000                         # km -> m
+    pred_d, lo_d, hi_d = sizes(s_test)
+    base_d = diameter_m(BASE_ALBEDO, s_test["H"])
+    err = lambda p: round(float(np.median(abs(p - true_d) / true_d)), 3)
+
+    # validation: measured NEOs that ARE >= 140 m but faint (H > 22) -- real hidden hazards. Does the model see them?
+    truly_hidden = (true_d >= 140) & (s_test["H"] > 22)
+    val = dict(true_hidden_in_test=int(truly_hidden.sum()),
+               caught=int((truly_hidden & (pred_d >= 140)).sum()),
+               caught_by_formula=int((truly_hidden & (base_d >= 140)).sum()))
+    metrics["size"] = dict(n_test=int(len(s_test)), median_err_model=err(pred_d), median_err_baseline=err(base_d),
+                           interval_coverage=round(float(((true_d >= lo_d) & (true_d <= hi_d)).mean()), 3),
+                           interval="from the 5%-95% albedo quantiles",
+                           baseline=f"D = 1329 km / sqrt({BASE_ALBEDO}) * 10^(-H/5)")
+    s = metrics["size"]
+    print(f"  size error (median): model {s['median_err_model']:.1%} vs formula {s['median_err_baseline']:.1%} | "
+          f"range coverage {s['interval_coverage']:.1%}")
+    print(f"  validation: {val['caught']}/{val['true_hidden_in_test']} real big-but-faint NEOs caught "
+          f"(formula: {val['caught_by_formula']})")
+
+    neos = full[(full["neo"] == "Y") & (full["e"] < 1)].copy()
+    d, d_lo, d_hi = sizes(neos)
+    neos["D_pred"], neos["D_lo"], neos["D_hi"] = d.round(), d_lo.round(), d_hi.round()
+    neos["D_meas"] = (neos["diameter"] * 1000).round()
+    best = neos["D_meas"].fillna(neos["D_pred"])               # a real measurement beats our estimate
+    neos["hidden"] = (neos["moid"] <= 0.05) & (neos["pha"] == "N") & (best >= 140)
+    strong = neos["hidden"] & (neos["D_meas"].notna() | (neos["D_lo"] >= 140))
+
+    neos["strong"] = strong
+    top = neos[neos["hidden"]].sort_values(["strong", "D_lo"], ascending=False).head(10)
+    metrics["hidden_hazards"] = dict(
+        count=int(neos["hidden"].sum()), strong=int(strong.sum()), validation=val,
+        top=[dict(name=r["full_name"].strip(), H=float(r["H"]), moid=float(r["moid"]),
+                  D_pred=float(r["D_pred"]), D_lo=float(r["D_lo"]), D_hi=float(r["D_hi"]),
+                  D_meas=None if pd.isna(r["D_meas"]) else float(r["D_meas"]), strong=bool(r["strong"]))
+             for _, r in top.iterrows()],
+        measured=int((neos["hidden"] & neos["D_meas"].notna()).sum()),
+        note=("Candidates for follow-up observation, not confirmed threats. 'measured' = already measured at "
+              ">= 140 m by NEOWISE yet not labeled hazardous, because H > 22."))
+    print(f"  hidden hazards: {metrics['hidden_hazards']['count']} ({metrics['hidden_hazards']['strong']} strong)")
+    for r in metrics["hidden_hazards"]["top"][:5]:
+        print(f"    {r['name']}: H {r['H']:.2f} | ~{r['D_pred']:.0f} m ({r['D_lo']:.0f}-{r['D_hi']:.0f})")
+    return neos.drop_duplicates("spkid").set_index("spkid")[SIZE_COLS]
+
+
 # ------------------------------------------------------------------ main
 def main():
     ap = argparse.ArgumentParser()
@@ -241,6 +327,13 @@ def main():
     for m in metrics["worst_misses"]:
         print(f"  {m['name']}: pB {m['pB']} -- {m['why']}")
 
+    sz = None
+    if HAVE_LGBM:
+        print("5b. Act 4: size model + hidden hazards")
+        sz = act4_hidden_hazards(args.sbdb, metrics)
+    else:
+        print("5b. [skip] Act 4 needs lightgbm (quantile regression). Fix: pip install lightgbm")
+
     print("6. Export")
     if HAVE_LGBM:
         try:
@@ -269,6 +362,11 @@ def main():
         "pha": df["label"].astype(int), "pA": full["A"].round(3), "pB": full["B"].round(3),
         "test": df.index.isin(test.index), "closeApproach": df["pdes"].map(closest).round(5),
     })
+    if sz is not None:
+        for c in SIZE_COLS:
+            out[c] = df["spkid"].map(sz[c]).values
+        out["hidden"] = out["hidden"].fillna(False).astype(bool)
+        print(f"  size fields joined for {out['D_pred'].notna().mean():.1%} of asteroids")
     assert out.columns.is_unique
     path = os.path.join(args.data_out, "asteroids.json")
     out.to_json(path, orient="records")
