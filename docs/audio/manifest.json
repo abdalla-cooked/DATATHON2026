@@ -1,0 +1,5453 @@
+{
+ "tiers": {
+  "chill": 0.2,
+  "screwed": 0.75
+ },
+ "acts": {
+  "intro": [
+   {
+    "who": "CAPCOM",
+    "text": "Mission Control, live. Forty-two thousand near-Earth asteroids on the board.",
+    "src": "audio/capcom_12f0fc8c5e.mp3"
+   },
+   {
+    "who": "INTERN",
+    "text": "Forty-two THOUSAND?",
+    "src": "audio/intern_3d1e630367.mp3"
+   },
+   {
+    "who": "CAPCOM",
+    "text": "We taught a machine to decide which ones deserve worry.",
+    "src": "audio/capcom_b67bcc6725.mp3"
+   }
+  ],
+  "act1": [
+   {
+    "who": "CAPCOM",
+    "text": "First, we gave the model everything.",
+    "src": "audio/capcom_af400a10a8.mp3"
+   },
+   {
+    "who": "INTERN",
+    "text": "And?",
+    "src": "audio/intern_d8354b676f.mp3"
+   },
+   {
+    "who": "CAPCOM",
+    "text": "It rediscovered NASA's exact rule for hazardous asteroids. Nobody told it.",
+    "src": "audio/capcom_18f79fe42d.mp3"
+   },
+   {
+    "who": "INTERN",
+    "text": "Okay, that's actually kind of cool.",
+    "src": "audio/intern_ac2a927771.mp3"
+   }
+  ],
+  "act2": [
+   {
+    "who": "CAPCOM",
+    "text": "Model B. We took away the answer key: no closest-approach distance.",
+    "src": "audio/capcom_29c2f67f8c.mp3"
+   },
+   {
+    "who": "INTERN",
+    "text": "So it's guessing?",
+    "src": "audio/intern_cf74657e51.mp3"
+   },
+   {
+    "who": "CAPCOM",
+    "text": "It's working out the geometry from the shape of the orbit.",
+    "src": "audio/capcom_ba581310cd.mp3"
+   }
+  ],
+  "mistakes": [
+   {
+    "who": "CAPCOM",
+    "text": "Magenta: real hazards the model missed. Yellow: false alarms.",
+    "src": "audio/capcom_6dce21e1ea.mp3"
+   },
+   {
+    "who": "INTERN",
+    "text": "It makes MISTAKES?",
+    "src": "audio/intern_42b9dabb6f.mp3"
+   },
+   {
+    "who": "CAPCOM",
+    "text": "Every model does. Ours shows you where.",
+    "src": "audio/capcom_b1db378af8.mp3"
+   }
+  ],
+  "act4": [
+   {
+    "who": "CAPCOM",
+    "text": "Now the good part. NASA judges an asteroid's size by how bright it looks.",
+    "src": "audio/capcom_23357c1b5c.mp3"
+   },
+   {
+    "who": "INTERN",
+    "text": "Makes sense.",
+    "src": "audio/intern_d67b3673b4.mp3"
+   },
+   {
+    "who": "CAPCOM",
+    "text": "Unless it's dark. Our model went looking for big, dark rocks hiding in plain sight.",
+    "src": "audio/capcom_9b8a669873.mp3"
+   },
+   {
+    "who": "INTERN",
+    "text": "Did it find any?",
+    "src": "audio/intern_be72b25cbc.mp3"
+   },
+   {
+    "who": "CAPCOM",
+    "text": "462.",
+    "src": "audio/capcom_324de6f66b.mp3"
+   },
+   {
+    "who": "INTERN",
+    "text": "Oh no.",
+    "src": "audio/intern_9220cc28f1.mp3"
+   }
+  ],
+  "custom": [
+   {
+    "who": "CAPCOM",
+    "text": "Design your own asteroid. The model will judge it live.",
+    "src": "audio/capcom_884755b7c4.mp3"
+   },
+   {
+    "who": "INTERN",
+    "text": "Please don't make a big one.",
+    "src": "audio/intern_b936ebfaff.mp3"
+   }
+  ]
+ },
+ "reactions": {
+  "near_miss_start": [
+   {
+    "who": "INTERN",
+    "text": "Oh no no no, wait wait wait wait...",
+    "src": "audio/intern_ddf1a0895e.mp3"
+   }
+  ],
+  "near_miss_end_1": [
+   {
+    "who": "CAPCOM",
+    "text": "It missed. By millions of kilometers.",
+    "src": "audio/capcom_32e5e7d4c5.mp3"
+   },
+   {
+    "who": "INTERN",
+    "text": "...I knew that.",
+    "src": "audio/intern_773f45cd7d.mp3"
+   }
+  ],
+  "near_miss_end_2": [
+   {
+    "who": "CAPCOM",
+    "text": "Relax. That's a near miss in space terms. Still millions of kilometers.",
+    "src": "audio/capcom_dd647bec13.mp3"
+   },
+   {
+    "who": "INTERN",
+    "text": "Space terms are terrifying.",
+    "src": "audio/intern_4d2f98113e.mp3"
+   }
+  ],
+  "custom_hit": [
+   {
+    "who": "INTERN",
+    "text": "OH NO NO WAIT WAIT WAIT!",
+    "src": "audio/intern_81f388ab5e.mp3"
+   },
+   {
+    "who": "CAPCOM",
+    "text": "Congratulations. You built a planet-killer.",
+    "src": "audio/capcom_34b897a25b.mp3"
+   },
+   {
+    "who": "INTERN",
+    "text": "Can we undo that?",
+    "src": "audio/intern_2681ff643c.mp3"
+   }
+  ],
+  "custom_chill_1": [
+   {
+    "who": "CAPCOM",
+    "text": "Harmless.",
+    "src": "audio/capcom_9f4ff7b3e4.mp3"
+   },
+   {
+    "who": "INTERN",
+    "text": "Boring. I love it.",
+    "src": "audio/intern_63d917b4dd.mp3"
+   }
+  ],
+  "custom_chill_2": [
+   {
+    "who": "CAPCOM",
+    "text": "That one's not coming anywhere near us.",
+    "src": "audio/capcom_3521092642.mp3"
+   },
+   {
+    "who": "INTERN",
+    "text": "Cancel the bunker.",
+    "src": "audio/intern_82cb56b356.mp3"
+   }
+  ],
+  "custom_sus_1": [
+   {
+    "who": "CAPCOM",
+    "text": "Hm. The model's a little nervous.",
+    "src": "audio/capcom_ba49d027d0.mp3"
+   },
+   {
+    "who": "INTERN",
+    "text": "Then I'm VERY nervous.",
+    "src": "audio/intern_f5a6f41fa1.mp3"
+   }
+  ],
+  "custom_sus_2": [
+   {
+    "who": "CAPCOM",
+    "text": "Not great, not terrible.",
+    "src": "audio/capcom_9411066779.mp3"
+   },
+   {
+    "who": "INTERN",
+    "text": "Maybe don't plan anything big.",
+    "src": "audio/intern_fab08ffd8f.mp3"
+   }
+  ],
+  "custom_screwed_1": [
+   {
+    "who": "INTERN",
+    "text": "Oh no. Oh no no no.",
+    "src": "audio/intern_6ee906099c.mp3"
+   },
+   {
+    "who": "CAPCOM",
+    "text": "High risk score. Hazardous means worth watching, not incoming.",
+    "src": "audio/capcom_bf18bbb951.mp3"
+   }
+  ],
+  "custom_screwed_2": [
+   {
+    "who": "INTERN",
+    "text": "Why would you BUILD that?",
+    "src": "audio/intern_9c45256d96.mp3"
+   },
+   {
+    "who": "CAPCOM",
+    "text": "For science. It's a what-if.",
+    "src": "audio/capcom_caa1c708d1.mp3"
+   }
+  ]
+ },
+ "sfx": {
+  "radio": "audio/sfx_radio.mp3",
+  "alarm": "audio/sfx_alarm.mp3",
+  "whoosh": "audio/sfx_whoosh.mp3",
+  "impact": "audio/sfx_impact.mp3"
+ },
+ "asteroids": {
+  "65803": {
+   "tier": "screwed",
+   "report": [
+    {
+     "who": "CAPCOM",
+     "text": "Asteroid Didymos. Risk score 84.",
+     "src": "audio/capcom_fdaecd959c.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "Is it too late to apply somewhere else?",
+     "src": "audio/intern_d00169b8cc.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "Mostly because its closest point to the Sun sits right around Earth's distance.",
+     "src": "audio/capcom_87c0e9fb28.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "So we're screwed?",
+     "src": "audio/intern_27b9aa8060.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "Hazardous means worth watching. Not incoming.",
+     "src": "audio/capcom_9c34c1c9f4.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "So we're a little screwed.",
+     "src": "audio/intern_d8e29ca797.mp3"
+    }
+   ],
+   "whatif": [
+    {
+     "who": "CAPCOM",
+     "text": "Hypothetically. If Didymos hit us at 13 kilometers per second...",
+     "src": "audio/capcom_48cb630eba.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "...about 9.4 thousand megatons.",
+     "src": "audio/capcom_1b442e9e52.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "Is that a lot?",
+     "src": "audio/intern_98402b63ab.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "About 630 thousand Hiroshimas.",
+     "src": "audio/capcom_074747950e.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "AAAAAAH!",
+     "src": "audio/intern_8dfe930328.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "It is not going to hit. This is a what-if.",
+     "src": "audio/capcom_80413cfa53.mp3"
+    }
+   ]
+  },
+  "99942": {
+   "tier": "screwed",
+   "report": [
+    {
+     "who": "CAPCOM",
+     "text": "Asteroid Apophis. Risk score 99.",
+     "src": "audio/capcom_8fdba36932.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "Oh no. Oh no no no.",
+     "src": "audio/intern_6ee906099c.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "Mostly because it swings in to exactly where Earth lives.",
+     "src": "audio/capcom_670e05fd01.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "So we're screwed?",
+     "src": "audio/intern_27b9aa8060.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "Hazardous means worth watching. Not incoming.",
+     "src": "audio/capcom_9c34c1c9f4.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "So we're a little screwed.",
+     "src": "audio/intern_d8e29ca797.mp3"
+    }
+   ],
+   "whatif": [
+    {
+     "who": "CAPCOM",
+     "text": "Hypothetically. If Apophis hit us at 13 kilometers per second...",
+     "src": "audio/capcom_02e7f950d8.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "...about 780 megatons.",
+     "src": "audio/capcom_35240275e2.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "Is that a lot?",
+     "src": "audio/intern_98402b63ab.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "About 52 thousand Hiroshimas.",
+     "src": "audio/capcom_82eb29d26d.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "AAAAAAH!",
+     "src": "audio/intern_8dfe930328.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "It is not going to hit. This is a what-if.",
+     "src": "audio/capcom_80413cfa53.mp3"
+    }
+   ]
+  },
+  "101955": {
+   "tier": "screwed",
+   "report": [
+    {
+     "who": "CAPCOM",
+     "text": "Asteroid Bennu. Risk score 97.",
+     "src": "audio/capcom_78179196bb.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "Oh no. Oh no no no.",
+     "src": "audio/intern_6ee906099c.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "Mostly because it swings in to exactly where Earth lives.",
+     "src": "audio/capcom_670e05fd01.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "So we're screwed?",
+     "src": "audio/intern_27b9aa8060.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "Hazardous means worth watching. Not incoming.",
+     "src": "audio/capcom_9c34c1c9f4.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "So we're a little screwed.",
+     "src": "audio/intern_d8e29ca797.mp3"
+    }
+   ],
+   "whatif": [
+    {
+     "who": "CAPCOM",
+     "text": "Hypothetically. If Bennu hit us at 13 kilometers per second...",
+     "src": "audio/capcom_b9a25ebfbc.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "...about 2.2 thousand megatons.",
+     "src": "audio/capcom_d32946c0bc.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "Is that a lot?",
+     "src": "audio/intern_98402b63ab.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "About 150 thousand Hiroshimas.",
+     "src": "audio/capcom_f8dfedd3af.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "AAAAAAH!",
+     "src": "audio/intern_8dfe930328.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "It is not going to hit. This is a what-if.",
+     "src": "audio/capcom_80413cfa53.mp3"
+    }
+   ]
+  },
+  "411165": {
+   "tier": "chill",
+   "report": [
+    {
+     "who": "CAPCOM",
+     "text": "Asteroid 2010 DF1. Risk score 7.",
+     "src": "audio/capcom_9043b832ed.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "Oh. Okay. Cool.",
+     "src": "audio/intern_31cb39676e.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "Mostly because its track around the Sun doesn't match ours.",
+     "src": "audio/capcom_2e910e8778.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "Nothing to see here.",
+     "src": "audio/capcom_c15d7d5a0e.mp3"
+    }
+   ],
+   "hidden": [
+    {
+     "who": "CAPCOM",
+     "text": "Asteroid 2010 DF1. Officially: not hazardous.",
+     "src": "audio/capcom_167a9597b8.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "Oh, thank goodness.",
+     "src": "audio/intern_e6d2134c28.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "NASA judged it by brightness. Our model says it's about 160 meters of dark rock.",
+     "src": "audio/capcom_d018af2104.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "That's big enough to count!",
+     "src": "audio/intern_6079e7f19a.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "Candidate for a second look. Somebody tell NASA.",
+     "src": "audio/capcom_5a45b1fa76.mp3"
+    }
+   ],
+   "whatif": [
+    {
+     "who": "CAPCOM",
+     "text": "Hypothetically. If 2010 DF1 hit us at 21 kilometers per second...",
+     "src": "audio/capcom_c5da74d4b2.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "...about 220 megatons.",
+     "src": "audio/capcom_688ca8a72c.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "Is that a lot?",
+     "src": "audio/intern_98402b63ab.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "About 14 thousand Hiroshimas.",
+     "src": "audio/capcom_353aa7dfac.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "AAAAAAH!",
+     "src": "audio/intern_8dfe930328.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "It is not going to hit. This is a what-if.",
+     "src": "audio/capcom_80413cfa53.mp3"
+    }
+   ]
+  },
+  "469445": {
+   "tier": "sus",
+   "report": [
+    {
+     "who": "CAPCOM",
+     "text": "Asteroid 2002 LT24. Risk score 23.",
+     "src": "audio/capcom_2b7670e149.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "Hmm. Define 'risk'.",
+     "src": "audio/intern_0c3d3c4916.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "Mostly because its orbit is turned away from our path.",
+     "src": "audio/capcom_07b8fd5438.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "Worth a second look. Not worth panicking.",
+     "src": "audio/capcom_e39cedfd50.mp3"
+    }
+   ],
+   "hidden": [
+    {
+     "who": "CAPCOM",
+     "text": "Asteroid 2002 LT24. Officially: not hazardous.",
+     "src": "audio/capcom_4e678d9ae0.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "Oh, thank goodness.",
+     "src": "audio/intern_e6d2134c28.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "NASA judged it by brightness. Our model says it's about 140 meters of dark rock.",
+     "src": "audio/capcom_fb9dd18cb6.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "That's big enough to count!",
+     "src": "audio/intern_6079e7f19a.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "Candidate for a second look. Somebody tell NASA.",
+     "src": "audio/capcom_5a45b1fa76.mp3"
+    }
+   ],
+   "whatif": [
+    {
+     "who": "CAPCOM",
+     "text": "Hypothetically. If 2002 LT24 hit us at 14 kilometers per second...",
+     "src": "audio/capcom_491cd79dce.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "...about 76 megatons.",
+     "src": "audio/capcom_c7142ec3f0.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "Is that a lot?",
+     "src": "audio/intern_98402b63ab.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "About 5 thousand Hiroshimas.",
+     "src": "audio/capcom_5ca4ad5952.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "AAAAAAH!",
+     "src": "audio/intern_8dfe930328.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "It is not going to hit. This is a what-if.",
+     "src": "audio/capcom_80413cfa53.mp3"
+    }
+   ]
+  },
+  "475016": {
+   "tier": "sus",
+   "report": [
+    {
+     "who": "CAPCOM",
+     "text": "Asteroid 2005 UO. Risk score 53.",
+     "src": "audio/capcom_a1d5b71384.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "Should I be sitting down?",
+     "src": "audio/intern_0a83179168.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "Mostly because its track around the Sun doesn't match ours.",
+     "src": "audio/capcom_2e910e8778.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "Worth a second look. Not worth panicking.",
+     "src": "audio/capcom_e39cedfd50.mp3"
+    }
+   ],
+   "hidden": [
+    {
+     "who": "CAPCOM",
+     "text": "Asteroid 2005 UO. Officially: not hazardous.",
+     "src": "audio/capcom_c7a502d15c.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "Oh, thank goodness.",
+     "src": "audio/intern_e6d2134c28.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "NASA judged it by brightness. Our model says it's about 160 meters of dark rock.",
+     "src": "audio/capcom_d018af2104.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "That's big enough to count!",
+     "src": "audio/intern_6079e7f19a.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "Candidate for a second look. Somebody tell NASA.",
+     "src": "audio/capcom_5a45b1fa76.mp3"
+    }
+   ],
+   "whatif": [
+    {
+     "who": "CAPCOM",
+     "text": "Hypothetically. If 2005 UO hit us at 22 kilometers per second...",
+     "src": "audio/capcom_528ca5ae71.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "...about 260 megatons.",
+     "src": "audio/capcom_336c98fa99.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "Is that a lot?",
+     "src": "audio/intern_98402b63ab.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "About 17 thousand Hiroshimas.",
+     "src": "audio/capcom_202c3825f9.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "AAAAAAH!",
+     "src": "audio/intern_8dfe930328.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "It is not going to hit. This is a what-if.",
+     "src": "audio/capcom_80413cfa53.mp3"
+    }
+   ]
+  },
+  "2010 LV108": {
+   "tier": "chill",
+   "report": [
+    {
+     "who": "CAPCOM",
+     "text": "Asteroid 2010 LV108. Risk score 0.",
+     "src": "audio/capcom_4f58684468.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "Oh. Okay. Cool.",
+     "src": "audio/intern_31cb39676e.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "Mostly because its orbit is tilted steeply away from ours.",
+     "src": "audio/capcom_6a0fa98e78.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "Nothing to see here.",
+     "src": "audio/capcom_c15d7d5a0e.mp3"
+    }
+   ],
+   "hidden": [
+    {
+     "who": "CAPCOM",
+     "text": "Asteroid 2010 LV108. Officially: not hazardous.",
+     "src": "audio/capcom_d2237b662b.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "Oh, thank goodness.",
+     "src": "audio/intern_e6d2134c28.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "NASA judged it by brightness. Our model says it's about 230 meters of dark rock.",
+     "src": "audio/capcom_6354d07ae2.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "That's big enough to count!",
+     "src": "audio/intern_6079e7f19a.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "Candidate for a second look. Somebody tell NASA.",
+     "src": "audio/capcom_5a45b1fa76.mp3"
+    }
+   ],
+   "whatif": [
+    {
+     "who": "CAPCOM",
+     "text": "Hypothetically. If 2010 LV108 hit us at 17 kilometers per second...",
+     "src": "audio/capcom_0df918be2e.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "...about 440 megatons.",
+     "src": "audio/capcom_483bf2817b.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "Is that a lot?",
+     "src": "audio/intern_98402b63ab.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "About 30 thousand Hiroshimas.",
+     "src": "audio/capcom_f201ebb1b5.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "AAAAAAH!",
+     "src": "audio/intern_8dfe930328.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "It is not going to hit. This is a what-if.",
+     "src": "audio/capcom_80413cfa53.mp3"
+    }
+   ]
+  },
+  "2014 JL25": {
+   "tier": "chill",
+   "report": [
+    {
+     "who": "CAPCOM",
+     "text": "Asteroid 2014 JL25. Risk score 0.",
+     "src": "audio/capcom_c6a0b789de.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "Boring. I love boring.",
+     "src": "audio/intern_9a84104535.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "Mostly because its orbit swings way out, far from us.",
+     "src": "audio/capcom_c78235688e.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "Go back to your sandwich.",
+     "src": "audio/capcom_a1de0be705.mp3"
+    }
+   ],
+   "hidden": [
+    {
+     "who": "CAPCOM",
+     "text": "Asteroid 2014 JL25. Officially: not hazardous.",
+     "src": "audio/capcom_a8e58b5ad4.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "Oh, thank goodness.",
+     "src": "audio/intern_e6d2134c28.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "NASA judged it by brightness. Our model says it's about 230 meters of dark rock.",
+     "src": "audio/capcom_6354d07ae2.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "That's big enough to count!",
+     "src": "audio/intern_6079e7f19a.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "Candidate for a second look. Somebody tell NASA.",
+     "src": "audio/capcom_5a45b1fa76.mp3"
+    }
+   ],
+   "whatif": [
+    {
+     "who": "CAPCOM",
+     "text": "Hypothetically. If 2014 JL25 hit us at 17 kilometers per second...",
+     "src": "audio/capcom_41c28e4f20.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "...about 420 megatons.",
+     "src": "audio/capcom_2b5ee8d52b.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "Is that a lot?",
+     "src": "audio/intern_98402b63ab.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "About 28 thousand Hiroshimas.",
+     "src": "audio/capcom_367b7a875d.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "AAAAAAH!",
+     "src": "audio/intern_8dfe930328.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "It is not going to hit. This is a what-if.",
+     "src": "audio/capcom_80413cfa53.mp3"
+    }
+   ]
+  },
+  "2015 BW310": {
+   "tier": "screwed",
+   "report": [
+    {
+     "who": "CAPCOM",
+     "text": "Asteroid 2015 BW310. Risk score 82.",
+     "src": "audio/capcom_25b7392cde.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "Okay. Okay. I'm calm. I'm calm.",
+     "src": "audio/intern_21c1e8dba6.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "Mostly because it swings in to exactly where Earth lives.",
+     "src": "audio/capcom_670e05fd01.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "So we're screwed?",
+     "src": "audio/intern_27b9aa8060.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "Hazardous means worth watching. Not incoming.",
+     "src": "audio/capcom_9c34c1c9f4.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "So we're a little screwed.",
+     "src": "audio/intern_d8e29ca797.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "Plot twist: NASA disagrees.",
+     "src": "audio/capcom_80a6aa7489.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "Who do we believe?!",
+     "src": "audio/intern_a762f6a5a8.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "NASA. This is one of our mistakes.",
+     "src": "audio/capcom_f611abed8e.mp3"
+    }
+   ],
+   "hidden": [
+    {
+     "who": "CAPCOM",
+     "text": "Asteroid 2015 BW310. Officially: not hazardous.",
+     "src": "audio/capcom_06180684c1.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "Oh, thank goodness.",
+     "src": "audio/intern_e6d2134c28.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "NASA judged it by brightness. Our model says it's about 150 meters of dark rock.",
+     "src": "audio/capcom_2d7aa3a34a.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "That's big enough to count!",
+     "src": "audio/intern_6079e7f19a.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "Candidate for a second look. Somebody tell NASA.",
+     "src": "audio/capcom_5a45b1fa76.mp3"
+    }
+   ],
+   "whatif": [
+    {
+     "who": "CAPCOM",
+     "text": "Hypothetically. If 2015 BW310 hit us at 17 kilometers per second...",
+     "src": "audio/capcom_082be4db73.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "...about 110 megatons.",
+     "src": "audio/capcom_137a983419.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "Is that a lot?",
+     "src": "audio/intern_98402b63ab.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "About 7.6 thousand Hiroshimas.",
+     "src": "audio/capcom_f5360d49db.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "AAAAAAH!",
+     "src": "audio/intern_8dfe930328.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "It is not going to hit. This is a what-if.",
+     "src": "audio/capcom_80413cfa53.mp3"
+    }
+   ]
+  },
+  "2015 SS20": {
+   "tier": "chill",
+   "report": [
+    {
+     "who": "CAPCOM",
+     "text": "Asteroid 2015 SS20. Risk score 19.",
+     "src": "audio/capcom_bb976b578a.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "Oh. Okay. Cool.",
+     "src": "audio/intern_31cb39676e.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "Mostly because its orbit is too round to reach us.",
+     "src": "audio/capcom_bcbfa58c42.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "Nothing to see here.",
+     "src": "audio/capcom_c15d7d5a0e.mp3"
+    }
+   ],
+   "hidden": [
+    {
+     "who": "CAPCOM",
+     "text": "Asteroid 2015 SS20. Officially: not hazardous.",
+     "src": "audio/capcom_276b798232.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "Oh, thank goodness.",
+     "src": "audio/intern_e6d2134c28.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "NASA judged it by brightness. Our model says it's about 260 meters of dark rock.",
+     "src": "audio/capcom_b067ed2d48.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "That's big enough to count!",
+     "src": "audio/intern_6079e7f19a.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "Candidate for a second look. Somebody tell NASA.",
+     "src": "audio/capcom_5a45b1fa76.mp3"
+    }
+   ],
+   "whatif": [
+    {
+     "who": "CAPCOM",
+     "text": "Hypothetically. If 2015 SS20 hit us at 15 kilometers per second...",
+     "src": "audio/capcom_60c5e44d98.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "...about 460 megatons.",
+     "src": "audio/capcom_c9315dbc2f.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "Is that a lot?",
+     "src": "audio/intern_98402b63ab.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "About 30 thousand Hiroshimas.",
+     "src": "audio/capcom_f201ebb1b5.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "AAAAAAH!",
+     "src": "audio/intern_8dfe930328.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "It is not going to hit. This is a what-if.",
+     "src": "audio/capcom_80413cfa53.mp3"
+    }
+   ]
+  },
+  "2015 TE": {
+   "tier": "chill",
+   "report": [
+    {
+     "who": "CAPCOM",
+     "text": "Asteroid 2015 TE. Risk score 13.",
+     "src": "audio/capcom_370b6cb7ef.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "Phew.",
+     "src": "audio/intern_19d1eb6cdf.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "Mostly because the way its orbit is turned keeps it out of our way.",
+     "src": "audio/capcom_3884fbb4b7.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "Go back to your sandwich.",
+     "src": "audio/capcom_a1de0be705.mp3"
+    }
+   ],
+   "hidden": [
+    {
+     "who": "CAPCOM",
+     "text": "Asteroid 2015 TE. Officially: not hazardous.",
+     "src": "audio/capcom_c6031d946f.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "Oh, thank goodness.",
+     "src": "audio/intern_e6d2134c28.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "NASA judged it by brightness. Our model says it's about 160 meters of dark rock.",
+     "src": "audio/capcom_d018af2104.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "That's big enough to count!",
+     "src": "audio/intern_6079e7f19a.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "Candidate for a second look. Somebody tell NASA.",
+     "src": "audio/capcom_5a45b1fa76.mp3"
+    }
+   ],
+   "whatif": [
+    {
+     "who": "CAPCOM",
+     "text": "Hypothetically. If 2015 TE hit us at 23 kilometers per second...",
+     "src": "audio/capcom_1586fd0dc0.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "...about 260 megatons.",
+     "src": "audio/capcom_336c98fa99.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "Is that a lot?",
+     "src": "audio/intern_98402b63ab.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "About 17 thousand Hiroshimas.",
+     "src": "audio/capcom_202c3825f9.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "AAAAAAH!",
+     "src": "audio/intern_8dfe930328.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "It is not going to hit. This is a what-if.",
+     "src": "audio/capcom_80413cfa53.mp3"
+    }
+   ]
+  },
+  "2016 FC13": {
+   "tier": "chill",
+   "report": [
+    {
+     "who": "CAPCOM",
+     "text": "Asteroid 2016 FC13. Risk score 2.",
+     "src": "audio/capcom_0d9d9c857f.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "Phew.",
+     "src": "audio/intern_19d1eb6cdf.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "Mostly because its orbit is tilted steeply away from ours.",
+     "src": "audio/capcom_6a0fa98e78.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "Go back to your sandwich.",
+     "src": "audio/capcom_a1de0be705.mp3"
+    }
+   ],
+   "hidden": [
+    {
+     "who": "CAPCOM",
+     "text": "Asteroid 2016 FC13. Officially: not hazardous.",
+     "src": "audio/capcom_291ce39691.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "Oh, thank goodness.",
+     "src": "audio/intern_e6d2134c28.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "NASA judged it by brightness. Our model says it's about 190 meters of dark rock.",
+     "src": "audio/capcom_e6c18b658c.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "That's big enough to count!",
+     "src": "audio/intern_6079e7f19a.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "Candidate for a second look. Somebody tell NASA.",
+     "src": "audio/capcom_5a45b1fa76.mp3"
+    }
+   ],
+   "whatif": [
+    {
+     "who": "CAPCOM",
+     "text": "Hypothetically. If 2016 FC13 hit us at 25 kilometers per second...",
+     "src": "audio/capcom_d0ea2e9dac.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "...about 490 megatons.",
+     "src": "audio/capcom_2b1b31ff6f.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "Is that a lot?",
+     "src": "audio/intern_98402b63ab.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "About 33 thousand Hiroshimas.",
+     "src": "audio/capcom_5fedf15919.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "AAAAAAH!",
+     "src": "audio/intern_8dfe930328.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "It is not going to hit. This is a what-if.",
+     "src": "audio/capcom_80413cfa53.mp3"
+    }
+   ]
+  },
+  "2016 LF2": {
+   "tier": "chill",
+   "report": [
+    {
+     "who": "CAPCOM",
+     "text": "Asteroid 2016 LF2. Risk score 5.",
+     "src": "audio/capcom_c6b368d4cc.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "Oh. Okay. Cool.",
+     "src": "audio/intern_31cb39676e.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "Mostly because it never wanders far from our part of space.",
+     "src": "audio/capcom_76f057b128.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "Go back to your sandwich.",
+     "src": "audio/capcom_a1de0be705.mp3"
+    }
+   ],
+   "hidden": [
+    {
+     "who": "CAPCOM",
+     "text": "Asteroid 2016 LF2. Officially: not hazardous.",
+     "src": "audio/capcom_6afab58854.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "Oh, thank goodness.",
+     "src": "audio/intern_e6d2134c28.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "NASA judged it by brightness. Our model says it's about 200 meters of dark rock.",
+     "src": "audio/capcom_30f0145328.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "That's big enough to count!",
+     "src": "audio/intern_6079e7f19a.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "Candidate for a second look. Somebody tell NASA.",
+     "src": "audio/capcom_5a45b1fa76.mp3"
+    }
+   ],
+   "whatif": [
+    {
+     "who": "CAPCOM",
+     "text": "Hypothetically. If 2016 LF2 hit us at 23 kilometers per second...",
+     "src": "audio/capcom_078192b60a.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "...about 570 megatons.",
+     "src": "audio/capcom_e881e6e815.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "Is that a lot?",
+     "src": "audio/intern_98402b63ab.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "About 38 thousand Hiroshimas.",
+     "src": "audio/capcom_912135f5da.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "AAAAAAH!",
+     "src": "audio/intern_8dfe930328.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "It is not going to hit. This is a what-if.",
+     "src": "audio/capcom_80413cfa53.mp3"
+    }
+   ]
+  },
+  "2019 UQ7": {
+   "tier": "chill",
+   "report": [
+    {
+     "who": "CAPCOM",
+     "text": "Asteroid 2019 UQ7. Risk score 8.",
+     "src": "audio/capcom_006d2554c9.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "Phew.",
+     "src": "audio/intern_19d1eb6cdf.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "Mostly because it crosses our plane far from where Earth orbits.",
+     "src": "audio/capcom_48b94e4b46.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "Nothing to see here.",
+     "src": "audio/capcom_c15d7d5a0e.mp3"
+    }
+   ],
+   "hidden": [
+    {
+     "who": "CAPCOM",
+     "text": "Asteroid 2019 UQ7. Officially: not hazardous.",
+     "src": "audio/capcom_18ac7e9f45.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "Oh, thank goodness.",
+     "src": "audio/intern_e6d2134c28.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "NASA judged it by brightness. Our model says it's about 250 meters of dark rock.",
+     "src": "audio/capcom_718db7934e.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "That's big enough to count!",
+     "src": "audio/intern_6079e7f19a.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "Candidate for a second look. Somebody tell NASA.",
+     "src": "audio/capcom_5a45b1fa76.mp3"
+    }
+   ],
+   "whatif": [
+    {
+     "who": "CAPCOM",
+     "text": "Hypothetically. If 2019 UQ7 hit us at 22 kilometers per second...",
+     "src": "audio/capcom_a464625bd7.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "...about 990 megatons.",
+     "src": "audio/capcom_b27d9402ac.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "Is that a lot?",
+     "src": "audio/intern_98402b63ab.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "About 66 thousand Hiroshimas.",
+     "src": "audio/capcom_9329494c4f.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "AAAAAAH!",
+     "src": "audio/intern_8dfe930328.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "It is not going to hit. This is a what-if.",
+     "src": "audio/capcom_80413cfa53.mp3"
+    }
+   ]
+  },
+  "2023 TZ1": {
+   "tier": "sus",
+   "report": [
+    {
+     "who": "CAPCOM",
+     "text": "Asteroid 2023 TZ1. Risk score 32.",
+     "src": "audio/capcom_48fddba4c2.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "Is that... bad?",
+     "src": "audio/intern_db36507435.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "Mostly because the way its orbit is turned lines it up with ours.",
+     "src": "audio/capcom_22e268901b.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "Worth a second look. Not worth panicking.",
+     "src": "audio/capcom_e39cedfd50.mp3"
+    }
+   ],
+   "hidden": [
+    {
+     "who": "CAPCOM",
+     "text": "Asteroid 2023 TZ1. Officially: not hazardous.",
+     "src": "audio/capcom_ea16e01028.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "Oh, thank goodness.",
+     "src": "audio/intern_e6d2134c28.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "NASA judged it by brightness. Our model says it's about 220 meters of dark rock.",
+     "src": "audio/capcom_392fa93fdf.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "That's big enough to count!",
+     "src": "audio/intern_6079e7f19a.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "Candidate for a second look. Somebody tell NASA.",
+     "src": "audio/capcom_5a45b1fa76.mp3"
+    }
+   ],
+   "whatif": [
+    {
+     "who": "CAPCOM",
+     "text": "Hypothetically. If 2023 TZ1 hit us at 30 kilometers per second...",
+     "src": "audio/capcom_a6e694c3d8.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "...about 1.1 thousand megatons.",
+     "src": "audio/capcom_aaf2f1e98d.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "Is that a lot?",
+     "src": "audio/intern_98402b63ab.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "About 74 thousand Hiroshimas.",
+     "src": "audio/capcom_05e6e292ea.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "AAAAAAH!",
+     "src": "audio/intern_8dfe930328.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "It is not going to hit. This is a what-if.",
+     "src": "audio/capcom_80413cfa53.mp3"
+    }
+   ]
+  },
+  "2017 FN90": {
+   "tier": "chill",
+   "report": [
+    {
+     "who": "CAPCOM",
+     "text": "Asteroid 2017 FN90. Risk score 4.",
+     "src": "audio/capcom_535d717cb9.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "Boring. I love boring.",
+     "src": "audio/intern_9a84104535.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "Mostly because its orbit is turned away from our path.",
+     "src": "audio/capcom_07b8fd5438.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "Nothing to see here.",
+     "src": "audio/capcom_c15d7d5a0e.mp3"
+    }
+   ],
+   "hidden": [
+    {
+     "who": "CAPCOM",
+     "text": "Asteroid 2017 FN90. Officially: not hazardous.",
+     "src": "audio/capcom_f0d130e612.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "Oh, thank goodness.",
+     "src": "audio/intern_e6d2134c28.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "NASA judged it by brightness. Our model says it's about 220 meters of dark rock.",
+     "src": "audio/capcom_392fa93fdf.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "That's big enough to count!",
+     "src": "audio/intern_6079e7f19a.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "Candidate for a second look. Somebody tell NASA.",
+     "src": "audio/capcom_5a45b1fa76.mp3"
+    }
+   ],
+   "whatif": [
+    {
+     "who": "CAPCOM",
+     "text": "Hypothetically. If 2017 FN90 hit us at 17 kilometers per second...",
+     "src": "audio/capcom_44d24d4496.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "...about 410 megatons.",
+     "src": "audio/capcom_e87be24b0a.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "Is that a lot?",
+     "src": "audio/intern_98402b63ab.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "About 27 thousand Hiroshimas.",
+     "src": "audio/capcom_3da509d8c9.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "AAAAAAH!",
+     "src": "audio/intern_8dfe930328.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "It is not going to hit. This is a what-if.",
+     "src": "audio/capcom_80413cfa53.mp3"
+    }
+   ]
+  },
+  "2022 XS": {
+   "tier": "chill",
+   "report": [
+    {
+     "who": "CAPCOM",
+     "text": "Asteroid 2022 XS. Risk score 3.",
+     "src": "audio/capcom_8c55923eb7.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "Oh. Okay. Cool.",
+     "src": "audio/intern_31cb39676e.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "Mostly because its orbit is tilted steeply away from ours.",
+     "src": "audio/capcom_6a0fa98e78.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "Go back to your sandwich.",
+     "src": "audio/capcom_a1de0be705.mp3"
+    }
+   ],
+   "hidden": [
+    {
+     "who": "CAPCOM",
+     "text": "Asteroid 2022 XS. Officially: not hazardous.",
+     "src": "audio/capcom_f4f98669b5.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "Oh, thank goodness.",
+     "src": "audio/intern_e6d2134c28.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "NASA judged it by brightness. Our model says it's about 240 meters of dark rock.",
+     "src": "audio/capcom_a6f3afcfc4.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "That's big enough to count!",
+     "src": "audio/intern_6079e7f19a.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "Candidate for a second look. Somebody tell NASA.",
+     "src": "audio/capcom_5a45b1fa76.mp3"
+    }
+   ],
+   "whatif": [
+    {
+     "who": "CAPCOM",
+     "text": "Hypothetically. If 2022 XS hit us at 15 kilometers per second...",
+     "src": "audio/capcom_d1b41d560d.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "...about 360 megatons.",
+     "src": "audio/capcom_2067ea4fc5.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "Is that a lot?",
+     "src": "audio/intern_98402b63ab.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "About 24 thousand Hiroshimas.",
+     "src": "audio/capcom_92597ae126.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "AAAAAAH!",
+     "src": "audio/intern_8dfe930328.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "It is not going to hit. This is a what-if.",
+     "src": "audio/capcom_80413cfa53.mp3"
+    }
+   ]
+  },
+  "2006 DU63": {
+   "tier": "chill",
+   "report": [
+    {
+     "who": "CAPCOM",
+     "text": "Asteroid 2006 DU63. Risk score 18.",
+     "src": "audio/capcom_4b914cb600.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "Oh. Okay. Cool.",
+     "src": "audio/intern_31cb39676e.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "Mostly because the way its orbit is turned keeps it out of our way.",
+     "src": "audio/capcom_3884fbb4b7.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "Go back to your sandwich.",
+     "src": "audio/capcom_a1de0be705.mp3"
+    }
+   ],
+   "hidden": [
+    {
+     "who": "CAPCOM",
+     "text": "Asteroid 2006 DU63. Officially: not hazardous.",
+     "src": "audio/capcom_1d807101ef.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "Oh, thank goodness.",
+     "src": "audio/intern_e6d2134c28.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "NASA judged it by brightness. Our model says it's about 250 meters of dark rock.",
+     "src": "audio/capcom_718db7934e.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "That's big enough to count!",
+     "src": "audio/intern_6079e7f19a.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "Candidate for a second look. Somebody tell NASA.",
+     "src": "audio/capcom_5a45b1fa76.mp3"
+    }
+   ],
+   "whatif": [
+    {
+     "who": "CAPCOM",
+     "text": "Hypothetically. If 2006 DU63 hit us at 21 kilometers per second...",
+     "src": "audio/capcom_427479726c.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "...about 900 megatons.",
+     "src": "audio/capcom_e9ce923fb5.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "Is that a lot?",
+     "src": "audio/intern_98402b63ab.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "About 60 thousand Hiroshimas.",
+     "src": "audio/capcom_7422547ffe.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "AAAAAAH!",
+     "src": "audio/intern_8dfe930328.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "It is not going to hit. This is a what-if.",
+     "src": "audio/capcom_80413cfa53.mp3"
+    }
+   ]
+  },
+  "2021 UF70": {
+   "tier": "sus",
+   "report": [
+    {
+     "who": "CAPCOM",
+     "text": "Asteroid 2021 UF70. Risk score 71.",
+     "src": "audio/capcom_a204a99aac.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "Should I be sitting down?",
+     "src": "audio/intern_0a83179168.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "Mostly because its orbit is about the same size as Earth's.",
+     "src": "audio/capcom_41c882ac9c.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "Worth a second look. Not worth panicking.",
+     "src": "audio/capcom_e39cedfd50.mp3"
+    }
+   ],
+   "hidden": [
+    {
+     "who": "CAPCOM",
+     "text": "Asteroid 2021 UF70. Officially: not hazardous.",
+     "src": "audio/capcom_b7d1e411f6.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "Oh, thank goodness.",
+     "src": "audio/intern_e6d2134c28.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "NASA judged it by brightness. Our model says it's about 230 meters of dark rock.",
+     "src": "audio/capcom_6354d07ae2.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "That's big enough to count!",
+     "src": "audio/intern_6079e7f19a.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "Candidate for a second look. Somebody tell NASA.",
+     "src": "audio/capcom_5a45b1fa76.mp3"
+    }
+   ],
+   "whatif": [
+    {
+     "who": "CAPCOM",
+     "text": "Hypothetically. If 2021 UF70 hit us at 15 kilometers per second...",
+     "src": "audio/capcom_880d17b802.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "...about 320 megatons.",
+     "src": "audio/capcom_c4e8587226.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "Is that a lot?",
+     "src": "audio/intern_98402b63ab.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "About 21 thousand Hiroshimas.",
+     "src": "audio/capcom_f69098da5d.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "AAAAAAH!",
+     "src": "audio/intern_8dfe930328.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "It is not going to hit. This is a what-if.",
+     "src": "audio/capcom_80413cfa53.mp3"
+    }
+   ]
+  },
+  "2025 OG2": {
+   "tier": "chill",
+   "report": [
+    {
+     "who": "CAPCOM",
+     "text": "Asteroid 2025 OG2. Risk score 1.",
+     "src": "audio/capcom_9b3345ea00.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "Phew.",
+     "src": "audio/intern_19d1eb6cdf.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "Mostly because it passes way above or below our lane.",
+     "src": "audio/capcom_dcf818304a.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "Nothing to see here.",
+     "src": "audio/capcom_c15d7d5a0e.mp3"
+    }
+   ],
+   "hidden": [
+    {
+     "who": "CAPCOM",
+     "text": "Asteroid 2025 OG2. Officially: not hazardous.",
+     "src": "audio/capcom_31370ad67e.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "Oh, thank goodness.",
+     "src": "audio/intern_e6d2134c28.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "NASA judged it by brightness. Our model says it's about 220 meters of dark rock.",
+     "src": "audio/capcom_392fa93fdf.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "That's big enough to count!",
+     "src": "audio/intern_6079e7f19a.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "Candidate for a second look. Somebody tell NASA.",
+     "src": "audio/capcom_5a45b1fa76.mp3"
+    }
+   ],
+   "whatif": [
+    {
+     "who": "CAPCOM",
+     "text": "Hypothetically. If 2025 OG2 hit us at 38 kilometers per second...",
+     "src": "audio/capcom_da4fc217c1.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "...about 2 thousand megatons.",
+     "src": "audio/capcom_88071794b3.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "Is that a lot?",
+     "src": "audio/intern_98402b63ab.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "About 130 thousand Hiroshimas.",
+     "src": "audio/capcom_b121b0ed00.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "AAAAAAH!",
+     "src": "audio/intern_8dfe930328.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "It is not going to hit. This is a what-if.",
+     "src": "audio/capcom_80413cfa53.mp3"
+    }
+   ]
+  },
+  "2019 SV7": {
+   "tier": "chill",
+   "report": [
+    {
+     "who": "CAPCOM",
+     "text": "Asteroid 2019 SV7. Risk score 4.",
+     "src": "audio/capcom_843d253520.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "Oh. Okay. Cool.",
+     "src": "audio/intern_31cb39676e.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "Mostly because it crosses our plane far from where Earth orbits.",
+     "src": "audio/capcom_48b94e4b46.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "Go back to your sandwich.",
+     "src": "audio/capcom_a1de0be705.mp3"
+    }
+   ],
+   "hidden": [
+    {
+     "who": "CAPCOM",
+     "text": "Asteroid 2019 SV7. Officially: not hazardous.",
+     "src": "audio/capcom_8dc326eece.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "Oh, thank goodness.",
+     "src": "audio/intern_e6d2134c28.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "NASA judged it by brightness. Our model says it's about 220 meters of dark rock.",
+     "src": "audio/capcom_392fa93fdf.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "That's big enough to count!",
+     "src": "audio/intern_6079e7f19a.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "Candidate for a second look. Somebody tell NASA.",
+     "src": "audio/capcom_5a45b1fa76.mp3"
+    }
+   ],
+   "whatif": [
+    {
+     "who": "CAPCOM",
+     "text": "Hypothetically. If 2019 SV7 hit us at 16 kilometers per second...",
+     "src": "audio/capcom_b4d5ffa919.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "...about 320 megatons.",
+     "src": "audio/capcom_c4e8587226.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "Is that a lot?",
+     "src": "audio/intern_98402b63ab.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "About 21 thousand Hiroshimas.",
+     "src": "audio/capcom_f69098da5d.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "AAAAAAH!",
+     "src": "audio/intern_8dfe930328.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "It is not going to hit. This is a what-if.",
+     "src": "audio/capcom_80413cfa53.mp3"
+    }
+   ]
+  },
+  "2007 RE1": {
+   "tier": "sus",
+   "report": [
+    {
+     "who": "CAPCOM",
+     "text": "Asteroid 2007 RE1. Risk score 43.",
+     "src": "audio/capcom_ac7dccbba9.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "Should I be sitting down?",
+     "src": "audio/intern_0a83179168.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "Mostly because its orbit happens to be turned toward our path.",
+     "src": "audio/capcom_87d6ed387b.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "Worth a second look. Not worth panicking.",
+     "src": "audio/capcom_e39cedfd50.mp3"
+    }
+   ],
+   "hidden": [
+    {
+     "who": "CAPCOM",
+     "text": "Asteroid 2007 RE1. Officially: not hazardous.",
+     "src": "audio/capcom_a330973d0c.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "Oh, thank goodness.",
+     "src": "audio/intern_e6d2134c28.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "NASA judged it by brightness. Our model says it's about 280 meters of dark rock.",
+     "src": "audio/capcom_6184398ca6.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "That's big enough to count!",
+     "src": "audio/intern_6079e7f19a.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "Candidate for a second look. Somebody tell NASA.",
+     "src": "audio/capcom_5a45b1fa76.mp3"
+    }
+   ],
+   "whatif": [
+    {
+     "who": "CAPCOM",
+     "text": "Hypothetically. If 2007 RE1 hit us at 15 kilometers per second...",
+     "src": "audio/capcom_1ce8da5bae.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "...about 630 megatons.",
+     "src": "audio/capcom_d386f13e37.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "Is that a lot?",
+     "src": "audio/intern_98402b63ab.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "About 42 thousand Hiroshimas.",
+     "src": "audio/capcom_04c847a33a.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "AAAAAAH!",
+     "src": "audio/intern_8dfe930328.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "It is not going to hit. This is a what-if.",
+     "src": "audio/capcom_80413cfa53.mp3"
+    }
+   ]
+  },
+  "2014 DJ23": {
+   "tier": "chill",
+   "report": [
+    {
+     "who": "CAPCOM",
+     "text": "Asteroid 2014 DJ23. Risk score 2.",
+     "src": "audio/capcom_7b4bde66a6.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "Phew.",
+     "src": "audio/intern_19d1eb6cdf.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "Mostly because the way its orbit is turned keeps it out of our way.",
+     "src": "audio/capcom_3884fbb4b7.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "Go back to your sandwich.",
+     "src": "audio/capcom_a1de0be705.mp3"
+    }
+   ],
+   "hidden": [
+    {
+     "who": "CAPCOM",
+     "text": "Asteroid 2014 DJ23. Officially: not hazardous.",
+     "src": "audio/capcom_baec1e7d53.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "Oh, thank goodness.",
+     "src": "audio/intern_e6d2134c28.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "NASA judged it by brightness. Our model says it's about 210 meters of dark rock.",
+     "src": "audio/capcom_1953e11494.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "That's big enough to count!",
+     "src": "audio/intern_6079e7f19a.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "Candidate for a second look. Somebody tell NASA.",
+     "src": "audio/capcom_5a45b1fa76.mp3"
+    }
+   ],
+   "whatif": [
+    {
+     "who": "CAPCOM",
+     "text": "Hypothetically. If 2014 DJ23 hit us at 23 kilometers per second...",
+     "src": "audio/capcom_ffad45fe7a.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "...about 630 megatons.",
+     "src": "audio/capcom_d386f13e37.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "Is that a lot?",
+     "src": "audio/intern_98402b63ab.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "About 42 thousand Hiroshimas.",
+     "src": "audio/capcom_04c847a33a.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "AAAAAAH!",
+     "src": "audio/intern_8dfe930328.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "It is not going to hit. This is a what-if.",
+     "src": "audio/capcom_80413cfa53.mp3"
+    }
+   ]
+  },
+  "2005 NG56": {
+   "tier": "chill",
+   "report": [
+    {
+     "who": "CAPCOM",
+     "text": "Asteroid 2005 NG56. Risk score 2.",
+     "src": "audio/capcom_f066ad4ef2.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "Phew.",
+     "src": "audio/intern_19d1eb6cdf.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "Mostly because its orbit is turned away from our path.",
+     "src": "audio/capcom_07b8fd5438.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "Nothing to see here.",
+     "src": "audio/capcom_c15d7d5a0e.mp3"
+    }
+   ],
+   "hidden": [
+    {
+     "who": "CAPCOM",
+     "text": "Asteroid 2005 NG56. Officially: not hazardous.",
+     "src": "audio/capcom_097870b3e9.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "Oh, thank goodness.",
+     "src": "audio/intern_e6d2134c28.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "NASA judged it by brightness. Our model says it's about 230 meters of dark rock.",
+     "src": "audio/capcom_6354d07ae2.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "That's big enough to count!",
+     "src": "audio/intern_6079e7f19a.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "Candidate for a second look. Somebody tell NASA.",
+     "src": "audio/capcom_5a45b1fa76.mp3"
+    }
+   ],
+   "whatif": [
+    {
+     "who": "CAPCOM",
+     "text": "Hypothetically. If 2005 NG56 hit us at 18 kilometers per second...",
+     "src": "audio/capcom_efbabbacfc.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "...about 460 megatons.",
+     "src": "audio/capcom_c9315dbc2f.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "Is that a lot?",
+     "src": "audio/intern_98402b63ab.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "About 31 thousand Hiroshimas.",
+     "src": "audio/capcom_74f99abd6a.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "AAAAAAH!",
+     "src": "audio/intern_8dfe930328.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "It is not going to hit. This is a what-if.",
+     "src": "audio/capcom_80413cfa53.mp3"
+    }
+   ]
+  },
+  "2013 NW": {
+   "tier": "chill",
+   "report": [
+    {
+     "who": "CAPCOM",
+     "text": "Asteroid 2013 NW. Risk score 5.",
+     "src": "audio/capcom_e5efb77ab2.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "Oh. Okay. Cool.",
+     "src": "audio/intern_31cb39676e.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "Mostly because it travels in our lane, not above or below it.",
+     "src": "audio/capcom_530487f77a.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "Nothing to see here.",
+     "src": "audio/capcom_c15d7d5a0e.mp3"
+    }
+   ],
+   "hidden": [
+    {
+     "who": "CAPCOM",
+     "text": "Asteroid 2013 NW. Officially: not hazardous.",
+     "src": "audio/capcom_dfb533e36e.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "Oh, thank goodness.",
+     "src": "audio/intern_e6d2134c28.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "NASA judged it by brightness. Our model says it's about 200 meters of dark rock.",
+     "src": "audio/capcom_30f0145328.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "That's big enough to count!",
+     "src": "audio/intern_6079e7f19a.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "Candidate for a second look. Somebody tell NASA.",
+     "src": "audio/capcom_5a45b1fa76.mp3"
+    }
+   ],
+   "whatif": [
+    {
+     "who": "CAPCOM",
+     "text": "Hypothetically. If 2013 NW hit us at 15 kilometers per second...",
+     "src": "audio/capcom_732dc60d9e.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "...about 220 megatons.",
+     "src": "audio/capcom_688ca8a72c.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "Is that a lot?",
+     "src": "audio/intern_98402b63ab.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "About 15 thousand Hiroshimas.",
+     "src": "audio/capcom_346cfbd870.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "AAAAAAH!",
+     "src": "audio/intern_8dfe930328.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "It is not going to hit. This is a what-if.",
+     "src": "audio/capcom_80413cfa53.mp3"
+    }
+   ]
+  },
+  "2015 KQ57": {
+   "tier": "chill",
+   "report": [
+    {
+     "who": "CAPCOM",
+     "text": "Asteroid 2015 KQ57. Risk score 8.",
+     "src": "audio/capcom_c1e30b628f.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "Phew.",
+     "src": "audio/intern_19d1eb6cdf.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "Mostly because its orbit is turned away from our path.",
+     "src": "audio/capcom_07b8fd5438.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "Go back to your sandwich.",
+     "src": "audio/capcom_a1de0be705.mp3"
+    }
+   ],
+   "hidden": [
+    {
+     "who": "CAPCOM",
+     "text": "Asteroid 2015 KQ57. Officially: not hazardous.",
+     "src": "audio/capcom_940cc9295e.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "Oh, thank goodness.",
+     "src": "audio/intern_e6d2134c28.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "NASA judged it by brightness. Our model says it's about 200 meters of dark rock.",
+     "src": "audio/capcom_30f0145328.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "That's big enough to count!",
+     "src": "audio/intern_6079e7f19a.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "Candidate for a second look. Somebody tell NASA.",
+     "src": "audio/capcom_5a45b1fa76.mp3"
+    }
+   ],
+   "whatif": [
+    {
+     "who": "CAPCOM",
+     "text": "Hypothetically. If 2015 KQ57 hit us at 18 kilometers per second...",
+     "src": "audio/capcom_da4759cbf4.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "...about 330 megatons.",
+     "src": "audio/capcom_acbd2ca097.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "Is that a lot?",
+     "src": "audio/intern_98402b63ab.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "About 22 thousand Hiroshimas.",
+     "src": "audio/capcom_c063380660.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "AAAAAAH!",
+     "src": "audio/intern_8dfe930328.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "It is not going to hit. This is a what-if.",
+     "src": "audio/capcom_80413cfa53.mp3"
+    }
+   ]
+  },
+  "276033": {
+   "tier": "chill",
+   "report": [
+    {
+     "who": "CAPCOM",
+     "text": "Asteroid 2002 AJ129. Risk score 20.",
+     "src": "audio/capcom_9fe13335b2.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "Oh. Okay. Cool.",
+     "src": "audio/intern_31cb39676e.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "Mostly because its orbit is pointed the wrong way to meet ours.",
+     "src": "audio/capcom_d8865c88cb.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "Go back to your sandwich.",
+     "src": "audio/capcom_a1de0be705.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "Plot twist: NASA disagrees.",
+     "src": "audio/capcom_80a6aa7489.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "Who do we believe?!",
+     "src": "audio/intern_a762f6a5a8.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "NASA. This is one of our mistakes.",
+     "src": "audio/capcom_f611abed8e.mp3"
+    }
+   ],
+   "whatif": [
+    {
+     "who": "CAPCOM",
+     "text": "Hypothetically. If 2002 AJ129 hit us at 37 kilometers per second...",
+     "src": "audio/capcom_a70fdb3759.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "...about 35 thousand megatons.",
+     "src": "audio/capcom_21e453cfae.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "Is that a lot?",
+     "src": "audio/intern_98402b63ab.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "About 2.3 million Hiroshimas.",
+     "src": "audio/capcom_e2825ba07d.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "AAAAAAH!",
+     "src": "audio/intern_8dfe930328.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "It is not going to hit. This is a what-if.",
+     "src": "audio/capcom_80413cfa53.mp3"
+    }
+   ]
+  },
+  "399457": {
+   "tier": "sus",
+   "report": [
+    {
+     "who": "CAPCOM",
+     "text": "Asteroid 2002 PD43. Risk score 23.",
+     "src": "audio/capcom_1a861c8ca2.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "Hmm. Define 'risk'.",
+     "src": "audio/intern_0c3d3c4916.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "Mostly because its orbit is pointed the wrong way to meet ours.",
+     "src": "audio/capcom_d8865c88cb.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "Keep one eye on it.",
+     "src": "audio/capcom_797c159c68.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "Plot twist: NASA disagrees.",
+     "src": "audio/capcom_80a6aa7489.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "Who do we believe?!",
+     "src": "audio/intern_a762f6a5a8.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "NASA. This is one of our mistakes.",
+     "src": "audio/capcom_f611abed8e.mp3"
+    }
+   ],
+   "whatif": [
+    {
+     "who": "CAPCOM",
+     "text": "Hypothetically. If 2002 PD43 hit us at 41 kilometers per second...",
+     "src": "audio/capcom_91573e5588.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "...about 64 thousand megatons.",
+     "src": "audio/capcom_c494d92511.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "Is that a lot?",
+     "src": "audio/intern_98402b63ab.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "About 4.3 million Hiroshimas.",
+     "src": "audio/capcom_7cb96461ec.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "AAAAAAH!",
+     "src": "audio/intern_8dfe930328.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "It is not going to hit. This is a what-if.",
+     "src": "audio/capcom_80413cfa53.mp3"
+    }
+   ]
+  },
+  "468468": {
+   "tier": "chill",
+   "report": [
+    {
+     "who": "CAPCOM",
+     "text": "Asteroid 2004 KH17. Risk score 5.",
+     "src": "audio/capcom_405f4c1dd1.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "Boring. I love boring.",
+     "src": "audio/intern_9a84104535.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "Mostly because it crosses our plane far from where Earth orbits.",
+     "src": "audio/capcom_48b94e4b46.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "Nothing to see here.",
+     "src": "audio/capcom_c15d7d5a0e.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "Plot twist: NASA disagrees.",
+     "src": "audio/capcom_80a6aa7489.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "Who do we believe?!",
+     "src": "audio/intern_a762f6a5a8.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "NASA. This is one of our mistakes.",
+     "src": "audio/capcom_f611abed8e.mp3"
+    }
+   ],
+   "whatif": [
+    {
+     "who": "CAPCOM",
+     "text": "Hypothetically. If 2004 KH17 hit us at 17 kilometers per second...",
+     "src": "audio/capcom_61803e356d.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "...about 290 megatons.",
+     "src": "audio/capcom_9dd90e2057.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "Is that a lot?",
+     "src": "audio/intern_98402b63ab.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "About 19 thousand Hiroshimas.",
+     "src": "audio/capcom_386247a757.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "AAAAAAH!",
+     "src": "audio/intern_8dfe930328.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "It is not going to hit. This is a what-if.",
+     "src": "audio/capcom_80413cfa53.mp3"
+    }
+   ]
+  },
+  "2000 SL10": {
+   "tier": "chill",
+   "report": [
+    {
+     "who": "CAPCOM",
+     "text": "Asteroid 2000 SL10. Risk score 5.",
+     "src": "audio/capcom_50b7bbb782.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "Boring. I love boring.",
+     "src": "audio/intern_9a84104535.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "Mostly because the way its orbit is turned keeps it out of our way.",
+     "src": "audio/capcom_3884fbb4b7.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "Nothing to see here.",
+     "src": "audio/capcom_c15d7d5a0e.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "Plot twist: NASA disagrees.",
+     "src": "audio/capcom_80a6aa7489.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "Who do we believe?!",
+     "src": "audio/intern_a762f6a5a8.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "NASA. This is one of our mistakes.",
+     "src": "audio/capcom_f611abed8e.mp3"
+    }
+   ],
+   "whatif": [
+    {
+     "who": "CAPCOM",
+     "text": "Hypothetically. If 2000 SL10 hit us at 14 kilometers per second...",
+     "src": "audio/capcom_1a228b03cf.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "...about 51 megatons.",
+     "src": "audio/capcom_1d2e98fb34.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "Is that a lot?",
+     "src": "audio/intern_98402b63ab.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "About 3.4 thousand Hiroshimas.",
+     "src": "audio/capcom_2a33781759.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "AAAAAAH!",
+     "src": "audio/intern_8dfe930328.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "It is not going to hit. This is a what-if.",
+     "src": "audio/capcom_80413cfa53.mp3"
+    }
+   ]
+  },
+  "2000 WC1": {
+   "tier": "chill",
+   "report": [
+    {
+     "who": "CAPCOM",
+     "text": "Asteroid 2000 WC1. Risk score 0.",
+     "src": "audio/capcom_7d2da2dc0d.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "Phew.",
+     "src": "audio/intern_19d1eb6cdf.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "Mostly because its orbit doesn't stretch far enough to meet ours.",
+     "src": "audio/capcom_c0e229e059.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "Nothing to see here.",
+     "src": "audio/capcom_c15d7d5a0e.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "Plot twist: NASA disagrees.",
+     "src": "audio/capcom_80a6aa7489.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "Who do we believe?!",
+     "src": "audio/intern_a762f6a5a8.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "NASA. This is one of our mistakes.",
+     "src": "audio/capcom_f611abed8e.mp3"
+    }
+   ],
+   "whatif": [
+    {
+     "who": "CAPCOM",
+     "text": "Hypothetically. If 2000 WC1 hit us at 16 kilometers per second...",
+     "src": "audio/capcom_a716e65cad.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "...about 43 megatons.",
+     "src": "audio/capcom_18c63188f6.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "Is that a lot?",
+     "src": "audio/intern_98402b63ab.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "About 2.8 thousand Hiroshimas.",
+     "src": "audio/capcom_f29da968cd.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "AAAAAAH!",
+     "src": "audio/intern_8dfe930328.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "It is not going to hit. This is a what-if.",
+     "src": "audio/capcom_80413cfa53.mp3"
+    }
+   ]
+  },
+  "3361": {
+   "tier": "screwed",
+   "report": [
+    {
+     "who": "CAPCOM",
+     "text": "Asteroid Orpheus. Risk score 100.",
+     "src": "audio/capcom_da1d6e7f5d.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "Oh no. Oh no no no.",
+     "src": "audio/intern_6ee906099c.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "Mostly because it swings in to exactly where Earth lives.",
+     "src": "audio/capcom_670e05fd01.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "So we're screwed?",
+     "src": "audio/intern_27b9aa8060.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "Hazardous means worth watching. Not incoming.",
+     "src": "audio/capcom_9c34c1c9f4.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "So we're a little screwed.",
+     "src": "audio/intern_d8e29ca797.mp3"
+    }
+   ],
+   "whatif": [
+    {
+     "who": "CAPCOM",
+     "text": "Hypothetically. If Orpheus hit us at 14 kilometers per second...",
+     "src": "audio/capcom_8af180bd31.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "...about 640 megatons.",
+     "src": "audio/capcom_0b41b9c724.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "Is that a lot?",
+     "src": "audio/intern_98402b63ab.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "About 43 thousand Hiroshimas.",
+     "src": "audio/capcom_b6599d134b.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "AAAAAAH!",
+     "src": "audio/intern_8dfe930328.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "It is not going to hit. This is a what-if.",
+     "src": "audio/capcom_80413cfa53.mp3"
+    }
+   ]
+  },
+  "4179": {
+   "tier": "screwed",
+   "report": [
+    {
+     "who": "CAPCOM",
+     "text": "Asteroid Toutatis. Risk score 100.",
+     "src": "audio/capcom_c586655850.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "Is it too late to apply somewhere else?",
+     "src": "audio/intern_d00169b8cc.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "Mostly because it swings in to exactly where Earth lives.",
+     "src": "audio/capcom_670e05fd01.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "So we're screwed?",
+     "src": "audio/intern_27b9aa8060.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "Hazardous means worth watching. Not incoming.",
+     "src": "audio/capcom_9c34c1c9f4.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "So we're a little screwed.",
+     "src": "audio/intern_d8e29ca797.mp3"
+    }
+   ],
+   "whatif": [
+    {
+     "who": "CAPCOM",
+     "text": "Hypothetically. If Toutatis hit us at 15 kilometers per second...",
+     "src": "audio/capcom_d8a487fe24.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "...about 4.5 million megatons.",
+     "src": "audio/capcom_f7a1803dae.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "Is that a lot?",
+     "src": "audio/intern_98402b63ab.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "About 300 million Hiroshimas.",
+     "src": "audio/capcom_5761201aa7.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "AAAAAAH!",
+     "src": "audio/intern_8dfe930328.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "It is not going to hit. This is a what-if.",
+     "src": "audio/capcom_80413cfa53.mp3"
+    }
+   ]
+  },
+  "7753": {
+   "tier": "screwed",
+   "report": [
+    {
+     "who": "CAPCOM",
+     "text": "Asteroid 1988 XB. Risk score 100.",
+     "src": "audio/capcom_6d2717acdb.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "Okay. Okay. I'm calm. I'm calm.",
+     "src": "audio/intern_21c1e8dba6.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "Mostly because its closest point to the Sun sits right around Earth's distance.",
+     "src": "audio/capcom_87c0e9fb28.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "So we're screwed?",
+     "src": "audio/intern_27b9aa8060.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "Hazardous means worth watching. Not incoming.",
+     "src": "audio/capcom_9c34c1c9f4.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "So we're a little screwed.",
+     "src": "audio/intern_d8e29ca797.mp3"
+    }
+   ],
+   "whatif": [
+    {
+     "who": "CAPCOM",
+     "text": "Hypothetically. If 1988 XB hit us at 16 kilometers per second...",
+     "src": "audio/capcom_132f0a7846.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "...about 21 thousand megatons.",
+     "src": "audio/capcom_2ac8630cec.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "Is that a lot?",
+     "src": "audio/intern_98402b63ab.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "About 1.4 million Hiroshimas.",
+     "src": "audio/capcom_820b4402e2.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "AAAAAAH!",
+     "src": "audio/intern_8dfe930328.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "It is not going to hit. This is a what-if.",
+     "src": "audio/capcom_80413cfa53.mp3"
+    }
+   ]
+  },
+  "14827": {
+   "tier": "screwed",
+   "report": [
+    {
+     "who": "CAPCOM",
+     "text": "Asteroid Hypnos. Risk score 100.",
+     "src": "audio/capcom_befcff6adf.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "Okay. Okay. I'm calm. I'm calm.",
+     "src": "audio/intern_21c1e8dba6.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "Mostly because its closest point to the Sun sits right around Earth's distance.",
+     "src": "audio/capcom_87c0e9fb28.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "So we're screwed?",
+     "src": "audio/intern_27b9aa8060.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "Hazardous means worth watching. Not incoming.",
+     "src": "audio/capcom_9c34c1c9f4.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "So we're a little screwed.",
+     "src": "audio/intern_d8e29ca797.mp3"
+    }
+   ],
+   "whatif": [
+    {
+     "who": "CAPCOM",
+     "text": "Hypothetically. If Hypnos hit us at 18 kilometers per second...",
+     "src": "audio/capcom_c1ff676d3e.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "...about 29 thousand megatons.",
+     "src": "audio/capcom_c8a74d4129.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "Is that a lot?",
+     "src": "audio/intern_98402b63ab.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "About 1.9 million Hiroshimas.",
+     "src": "audio/capcom_b2886ef630.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "AAAAAAH!",
+     "src": "audio/intern_8dfe930328.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "It is not going to hit. This is a what-if.",
+     "src": "audio/capcom_80413cfa53.mp3"
+    }
+   ]
+  },
+  "140158": {
+   "tier": "screwed",
+   "report": [
+    {
+     "who": "CAPCOM",
+     "text": "Asteroid 2001 SX169. Risk score 100.",
+     "src": "audio/capcom_86f2f32bb0.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "Is it too late to apply somewhere else?",
+     "src": "audio/intern_d00169b8cc.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "Mostly because its closest point to the Sun sits right around Earth's distance.",
+     "src": "audio/capcom_87c0e9fb28.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "So we're screwed?",
+     "src": "audio/intern_27b9aa8060.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "Hazardous means worth watching. Not incoming.",
+     "src": "audio/capcom_9c34c1c9f4.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "So we're a little screwed.",
+     "src": "audio/intern_d8e29ca797.mp3"
+    }
+   ],
+   "whatif": [
+    {
+     "who": "CAPCOM",
+     "text": "Hypothetically. If 2001 SX169 hit us at 18 kilometers per second...",
+     "src": "audio/capcom_41d3d8e9eb.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "...about 7.2 thousand megatons.",
+     "src": "audio/capcom_5fc96f3e75.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "Is that a lot?",
+     "src": "audio/intern_98402b63ab.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "About 480 thousand Hiroshimas.",
+     "src": "audio/capcom_fd80ba3f0e.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "AAAAAAH!",
+     "src": "audio/intern_8dfe930328.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "It is not going to hit. This is a what-if.",
+     "src": "audio/capcom_80413cfa53.mp3"
+    }
+   ]
+  },
+  "154590": {
+   "tier": "screwed",
+   "report": [
+    {
+     "who": "CAPCOM",
+     "text": "Asteroid 2003 MA3. Risk score 100.",
+     "src": "audio/capcom_baa1f8b7a6.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "Oh no. Oh no no no.",
+     "src": "audio/intern_6ee906099c.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "Mostly because it swings in to exactly where Earth lives.",
+     "src": "audio/capcom_670e05fd01.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "So we're screwed?",
+     "src": "audio/intern_27b9aa8060.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "Hazardous means worth watching. Not incoming.",
+     "src": "audio/capcom_9c34c1c9f4.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "So we're a little screwed.",
+     "src": "audio/intern_d8e29ca797.mp3"
+    }
+   ],
+   "whatif": [
+    {
+     "who": "CAPCOM",
+     "text": "Hypothetically. If 2003 MA3 hit us at 16 kilometers per second...",
+     "src": "audio/capcom_ef4b58488a.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "...about 21 megatons.",
+     "src": "audio/capcom_7b358ffbae.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "Is that a lot?",
+     "src": "audio/intern_98402b63ab.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "About 1.4 thousand Hiroshimas.",
+     "src": "audio/capcom_b392d942b7.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "AAAAAAH!",
+     "src": "audio/intern_8dfe930328.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "It is not going to hit. This is a what-if.",
+     "src": "audio/capcom_80413cfa53.mp3"
+    }
+   ]
+  },
+  "155338": {
+   "tier": "screwed",
+   "report": [
+    {
+     "who": "CAPCOM",
+     "text": "Asteroid 2006 MZ1. Risk score 100.",
+     "src": "audio/capcom_485cf5e33a.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "Is it too late to apply somewhere else?",
+     "src": "audio/intern_d00169b8cc.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "Mostly because it swings in to exactly where Earth lives.",
+     "src": "audio/capcom_670e05fd01.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "So we're screwed?",
+     "src": "audio/intern_27b9aa8060.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "Hazardous means worth watching. Not incoming.",
+     "src": "audio/capcom_9c34c1c9f4.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "So we're a little screwed.",
+     "src": "audio/intern_d8e29ca797.mp3"
+    }
+   ],
+   "whatif": [
+    {
+     "who": "CAPCOM",
+     "text": "Hypothetically. If 2006 MZ1 hit us at 16 kilometers per second...",
+     "src": "audio/capcom_53069bd58c.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "...about 330 megatons.",
+     "src": "audio/capcom_acbd2ca097.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "Is that a lot?",
+     "src": "audio/intern_98402b63ab.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "About 22 thousand Hiroshimas.",
+     "src": "audio/capcom_c063380660.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "AAAAAAH!",
+     "src": "audio/intern_8dfe930328.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "It is not going to hit. This is a what-if.",
+     "src": "audio/capcom_80413cfa53.mp3"
+    }
+   ]
+  },
+  "162998": {
+   "tier": "screwed",
+   "report": [
+    {
+     "who": "CAPCOM",
+     "text": "Asteroid 2001 SK162. Risk score 100.",
+     "src": "audio/capcom_79a53b923a.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "Okay. Okay. I'm calm. I'm calm.",
+     "src": "audio/intern_21c1e8dba6.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "Mostly because its closest point to the Sun sits right around Earth's distance.",
+     "src": "audio/capcom_87c0e9fb28.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "So we're screwed?",
+     "src": "audio/intern_27b9aa8060.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "Hazardous means worth watching. Not incoming.",
+     "src": "audio/capcom_9c34c1c9f4.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "So we're a little screwed.",
+     "src": "audio/intern_d8e29ca797.mp3"
+    }
+   ],
+   "whatif": [
+    {
+     "who": "CAPCOM",
+     "text": "Hypothetically. If 2001 SK162 hit us at 15 kilometers per second...",
+     "src": "audio/capcom_c37667d541.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "...about 18 thousand megatons.",
+     "src": "audio/capcom_279b66be82.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "Is that a lot?",
+     "src": "audio/intern_98402b63ab.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "About 1.2 million Hiroshimas.",
+     "src": "audio/capcom_4215bd9177.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "AAAAAAH!",
+     "src": "audio/intern_8dfe930328.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "It is not going to hit. This is a what-if.",
+     "src": "audio/capcom_80413cfa53.mp3"
+    }
+   ]
+  },
+  "164211": {
+   "tier": "screwed",
+   "report": [
+    {
+     "who": "CAPCOM",
+     "text": "Asteroid 2004 JA27. Risk score 100.",
+     "src": "audio/capcom_02734aa9ea.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "Okay. Okay. I'm calm. I'm calm.",
+     "src": "audio/intern_21c1e8dba6.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "Mostly because its closest point to the Sun sits right around Earth's distance.",
+     "src": "audio/capcom_87c0e9fb28.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "So we're screwed?",
+     "src": "audio/intern_27b9aa8060.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "Hazardous means worth watching. Not incoming.",
+     "src": "audio/capcom_9c34c1c9f4.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "So we're a little screwed.",
+     "src": "audio/intern_d8e29ca797.mp3"
+    }
+   ],
+   "whatif": [
+    {
+     "who": "CAPCOM",
+     "text": "Hypothetically. If 2004 JA27 hit us at 13 kilometers per second...",
+     "src": "audio/capcom_5653c660e6.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "...about 1.5 thousand megatons.",
+     "src": "audio/capcom_1149dc554a.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "Is that a lot?",
+     "src": "audio/intern_98402b63ab.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "About 97 thousand Hiroshimas.",
+     "src": "audio/capcom_63b8c00b01.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "AAAAAAH!",
+     "src": "audio/intern_8dfe930328.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "It is not going to hit. This is a what-if.",
+     "src": "audio/capcom_80413cfa53.mp3"
+    }
+   ]
+  },
+  "306383": {
+   "tier": "screwed",
+   "report": [
+    {
+     "who": "CAPCOM",
+     "text": "Asteroid 1993 VD. Risk score 100.",
+     "src": "audio/capcom_4c3985f628.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "Oh no. Oh no no no.",
+     "src": "audio/intern_6ee906099c.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "Mostly because it swings in to exactly where Earth lives.",
+     "src": "audio/capcom_670e05fd01.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "So we're screwed?",
+     "src": "audio/intern_27b9aa8060.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "Hazardous means worth watching. Not incoming.",
+     "src": "audio/capcom_9c34c1c9f4.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "So we're a little screwed.",
+     "src": "audio/intern_d8e29ca797.mp3"
+    }
+   ],
+   "whatif": [
+    {
+     "who": "CAPCOM",
+     "text": "Hypothetically. If 1993 VD hit us at 20 kilometers per second...",
+     "src": "audio/capcom_ac25d30862.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "...about 200 megatons.",
+     "src": "audio/capcom_6d03b9ef97.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "Is that a lot?",
+     "src": "audio/intern_98402b63ab.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "About 14 thousand Hiroshimas.",
+     "src": "audio/capcom_353aa7dfac.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "AAAAAAH!",
+     "src": "audio/intern_8dfe930328.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "It is not going to hit. This is a what-if.",
+     "src": "audio/capcom_80413cfa53.mp3"
+    }
+   ]
+  },
+  "360191": {
+   "tier": "screwed",
+   "report": [
+    {
+     "who": "CAPCOM",
+     "text": "Asteroid 1988 TA. Risk score 100.",
+     "src": "audio/capcom_0dbcf18599.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "Okay. Okay. I'm calm. I'm calm.",
+     "src": "audio/intern_21c1e8dba6.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "Mostly because its closest point to the Sun sits right around Earth's distance.",
+     "src": "audio/capcom_87c0e9fb28.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "So we're screwed?",
+     "src": "audio/intern_27b9aa8060.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "Hazardous means worth watching. Not incoming.",
+     "src": "audio/capcom_9c34c1c9f4.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "So we're a little screwed.",
+     "src": "audio/intern_d8e29ca797.mp3"
+    }
+   ],
+   "whatif": [
+    {
+     "who": "CAPCOM",
+     "text": "Hypothetically. If 1988 TA hit us at 17 kilometers per second...",
+     "src": "audio/capcom_c9119581cd.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "...about 2.3 thousand megatons.",
+     "src": "audio/capcom_a6fd71a3b3.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "Is that a lot?",
+     "src": "audio/intern_98402b63ab.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "About 150 thousand Hiroshimas.",
+     "src": "audio/capcom_f8dfedd3af.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "AAAAAAH!",
+     "src": "audio/intern_8dfe930328.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "It is not going to hit. This is a what-if.",
+     "src": "audio/capcom_80413cfa53.mp3"
+    }
+   ]
+  },
+  "406213": {
+   "tier": "screwed",
+   "report": [
+    {
+     "who": "CAPCOM",
+     "text": "Asteroid 2007 AB2. Risk score 100.",
+     "src": "audio/capcom_4bd67ff752.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "Is it too late to apply somewhere else?",
+     "src": "audio/intern_d00169b8cc.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "Mostly because its closest point to the Sun sits right around Earth's distance.",
+     "src": "audio/capcom_87c0e9fb28.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "So we're screwed?",
+     "src": "audio/intern_27b9aa8060.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "Hazardous means worth watching. Not incoming.",
+     "src": "audio/capcom_9c34c1c9f4.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "So we're a little screwed.",
+     "src": "audio/intern_d8e29ca797.mp3"
+    }
+   ],
+   "whatif": [
+    {
+     "who": "CAPCOM",
+     "text": "Hypothetically. If 2007 AB2 hit us at 16 kilometers per second...",
+     "src": "audio/capcom_b544ab1113.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "...about 790 megatons.",
+     "src": "audio/capcom_60fd0097d8.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "Is that a lot?",
+     "src": "audio/intern_98402b63ab.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "About 53 thousand Hiroshimas.",
+     "src": "audio/capcom_44b91fc3ab.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "AAAAAAH!",
+     "src": "audio/intern_8dfe930328.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "It is not going to hit. This is a what-if.",
+     "src": "audio/capcom_80413cfa53.mp3"
+    }
+   ]
+  },
+  "459683": {
+   "tier": "screwed",
+   "report": [
+    {
+     "who": "CAPCOM",
+     "text": "Asteroid 2013 MY5. Risk score 100.",
+     "src": "audio/capcom_4a9c069658.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "Is it too late to apply somewhere else?",
+     "src": "audio/intern_d00169b8cc.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "Mostly because its closest point to the Sun sits right around Earth's distance.",
+     "src": "audio/capcom_87c0e9fb28.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "So we're screwed?",
+     "src": "audio/intern_27b9aa8060.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "Hazardous means worth watching. Not incoming.",
+     "src": "audio/capcom_9c34c1c9f4.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "So we're a little screwed.",
+     "src": "audio/intern_d8e29ca797.mp3"
+    }
+   ],
+   "whatif": [
+    {
+     "who": "CAPCOM",
+     "text": "Hypothetically. If 2013 MY5 hit us at 15 kilometers per second...",
+     "src": "audio/capcom_de8b66dc71.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "...about 530 megatons.",
+     "src": "audio/capcom_6bb5dc2a1e.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "Is that a lot?",
+     "src": "audio/intern_98402b63ab.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "About 35 thousand Hiroshimas.",
+     "src": "audio/capcom_a5e25ecc8c.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "AAAAAAH!",
+     "src": "audio/intern_8dfe930328.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "It is not going to hit. This is a what-if.",
+     "src": "audio/capcom_80413cfa53.mp3"
+    }
+   ]
+  },
+  "496817": {
+   "tier": "screwed",
+   "report": [
+    {
+     "who": "CAPCOM",
+     "text": "Asteroid 1989 VB. Risk score 100.",
+     "src": "audio/capcom_1964ef0370.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "Oh no. Oh no no no.",
+     "src": "audio/intern_6ee906099c.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "Mostly because its closest point to the Sun sits right around Earth's distance.",
+     "src": "audio/capcom_87c0e9fb28.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "So we're screwed?",
+     "src": "audio/intern_27b9aa8060.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "Hazardous means worth watching. Not incoming.",
+     "src": "audio/capcom_9c34c1c9f4.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "So we're a little screwed.",
+     "src": "audio/intern_d8e29ca797.mp3"
+    }
+   ],
+   "whatif": [
+    {
+     "who": "CAPCOM",
+     "text": "Hypothetically. If 1989 VB hit us at 13 kilometers per second...",
+     "src": "audio/capcom_03b734466c.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "...about 1.4 thousand megatons.",
+     "src": "audio/capcom_59497e2864.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "Is that a lot?",
+     "src": "audio/intern_98402b63ab.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "About 96 thousand Hiroshimas.",
+     "src": "audio/capcom_63197ba313.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "AAAAAAH!",
+     "src": "audio/intern_8dfe930328.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "It is not going to hit. This is a what-if.",
+     "src": "audio/capcom_80413cfa53.mp3"
+    }
+   ]
+  },
+  "523606": {
+   "tier": "screwed",
+   "report": [
+    {
+     "who": "CAPCOM",
+     "text": "Asteroid 2005 CJ. Risk score 100.",
+     "src": "audio/capcom_68828e83b2.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "Is it too late to apply somewhere else?",
+     "src": "audio/intern_d00169b8cc.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "Mostly because its closest point to the Sun sits right around Earth's distance.",
+     "src": "audio/capcom_87c0e9fb28.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "So we're screwed?",
+     "src": "audio/intern_27b9aa8060.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "Hazardous means worth watching. Not incoming.",
+     "src": "audio/capcom_9c34c1c9f4.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "So we're a little screwed.",
+     "src": "audio/intern_d8e29ca797.mp3"
+    }
+   ],
+   "whatif": [
+    {
+     "who": "CAPCOM",
+     "text": "Hypothetically. If 2005 CJ hit us at 16 kilometers per second...",
+     "src": "audio/capcom_6bcc1c4a5f.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "...about 660 megatons.",
+     "src": "audio/capcom_6d38e2d0ee.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "Is that a lot?",
+     "src": "audio/intern_98402b63ab.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "About 44 thousand Hiroshimas.",
+     "src": "audio/capcom_fa020dd690.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "AAAAAAH!",
+     "src": "audio/intern_8dfe930328.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "It is not going to hit. This is a what-if.",
+     "src": "audio/capcom_80413cfa53.mp3"
+    }
+   ]
+  },
+  "612786": {
+   "tier": "screwed",
+   "report": [
+    {
+     "who": "CAPCOM",
+     "text": "Asteroid 2004 PJ2. Risk score 100.",
+     "src": "audio/capcom_4972a3e246.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "Is it too late to apply somewhere else?",
+     "src": "audio/intern_d00169b8cc.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "Mostly because it swings in to exactly where Earth lives.",
+     "src": "audio/capcom_670e05fd01.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "So we're screwed?",
+     "src": "audio/intern_27b9aa8060.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "Hazardous means worth watching. Not incoming.",
+     "src": "audio/capcom_9c34c1c9f4.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "So we're a little screwed.",
+     "src": "audio/intern_d8e29ca797.mp3"
+    }
+   ],
+   "whatif": [
+    {
+     "who": "CAPCOM",
+     "text": "Hypothetically. If 2004 PJ2 hit us at 13 kilometers per second...",
+     "src": "audio/capcom_190583d7b9.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "...about 160 megatons.",
+     "src": "audio/capcom_dcfee83cf4.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "Is that a lot?",
+     "src": "audio/intern_98402b63ab.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "About 11 thousand Hiroshimas.",
+     "src": "audio/capcom_eb712c9d93.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "AAAAAAH!",
+     "src": "audio/intern_8dfe930328.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "It is not going to hit. This is a what-if.",
+     "src": "audio/capcom_80413cfa53.mp3"
+    }
+   ]
+  },
+  "875163": {
+   "tier": "screwed",
+   "report": [
+    {
+     "who": "CAPCOM",
+     "text": "Asteroid 1998 SH2. Risk score 100.",
+     "src": "audio/capcom_3cddc06ea4.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "Is it too late to apply somewhere else?",
+     "src": "audio/intern_d00169b8cc.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "Mostly because it swings in to exactly where Earth lives.",
+     "src": "audio/capcom_670e05fd01.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "So we're screwed?",
+     "src": "audio/intern_27b9aa8060.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "Hazardous means worth watching. Not incoming.",
+     "src": "audio/capcom_9c34c1c9f4.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "So we're a little screwed.",
+     "src": "audio/intern_d8e29ca797.mp3"
+    }
+   ],
+   "whatif": [
+    {
+     "who": "CAPCOM",
+     "text": "Hypothetically. If 1998 SH2 hit us at 21 kilometers per second...",
+     "src": "audio/capcom_9e10eb71a5.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "...about 3.1 thousand megatons.",
+     "src": "audio/capcom_f7164251cf.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "Is that a lot?",
+     "src": "audio/intern_98402b63ab.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "About 210 thousand Hiroshimas.",
+     "src": "audio/capcom_05c12de8f2.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "AAAAAAH!",
+     "src": "audio/intern_8dfe930328.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "It is not going to hit. This is a what-if.",
+     "src": "audio/capcom_80413cfa53.mp3"
+    }
+   ]
+  },
+  "1998 WB2": {
+   "tier": "screwed",
+   "report": [
+    {
+     "who": "CAPCOM",
+     "text": "Asteroid 1998 WB2. Risk score 100.",
+     "src": "audio/capcom_7270b43bda.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "Okay. Okay. I'm calm. I'm calm.",
+     "src": "audio/intern_21c1e8dba6.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "Mostly because it swings in to exactly where Earth lives.",
+     "src": "audio/capcom_670e05fd01.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "So we're screwed?",
+     "src": "audio/intern_27b9aa8060.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "Hazardous means worth watching. Not incoming.",
+     "src": "audio/capcom_9c34c1c9f4.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "So we're a little screwed.",
+     "src": "audio/intern_d8e29ca797.mp3"
+    }
+   ],
+   "whatif": [
+    {
+     "who": "CAPCOM",
+     "text": "Hypothetically. If 1998 WB2 hit us at 18 kilometers per second...",
+     "src": "audio/capcom_b62f87484d.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "...about 130 megatons.",
+     "src": "audio/capcom_178621fdf0.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "Is that a lot?",
+     "src": "audio/intern_98402b63ab.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "About 8.9 thousand Hiroshimas.",
+     "src": "audio/capcom_e9b46b5195.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "AAAAAAH!",
+     "src": "audio/intern_8dfe930328.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "It is not going to hit. This is a what-if.",
+     "src": "audio/capcom_80413cfa53.mp3"
+    }
+   ]
+  },
+  "2002 EU11": {
+   "tier": "screwed",
+   "report": [
+    {
+     "who": "CAPCOM",
+     "text": "Asteroid 2002 EU11. Risk score 100.",
+     "src": "audio/capcom_a785405758.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "Oh no. Oh no no no.",
+     "src": "audio/intern_6ee906099c.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "Mostly because it swings in to exactly where Earth lives.",
+     "src": "audio/capcom_670e05fd01.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "So we're screwed?",
+     "src": "audio/intern_27b9aa8060.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "Hazardous means worth watching. Not incoming.",
+     "src": "audio/capcom_9c34c1c9f4.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "So we're a little screwed.",
+     "src": "audio/intern_d8e29ca797.mp3"
+    }
+   ],
+   "whatif": [
+    {
+     "who": "CAPCOM",
+     "text": "Hypothetically. If 2002 EU11 hit us at 23 kilometers per second...",
+     "src": "audio/capcom_81b2589212.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "...about 520 megatons.",
+     "src": "audio/capcom_f929ba64ab.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "Is that a lot?",
+     "src": "audio/intern_98402b63ab.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "About 34 thousand Hiroshimas.",
+     "src": "audio/capcom_01e3e9ea36.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "AAAAAAH!",
+     "src": "audio/intern_8dfe930328.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "It is not going to hit. This is a what-if.",
+     "src": "audio/capcom_80413cfa53.mp3"
+    }
+   ]
+  },
+  "2006 UO": {
+   "tier": "screwed",
+   "report": [
+    {
+     "who": "CAPCOM",
+     "text": "Asteroid 2006 UO. Risk score 100.",
+     "src": "audio/capcom_7122f428dc.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "Oh no. Oh no no no.",
+     "src": "audio/intern_6ee906099c.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "Mostly because its closest point to the Sun sits right around Earth's distance.",
+     "src": "audio/capcom_87c0e9fb28.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "So we're screwed?",
+     "src": "audio/intern_27b9aa8060.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "Hazardous means worth watching. Not incoming.",
+     "src": "audio/capcom_9c34c1c9f4.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "So we're a little screwed.",
+     "src": "audio/intern_d8e29ca797.mp3"
+    }
+   ],
+   "whatif": [
+    {
+     "who": "CAPCOM",
+     "text": "Hypothetically. If 2006 UO hit us at 14 kilometers per second...",
+     "src": "audio/capcom_6dc292b07f.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "...about 530 megatons.",
+     "src": "audio/capcom_6bb5dc2a1e.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "Is that a lot?",
+     "src": "audio/intern_98402b63ab.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "About 35 thousand Hiroshimas.",
+     "src": "audio/capcom_a5e25ecc8c.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "AAAAAAH!",
+     "src": "audio/intern_8dfe930328.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "It is not going to hit. This is a what-if.",
+     "src": "audio/capcom_80413cfa53.mp3"
+    }
+   ]
+  },
+  "2008 XA2": {
+   "tier": "screwed",
+   "report": [
+    {
+     "who": "CAPCOM",
+     "text": "Asteroid 2008 XA2. Risk score 100.",
+     "src": "audio/capcom_bda0e2489f.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "Okay. Okay. I'm calm. I'm calm.",
+     "src": "audio/intern_21c1e8dba6.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "Mostly because its closest point to the Sun sits right around Earth's distance.",
+     "src": "audio/capcom_87c0e9fb28.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "So we're screwed?",
+     "src": "audio/intern_27b9aa8060.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "Hazardous means worth watching. Not incoming.",
+     "src": "audio/capcom_9c34c1c9f4.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "So we're a little screwed.",
+     "src": "audio/intern_d8e29ca797.mp3"
+    }
+   ],
+   "whatif": [
+    {
+     "who": "CAPCOM",
+     "text": "Hypothetically. If 2008 XA2 hit us at 15 kilometers per second...",
+     "src": "audio/capcom_37d64d3302.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "...about 190 megatons.",
+     "src": "audio/capcom_3cd9e1b2ea.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "Is that a lot?",
+     "src": "audio/intern_98402b63ab.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "About 13 thousand Hiroshimas.",
+     "src": "audio/capcom_691bb39716.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "AAAAAAH!",
+     "src": "audio/intern_8dfe930328.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "It is not going to hit. This is a what-if.",
+     "src": "audio/capcom_80413cfa53.mp3"
+    }
+   ]
+  },
+  "2010 VT11": {
+   "tier": "screwed",
+   "report": [
+    {
+     "who": "CAPCOM",
+     "text": "Asteroid 2010 VT11. Risk score 100.",
+     "src": "audio/capcom_956c3236a7.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "Okay. Okay. I'm calm. I'm calm.",
+     "src": "audio/intern_21c1e8dba6.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "Mostly because it swings in to exactly where Earth lives.",
+     "src": "audio/capcom_670e05fd01.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "So we're screwed?",
+     "src": "audio/intern_27b9aa8060.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "Hazardous means worth watching. Not incoming.",
+     "src": "audio/capcom_9c34c1c9f4.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "So we're a little screwed.",
+     "src": "audio/intern_d8e29ca797.mp3"
+    }
+   ],
+   "whatif": [
+    {
+     "who": "CAPCOM",
+     "text": "Hypothetically. If 2010 VT11 hit us at 21 kilometers per second...",
+     "src": "audio/capcom_1afa4817cd.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "...about 190 megatons.",
+     "src": "audio/capcom_3cd9e1b2ea.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "Is that a lot?",
+     "src": "audio/intern_98402b63ab.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "About 13 thousand Hiroshimas.",
+     "src": "audio/capcom_691bb39716.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "AAAAAAH!",
+     "src": "audio/intern_8dfe930328.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "It is not going to hit. This is a what-if.",
+     "src": "audio/capcom_80413cfa53.mp3"
+    }
+   ]
+  },
+  "2011 LJ19": {
+   "tier": "screwed",
+   "report": [
+    {
+     "who": "CAPCOM",
+     "text": "Asteroid 2011 LJ19. Risk score 100.",
+     "src": "audio/capcom_333a09d75b.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "Okay. Okay. I'm calm. I'm calm.",
+     "src": "audio/intern_21c1e8dba6.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "Mostly because its closest point to the Sun sits right around Earth's distance.",
+     "src": "audio/capcom_87c0e9fb28.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "So we're screwed?",
+     "src": "audio/intern_27b9aa8060.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "Hazardous means worth watching. Not incoming.",
+     "src": "audio/capcom_9c34c1c9f4.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "So we're a little screwed.",
+     "src": "audio/intern_d8e29ca797.mp3"
+    }
+   ],
+   "whatif": [
+    {
+     "who": "CAPCOM",
+     "text": "Hypothetically. If 2011 LJ19 hit us at 15 kilometers per second...",
+     "src": "audio/capcom_202d3d49ce.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "...about 900 megatons.",
+     "src": "audio/capcom_e9ce923fb5.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "Is that a lot?",
+     "src": "audio/intern_98402b63ab.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "About 60 thousand Hiroshimas.",
+     "src": "audio/capcom_7422547ffe.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "AAAAAAH!",
+     "src": "audio/intern_8dfe930328.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "It is not going to hit. This is a what-if.",
+     "src": "audio/capcom_80413cfa53.mp3"
+    }
+   ]
+  },
+  "2014 NK52": {
+   "tier": "screwed",
+   "report": [
+    {
+     "who": "CAPCOM",
+     "text": "Asteroid 2014 NK52. Risk score 100.",
+     "src": "audio/capcom_52e5f46e70.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "Oh no. Oh no no no.",
+     "src": "audio/intern_6ee906099c.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "Mostly because its closest point to the Sun sits right around Earth's distance.",
+     "src": "audio/capcom_87c0e9fb28.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "So we're screwed?",
+     "src": "audio/intern_27b9aa8060.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "Hazardous means worth watching. Not incoming.",
+     "src": "audio/capcom_9c34c1c9f4.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "So we're a little screwed.",
+     "src": "audio/intern_d8e29ca797.mp3"
+    }
+   ],
+   "whatif": [
+    {
+     "who": "CAPCOM",
+     "text": "Hypothetically. If 2014 NK52 hit us at 30 kilometers per second...",
+     "src": "audio/capcom_e999c3d1d8.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "...about 14 thousand megatons.",
+     "src": "audio/capcom_e5dbb5ab86.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "Is that a lot?",
+     "src": "audio/intern_98402b63ab.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "About 950 thousand Hiroshimas.",
+     "src": "audio/capcom_2f810d46b3.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "AAAAAAH!",
+     "src": "audio/intern_8dfe930328.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "It is not going to hit. This is a what-if.",
+     "src": "audio/capcom_80413cfa53.mp3"
+    }
+   ]
+  },
+  "2022 YB4": {
+   "tier": "screwed",
+   "report": [
+    {
+     "who": "CAPCOM",
+     "text": "Asteroid 2022 YB4. Risk score 100.",
+     "src": "audio/capcom_6c4c7d024b.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "Okay. Okay. I'm calm. I'm calm.",
+     "src": "audio/intern_21c1e8dba6.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "Mostly because it swings in to exactly where Earth lives.",
+     "src": "audio/capcom_670e05fd01.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "So we're screwed?",
+     "src": "audio/intern_27b9aa8060.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "Hazardous means worth watching. Not incoming.",
+     "src": "audio/capcom_9c34c1c9f4.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "So we're a little screwed.",
+     "src": "audio/intern_d8e29ca797.mp3"
+    }
+   ],
+   "whatif": [
+    {
+     "who": "CAPCOM",
+     "text": "Hypothetically. If 2022 YB4 hit us at 14 kilometers per second...",
+     "src": "audio/capcom_5e00e7363b.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "...about 130 megatons.",
+     "src": "audio/capcom_178621fdf0.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "Is that a lot?",
+     "src": "audio/intern_98402b63ab.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "About 8.7 thousand Hiroshimas.",
+     "src": "audio/capcom_30374f3be3.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "AAAAAAH!",
+     "src": "audio/intern_8dfe930328.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "It is not going to hit. This is a what-if.",
+     "src": "audio/capcom_80413cfa53.mp3"
+    }
+   ]
+  },
+  "2025 RK1": {
+   "tier": "screwed",
+   "report": [
+    {
+     "who": "CAPCOM",
+     "text": "Asteroid 2025 RK1. Risk score 100.",
+     "src": "audio/capcom_855a3cb0fa.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "Is it too late to apply somewhere else?",
+     "src": "audio/intern_d00169b8cc.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "Mostly because its closest point to the Sun sits right around Earth's distance.",
+     "src": "audio/capcom_87c0e9fb28.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "So we're screwed?",
+     "src": "audio/intern_27b9aa8060.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "Hazardous means worth watching. Not incoming.",
+     "src": "audio/capcom_9c34c1c9f4.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "So we're a little screwed.",
+     "src": "audio/intern_d8e29ca797.mp3"
+    }
+   ],
+   "whatif": [
+    {
+     "who": "CAPCOM",
+     "text": "Hypothetically. If 2025 RK1 hit us at 16 kilometers per second...",
+     "src": "audio/capcom_64c1def09a.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "...about 760 megatons.",
+     "src": "audio/capcom_990d02da68.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "Is that a lot?",
+     "src": "audio/intern_98402b63ab.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "About 51 thousand Hiroshimas.",
+     "src": "audio/capcom_ee18181a45.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "AAAAAAH!",
+     "src": "audio/intern_8dfe930328.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "It is not going to hit. This is a what-if.",
+     "src": "audio/capcom_80413cfa53.mp3"
+    }
+   ]
+  },
+  "242708": {
+   "tier": "screwed",
+   "report": [
+    {
+     "who": "CAPCOM",
+     "text": "Asteroid 2005 UK1. Risk score 100.",
+     "src": "audio/capcom_571610d2e5.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "Okay. Okay. I'm calm. I'm calm.",
+     "src": "audio/intern_21c1e8dba6.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "Mostly because it orbits almost flat, in the same plane as Earth.",
+     "src": "audio/capcom_63c74b3c3b.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "So we're screwed?",
+     "src": "audio/intern_27b9aa8060.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "Hazardous means worth watching. Not incoming.",
+     "src": "audio/capcom_9c34c1c9f4.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "So we're a little screwed.",
+     "src": "audio/intern_d8e29ca797.mp3"
+    }
+   ],
+   "whatif": [
+    {
+     "who": "CAPCOM",
+     "text": "Hypothetically. If 2005 UK1 hit us at 22 kilometers per second...",
+     "src": "audio/capcom_4c2cd6b148.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "...about 70 thousand megatons.",
+     "src": "audio/capcom_ca6bf6c882.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "Is that a lot?",
+     "src": "audio/intern_98402b63ab.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "About 4.7 million Hiroshimas.",
+     "src": "audio/capcom_0f427c8798.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "AAAAAAH!",
+     "src": "audio/intern_8dfe930328.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "It is not going to hit. This is a what-if.",
+     "src": "audio/capcom_80413cfa53.mp3"
+    }
+   ]
+  },
+  "414990": {
+   "tier": "screwed",
+   "report": [
+    {
+     "who": "CAPCOM",
+     "text": "Asteroid 2011 EM51. Risk score 100.",
+     "src": "audio/capcom_addc3f102c.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "Okay. Okay. I'm calm. I'm calm.",
+     "src": "audio/intern_21c1e8dba6.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "Mostly because its closest point to the Sun sits right around Earth's distance.",
+     "src": "audio/capcom_87c0e9fb28.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "So we're screwed?",
+     "src": "audio/intern_27b9aa8060.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "Hazardous means worth watching. Not incoming.",
+     "src": "audio/capcom_9c34c1c9f4.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "So we're a little screwed.",
+     "src": "audio/intern_d8e29ca797.mp3"
+    }
+   ],
+   "whatif": [
+    {
+     "who": "CAPCOM",
+     "text": "Hypothetically. If 2011 EM51 hit us at 14 kilometers per second...",
+     "src": "audio/capcom_3b0c1b6f44.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "...about 40 megatons.",
+     "src": "audio/capcom_66ba9ba016.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "Is that a lot?",
+     "src": "audio/intern_98402b63ab.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "About 2.7 thousand Hiroshimas.",
+     "src": "audio/capcom_f1ae4ab0b2.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "AAAAAAH!",
+     "src": "audio/intern_8dfe930328.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "It is not going to hit. This is a what-if.",
+     "src": "audio/capcom_80413cfa53.mp3"
+    }
+   ]
+  },
+  "490354": {
+   "tier": "screwed",
+   "report": [
+    {
+     "who": "CAPCOM",
+     "text": "Asteroid 2009 FF19. Risk score 100.",
+     "src": "audio/capcom_1605cc3c67.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "Is it too late to apply somewhere else?",
+     "src": "audio/intern_d00169b8cc.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "Mostly because it swings in to exactly where Earth lives.",
+     "src": "audio/capcom_670e05fd01.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "So we're screwed?",
+     "src": "audio/intern_27b9aa8060.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "Hazardous means worth watching. Not incoming.",
+     "src": "audio/capcom_9c34c1c9f4.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "So we're a little screwed.",
+     "src": "audio/intern_d8e29ca797.mp3"
+    }
+   ],
+   "whatif": [
+    {
+     "who": "CAPCOM",
+     "text": "Hypothetically. If 2009 FF19 hit us at 15 kilometers per second...",
+     "src": "audio/capcom_b12a58ff4d.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "...about 94 megatons.",
+     "src": "audio/capcom_324f29d47a.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "Is that a lot?",
+     "src": "audio/intern_98402b63ab.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "About 6.3 thousand Hiroshimas.",
+     "src": "audio/capcom_d7c6f475b2.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "AAAAAAH!",
+     "src": "audio/intern_8dfe930328.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "It is not going to hit. This is a what-if.",
+     "src": "audio/capcom_80413cfa53.mp3"
+    }
+   ]
+  },
+  "509821": {
+   "tier": "screwed",
+   "report": [
+    {
+     "who": "CAPCOM",
+     "text": "Asteroid 2008 WQ63. Risk score 100.",
+     "src": "audio/capcom_3d31c3e5b1.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "Okay. Okay. I'm calm. I'm calm.",
+     "src": "audio/intern_21c1e8dba6.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "Mostly because it swings in to exactly where Earth lives.",
+     "src": "audio/capcom_670e05fd01.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "So we're screwed?",
+     "src": "audio/intern_27b9aa8060.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "Hazardous means worth watching. Not incoming.",
+     "src": "audio/capcom_9c34c1c9f4.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "So we're a little screwed.",
+     "src": "audio/intern_d8e29ca797.mp3"
+    }
+   ],
+   "whatif": [
+    {
+     "who": "CAPCOM",
+     "text": "Hypothetically. If 2008 WQ63 hit us at 20 kilometers per second...",
+     "src": "audio/capcom_ab8758cff1.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "...about 1.3 thousand megatons.",
+     "src": "audio/capcom_f3ebd0df14.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "Is that a lot?",
+     "src": "audio/intern_98402b63ab.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "About 85 thousand Hiroshimas.",
+     "src": "audio/capcom_e7f1524d25.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "AAAAAAH!",
+     "src": "audio/intern_8dfe930328.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "It is not going to hit. This is a what-if.",
+     "src": "audio/capcom_80413cfa53.mp3"
+    }
+   ]
+  },
+  "538212": {
+   "tier": "screwed",
+   "report": [
+    {
+     "who": "CAPCOM",
+     "text": "Asteroid 2016 CA136. Risk score 100.",
+     "src": "audio/capcom_0a93b851fb.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "Is it too late to apply somewhere else?",
+     "src": "audio/intern_d00169b8cc.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "Mostly because its closest point to the Sun sits right around Earth's distance.",
+     "src": "audio/capcom_87c0e9fb28.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "So we're screwed?",
+     "src": "audio/intern_27b9aa8060.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "Hazardous means worth watching. Not incoming.",
+     "src": "audio/capcom_9c34c1c9f4.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "So we're a little screwed.",
+     "src": "audio/intern_d8e29ca797.mp3"
+    }
+   ],
+   "whatif": [
+    {
+     "who": "CAPCOM",
+     "text": "Hypothetically. If 2016 CA136 hit us at 27 kilometers per second...",
+     "src": "audio/capcom_924a0157e4.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "...about 26 thousand megatons.",
+     "src": "audio/capcom_42f46fdbb5.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "Is that a lot?",
+     "src": "audio/intern_98402b63ab.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "About 1.8 million Hiroshimas.",
+     "src": "audio/capcom_bec5184e40.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "AAAAAAH!",
+     "src": "audio/intern_8dfe930328.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "It is not going to hit. This is a what-if.",
+     "src": "audio/capcom_80413cfa53.mp3"
+    }
+   ]
+  },
+  "879537": {
+   "tier": "screwed",
+   "report": [
+    {
+     "who": "CAPCOM",
+     "text": "Asteroid 2014 AF51. Risk score 100.",
+     "src": "audio/capcom_426afea824.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "Oh no. Oh no no no.",
+     "src": "audio/intern_6ee906099c.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "Mostly because its closest point to the Sun sits right around Earth's distance.",
+     "src": "audio/capcom_87c0e9fb28.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "So we're screwed?",
+     "src": "audio/intern_27b9aa8060.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "Hazardous means worth watching. Not incoming.",
+     "src": "audio/capcom_9c34c1c9f4.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "So we're a little screwed.",
+     "src": "audio/intern_d8e29ca797.mp3"
+    }
+   ],
+   "whatif": [
+    {
+     "who": "CAPCOM",
+     "text": "Hypothetically. If 2014 AF51 hit us at 13 kilometers per second...",
+     "src": "audio/capcom_482af604ec.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "...about 870 megatons.",
+     "src": "audio/capcom_e55434bd30.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "Is that a lot?",
+     "src": "audio/intern_98402b63ab.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "About 58 thousand Hiroshimas.",
+     "src": "audio/capcom_e5e3bcce7d.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "AAAAAAH!",
+     "src": "audio/intern_8dfe930328.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "It is not going to hit. This is a what-if.",
+     "src": "audio/capcom_80413cfa53.mp3"
+    }
+   ]
+  },
+  "2002 AC9": {
+   "tier": "screwed",
+   "report": [
+    {
+     "who": "CAPCOM",
+     "text": "Asteroid 2002 AC9. Risk score 100.",
+     "src": "audio/capcom_2c72e9e7ee.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "Okay. Okay. I'm calm. I'm calm.",
+     "src": "audio/intern_21c1e8dba6.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "Mostly because it orbits almost flat, in the same plane as Earth.",
+     "src": "audio/capcom_63c74b3c3b.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "So we're screwed?",
+     "src": "audio/intern_27b9aa8060.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "Hazardous means worth watching. Not incoming.",
+     "src": "audio/capcom_9c34c1c9f4.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "So we're a little screwed.",
+     "src": "audio/intern_d8e29ca797.mp3"
+    }
+   ],
+   "whatif": [
+    {
+     "who": "CAPCOM",
+     "text": "Hypothetically. If 2002 AC9 hit us at 18 kilometers per second...",
+     "src": "audio/capcom_a30bb850cc.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "...about 280 megatons.",
+     "src": "audio/capcom_fb9dc6ac5f.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "Is that a lot?",
+     "src": "audio/intern_98402b63ab.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "About 19 thousand Hiroshimas.",
+     "src": "audio/capcom_386247a757.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "AAAAAAH!",
+     "src": "audio/intern_8dfe930328.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "It is not going to hit. This is a what-if.",
+     "src": "audio/capcom_80413cfa53.mp3"
+    }
+   ]
+  },
+  "2008 RM98": {
+   "tier": "screwed",
+   "report": [
+    {
+     "who": "CAPCOM",
+     "text": "Asteroid 2008 RM98. Risk score 100.",
+     "src": "audio/capcom_4273cdf463.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "Okay. Okay. I'm calm. I'm calm.",
+     "src": "audio/intern_21c1e8dba6.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "Mostly because it swings in to exactly where Earth lives.",
+     "src": "audio/capcom_670e05fd01.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "So we're screwed?",
+     "src": "audio/intern_27b9aa8060.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "Hazardous means worth watching. Not incoming.",
+     "src": "audio/capcom_9c34c1c9f4.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "So we're a little screwed.",
+     "src": "audio/intern_d8e29ca797.mp3"
+    }
+   ],
+   "whatif": [
+    {
+     "who": "CAPCOM",
+     "text": "Hypothetically. If 2008 RM98 hit us at 15 kilometers per second...",
+     "src": "audio/capcom_f95889c196.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "...about 2.4 thousand megatons.",
+     "src": "audio/capcom_832c5d8541.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "Is that a lot?",
+     "src": "audio/intern_98402b63ab.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "About 160 thousand Hiroshimas.",
+     "src": "audio/capcom_8323a8ebf7.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "AAAAAAH!",
+     "src": "audio/intern_8dfe930328.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "It is not going to hit. This is a what-if.",
+     "src": "audio/capcom_80413cfa53.mp3"
+    }
+   ]
+  },
+  "2012 MZ6": {
+   "tier": "screwed",
+   "report": [
+    {
+     "who": "CAPCOM",
+     "text": "Asteroid 2012 MZ6. Risk score 100.",
+     "src": "audio/capcom_5b41d27be5.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "Okay. Okay. I'm calm. I'm calm.",
+     "src": "audio/intern_21c1e8dba6.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "Mostly because its closest point to the Sun sits right around Earth's distance.",
+     "src": "audio/capcom_87c0e9fb28.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "So we're screwed?",
+     "src": "audio/intern_27b9aa8060.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "Hazardous means worth watching. Not incoming.",
+     "src": "audio/capcom_9c34c1c9f4.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "So we're a little screwed.",
+     "src": "audio/intern_d8e29ca797.mp3"
+    }
+   ],
+   "whatif": [
+    {
+     "who": "CAPCOM",
+     "text": "Hypothetically. If 2012 MZ6 hit us at 15 kilometers per second...",
+     "src": "audio/capcom_68157cc777.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "...about 190 megatons.",
+     "src": "audio/capcom_3cd9e1b2ea.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "Is that a lot?",
+     "src": "audio/intern_98402b63ab.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "About 12 thousand Hiroshimas.",
+     "src": "audio/capcom_502ccea1d5.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "AAAAAAH!",
+     "src": "audio/intern_8dfe930328.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "It is not going to hit. This is a what-if.",
+     "src": "audio/capcom_80413cfa53.mp3"
+    }
+   ]
+  },
+  "2017 FE1": {
+   "tier": "screwed",
+   "report": [
+    {
+     "who": "CAPCOM",
+     "text": "Asteroid 2017 FE1. Risk score 100.",
+     "src": "audio/capcom_97f7cd61d6.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "Oh no. Oh no no no.",
+     "src": "audio/intern_6ee906099c.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "Mostly because its closest point to the Sun sits right around Earth's distance.",
+     "src": "audio/capcom_87c0e9fb28.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "So we're screwed?",
+     "src": "audio/intern_27b9aa8060.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "Hazardous means worth watching. Not incoming.",
+     "src": "audio/capcom_9c34c1c9f4.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "So we're a little screwed.",
+     "src": "audio/intern_d8e29ca797.mp3"
+    }
+   ],
+   "whatif": [
+    {
+     "who": "CAPCOM",
+     "text": "Hypothetically. If 2017 FE1 hit us at 16 kilometers per second...",
+     "src": "audio/capcom_302132d3f6.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "...about 1.3 thousand megatons.",
+     "src": "audio/capcom_f3ebd0df14.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "Is that a lot?",
+     "src": "audio/intern_98402b63ab.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "About 87 thousand Hiroshimas.",
+     "src": "audio/capcom_8d950dc0b4.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "AAAAAAH!",
+     "src": "audio/intern_8dfe930328.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "It is not going to hit. This is a what-if.",
+     "src": "audio/capcom_80413cfa53.mp3"
+    }
+   ]
+  },
+  "2017 QL33": {
+   "tier": "screwed",
+   "report": [
+    {
+     "who": "CAPCOM",
+     "text": "Asteroid 2017 QL33. Risk score 100.",
+     "src": "audio/capcom_a66ad3e9ca.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "Oh no. Oh no no no.",
+     "src": "audio/intern_6ee906099c.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "Mostly because it swings in to exactly where Earth lives.",
+     "src": "audio/capcom_670e05fd01.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "So we're screwed?",
+     "src": "audio/intern_27b9aa8060.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "Hazardous means worth watching. Not incoming.",
+     "src": "audio/capcom_9c34c1c9f4.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "So we're a little screwed.",
+     "src": "audio/intern_d8e29ca797.mp3"
+    }
+   ],
+   "whatif": [
+    {
+     "who": "CAPCOM",
+     "text": "Hypothetically. If 2017 QL33 hit us at 14 kilometers per second...",
+     "src": "audio/capcom_42ac1dd792.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "...about 100 megatons.",
+     "src": "audio/capcom_721eba7bed.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "Is that a lot?",
+     "src": "audio/intern_98402b63ab.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "About 6.7 thousand Hiroshimas.",
+     "src": "audio/capcom_d9d6c30776.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "AAAAAAH!",
+     "src": "audio/intern_8dfe930328.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "It is not going to hit. This is a what-if.",
+     "src": "audio/capcom_80413cfa53.mp3"
+    }
+   ]
+  },
+  "2018 QT": {
+   "tier": "screwed",
+   "report": [
+    {
+     "who": "CAPCOM",
+     "text": "Asteroid 2018 QT. Risk score 100.",
+     "src": "audio/capcom_56412aea1c.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "Oh no. Oh no no no.",
+     "src": "audio/intern_6ee906099c.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "Mostly because it swings in to exactly where Earth lives.",
+     "src": "audio/capcom_670e05fd01.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "So we're screwed?",
+     "src": "audio/intern_27b9aa8060.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "Hazardous means worth watching. Not incoming.",
+     "src": "audio/capcom_9c34c1c9f4.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "So we're a little screwed.",
+     "src": "audio/intern_d8e29ca797.mp3"
+    }
+   ],
+   "whatif": [
+    {
+     "who": "CAPCOM",
+     "text": "Hypothetically. If 2018 QT hit us at 16 kilometers per second...",
+     "src": "audio/capcom_60a4cd6607.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "...about 330 megatons.",
+     "src": "audio/capcom_acbd2ca097.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "Is that a lot?",
+     "src": "audio/intern_98402b63ab.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "About 22 thousand Hiroshimas.",
+     "src": "audio/capcom_c063380660.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "AAAAAAH!",
+     "src": "audio/intern_8dfe930328.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "It is not going to hit. This is a what-if.",
+     "src": "audio/capcom_80413cfa53.mp3"
+    }
+   ]
+  },
+  "162695": {
+   "tier": "screwed",
+   "report": [
+    {
+     "who": "CAPCOM",
+     "text": "Asteroid 2000 UL11. Risk score 100.",
+     "src": "audio/capcom_0814343210.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "Okay. Okay. I'm calm. I'm calm.",
+     "src": "audio/intern_21c1e8dba6.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "Mostly because its closest point to the Sun sits right around Earth's distance.",
+     "src": "audio/capcom_87c0e9fb28.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "So we're screwed?",
+     "src": "audio/intern_27b9aa8060.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "Hazardous means worth watching. Not incoming.",
+     "src": "audio/capcom_9c34c1c9f4.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "So we're a little screwed.",
+     "src": "audio/intern_d8e29ca797.mp3"
+    }
+   ],
+   "whatif": [
+    {
+     "who": "CAPCOM",
+     "text": "Hypothetically. If 2000 UL11 hit us at 20 kilometers per second...",
+     "src": "audio/capcom_8b02607c3a.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "...about 2.7 thousand megatons.",
+     "src": "audio/capcom_5e985bfe84.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "Is that a lot?",
+     "src": "audio/intern_98402b63ab.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "About 180 thousand Hiroshimas.",
+     "src": "audio/capcom_e8b4cc875c.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "AAAAAAH!",
+     "src": "audio/intern_8dfe930328.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "It is not going to hit. This is a what-if.",
+     "src": "audio/capcom_80413cfa53.mp3"
+    }
+   ]
+  },
+  "363599": {
+   "tier": "screwed",
+   "report": [
+    {
+     "who": "CAPCOM",
+     "text": "Asteroid 2004 FG11. Risk score 100.",
+     "src": "audio/capcom_0c0523d72b.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "Oh no. Oh no no no.",
+     "src": "audio/intern_6ee906099c.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "Mostly because it swings in to exactly where Earth lives.",
+     "src": "audio/capcom_670e05fd01.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "So we're screwed?",
+     "src": "audio/intern_27b9aa8060.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "Hazardous means worth watching. Not incoming.",
+     "src": "audio/capcom_9c34c1c9f4.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "So we're a little screwed.",
+     "src": "audio/intern_d8e29ca797.mp3"
+    }
+   ],
+   "whatif": [
+    {
+     "who": "CAPCOM",
+     "text": "Hypothetically. If 2004 FG11 hit us at 28 kilometers per second...",
+     "src": "audio/capcom_bd6908bcbf.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "...about 350 megatons.",
+     "src": "audio/capcom_c3970a87e9.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "Is that a lot?",
+     "src": "audio/intern_98402b63ab.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "About 23 thousand Hiroshimas.",
+     "src": "audio/capcom_5933489270.mp3"
+    },
+    {
+     "who": "INTERN",
+     "text": "AAAAAAH!",
+     "src": "audio/intern_8dfe930328.mp3"
+    },
+    {
+     "who": "CAPCOM",
+     "text": "It is not going to hit. This is a what-if.",
+     "src": "audio/capcom_80413cfa53.mp3"
+    }
+   ]
+  }
+ }
+}

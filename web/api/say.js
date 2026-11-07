@@ -15,6 +15,7 @@ const hits = new Map();                                       // ip -> timestamp
 let budget = { hour: 0, chars: 0 };
 
 function send(res, status, body) {
+  if (status >= 400) console.warn(`[api/say] ${status} ${body}`);
   res.statusCode = status;
   res.setHeader('Content-Type', 'text/plain; charset=utf-8');
   res.setHeader('Cache-Control', 'no-store');
@@ -37,8 +38,10 @@ function limited(ip, chars) {
 export default async function handler(req, res) {
   const q = Object.fromEntries(new URL(req.url, 'http://local').searchParams);
   let line = null;
+  let tone = '';
   if (q.sig) {
-    if (verify(q.who, q.text, q.sig)) line = [q.who, q.text];
+    tone = q.tone || '';
+    if (verify(q.who, q.text, q.sig, tone)) line = [q.who, q.text];
   } else {
     const P = sanitize(q, L);
     const i = Number(q.i);
@@ -59,7 +62,8 @@ export default async function handler(req, res) {
     const r = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${voice}?output_format=mp3_44100_64`, {
       method: 'POST',
       headers: { 'xi-api-key': key, 'Content-Type': 'application/json', Accept: 'audio/mpeg' },
-      body: JSON.stringify({ text, model_id: MODEL_ID, voice_settings: L.voices[who] }),
+      // the INTERN's emotion (panic … glad) picks a matching delivery; everyone else uses their base settings
+      body: JSON.stringify({ text, model_id: MODEL_ID, voice_settings: (who === 'INTERN' && L.intern_tones?.[tone]) || L.voices[who] }),
     });
     if (!r.ok) return send(res, 502, `elevenlabs ${r.status}`);
     const audio = Buffer.from(await r.arrayBuffer());

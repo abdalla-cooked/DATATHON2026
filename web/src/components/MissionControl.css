@@ -14,3 +14,6 @@
 .mc-caption.intern { border-left-color: #ff3030; }
 .mc-caption.radio { border-left-color: #7dff3a; color: #9aa4b8; font-style: italic; }
 .mc-caption b { margin-right: 6px; }
+
+/* the time controls sit 36px higher on screens up to 1480px wide (room for the legend), so lift the subtitles too */
+@media (min-width: 761px) and (max-width: 1480px) { .mc-caption { bottom: 112px; } }

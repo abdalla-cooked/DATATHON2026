@@ -9,6 +9,7 @@ export default function TopBar({ view, setView }) {
         <button className={view.model === 'B' ? 'on' : ''} onClick={() => set({ model: 'B' })}>Model B · orbit only</button>
         <label><input type="checkbox" checked={view.testOnly} onChange={(e) => set({ testOnly: e.target.checked })} /> Unseen test set only</label>
         <label><input type="checkbox" checked={view.showMistakes} onChange={(e) => set({ showMistakes: e.target.checked })} /> Show mistakes</label>
+        <label className="lime"><input type="checkbox" id="showHidden" checked={!!view.showHidden} onChange={(e) => set({ showHidden: e.target.checked })} /> 🕵️ Hidden hazards</label>
       </div>
     </header>
   );

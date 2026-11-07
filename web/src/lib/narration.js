@@ -80,8 +80,8 @@ async function writtenDialogue(P) {
   try {
     const r = await fetch(`api/script?${toQuery(P)}`, { signal: ctl.signal });
     const body = r.ok ? await r.json() : null;
-    return body?.lines?.map(({ who, text, sig }) => ({
-      who, text, src: `api/say?${new URLSearchParams({ who, text, sig })}`,
+    return body?.lines?.map(({ who, text, sig, tone = '' }) => ({
+      who, text, src: `api/say?${new URLSearchParams({ who, text, sig, tone })}`,
     })) ?? null;
   } catch {
     return null;

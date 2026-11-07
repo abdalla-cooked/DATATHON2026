@@ -26,3 +26,10 @@
 @media (max-width: 760px) {
   .view-buttons { top: 118px; flex-direction: row; flex-wrap: wrap; right: 16px; }
 }
+
+/* Act 4 caption: the hidden-hazards discovery */
+.view-buttons .cloud-info .hidden-card {
+  margin: 4px 0 0; padding-top: 6px; border-top: 1px solid #1f2940;
+  font-size: 11px; line-height: 1.45; color: #cfe9b8;
+}
+.view-buttons .cloud-info .hidden-card b { color: #9dff3a; font-size: 12px; }

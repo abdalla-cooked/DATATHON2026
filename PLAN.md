@@ -1010,8 +1010,8 @@ $env:NODE_EXTRA_CA_CERTS = "$PWD\..\.certs\norton-root.pem"; npm run dev
 **Deploy (live voice needs Vercel; GitHub Pages can't run the function):**
 1. vercel.com → sign in with GitHub → **Add New → Project** → import the repo.
 2. **Root Directory: `web`**. Framework: Vite (auto-detected; `web/vercel.json` sets the build output to `dist`).
-3. **Settings → Environment Variables:** `ELEVENLABS_API_KEY`, `CAPCOM_VOICE_ID` (`onwK4e9ZLuTAKqWW03F9`, Daniel),
-   `INTERN_VOICE_ID` (`TX3LPaxmHKxFdv7VOQHJ`, Liam), `ANTHROPIC_API_KEY` (live writing). Then **Redeploy**.
+3. **Settings → Environment Variables:** `ELEVENLABS_API_KEY`, `CAPCOM_VOICE_ID` (`onwK4e9ZLuTAKqWW03F9`, Daniel, the professional),
+   `INTERN_VOICE_ID` (`SOYHLrjzK2X1ezoPC6cr`, Harry), `ANTHROPIC_API_KEY` (live writing). Then **Redeploy**.
 4. Open `https://<project>.vercel.app/api/health` → `{"live":true,"script":true}`. Click any dot and hear a fresh exchange.
 5. GitHub Pages (`docs/`) still works as a backup: recordings + subtitles, no live voice.
 Submit the **Vercel URL**. Watch your ElevenLabs usage on its dashboard during judging.

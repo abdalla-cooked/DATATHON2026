@@ -3,14 +3,49 @@ export default {
  "_readme": "Mission Control Live script (P3 owns the words, P1 runs scripts/narrate.py). Two voices: CAPCOM is calm and deadpan and reads the data; INTERN panics and gets corrected. Every 'screwed' moment ends with CAPCOM saying the honest science. Keep each line under ~12 seconds out loud. Editing a line only regenerates that one clip.",
  "voices": {
   "CAPCOM": {
-   "stability": 0.65,
-   "similarity_boost": 0.8,
-   "style": 0.1
+   "stability": 0.8,
+   "similarity_boost": 0.85,
+   "style": 0.0,
+   "speed": 0.95
   },
   "INTERN": {
-   "stability": 0.3,
+   "stability": 0.25,
+   "similarity_boost": 0.7,
+   "style": 0.85,
+   "speed": 1.12
+  }
+ },
+ "intern_tones": {
+  "_readme": "Live voice only: the INTERN's delivery follows the risk score (web/api/script.js BANDS). Lower stability + higher style = more dramatic.",
+  "panic": {
+   "stability": 0.1,
+   "similarity_boost": 0.6,
+   "style": 1.0,
+   "speed": 1.18
+  },
+  "edge": {
+   "stability": 0.22,
+   "similarity_boost": 0.7,
+   "style": 0.85,
+   "speed": 1.12
+  },
+  "worried": {
+   "stability": 0.35,
    "similarity_boost": 0.75,
-   "style": 0.65
+   "style": 0.65,
+   "speed": 1.05
+  },
+  "relieved": {
+   "stability": 0.45,
+   "similarity_boost": 0.75,
+   "style": 0.5,
+   "speed": 0.98
+  },
+  "glad": {
+   "stability": 0.4,
+   "similarity_boost": 0.75,
+   "style": 0.6,
+   "speed": 1.05
   }
  },
  "acts": {

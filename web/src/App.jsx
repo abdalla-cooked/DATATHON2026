@@ -13,7 +13,7 @@ import Legend from './components/Legend.jsx';
 //   custom / customScore ← 'custom-asteroid' / 'custom-scored' (added in later steps)
 export default function App() {
   const { asteroids, metrics, error } = useData();
-  const [view, setView] = useState({ model: 'A', testOnly: false, showMistakes: false });
+  const [view, setView] = useState({ model: 'A', testOnly: false, showMistakes: false, showHidden: false });
   const [selected, setSelected] = useState(null);
 
   // Mission Control Live: the commentators react to every click, straight from the click handler
