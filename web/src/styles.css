@@ -131,3 +131,30 @@ pre { margin: 0; padding: 8px; background: #0e1627; font-size: 11px; overflow: a
   body .mc-toggle { bottom: 68px; left: auto; right: 16px; }
   body .mc-caption { bottom: 112px; }
 }
+
+/* Ambient music toggle (Root.jsx, lib/music.js): bottom-left on the intro, above Mission Control Live in the app */
+.music-toggle {
+  position: fixed; left: 16px; bottom: 16px; z-index: 45;
+  padding: 6px 10px; font: 12px system-ui, sans-serif; color: #8b96ad; cursor: pointer;
+  background: rgba(10, 14, 25, .7); border: 1px solid #1f2940; border-radius: 6px; backdrop-filter: blur(4px);
+}
+.music-toggle.on { color: #dde; border-color: #3a7bff; }
+.music-toggle.in-app { bottom: 56px; z-index: 6; }
+@media (max-width: 760px) { .music-toggle.in-app { bottom: 68px; } }
+
+/* Begin gate (Root.jsx): only when the browser blocks autoplay, so the opening starts with its music */
+.sound-gate {
+  position: fixed; inset: 0; z-index: 50; cursor: pointer;
+  display: flex; flex-direction: column; align-items: center; justify-content: flex-start; gap: 14px;
+  padding-top: 64vh; box-sizing: border-box; /* below the hero title and subtitle, over the dark side of Earth */
+  background: radial-gradient(ellipse at center, rgba(5, 6, 10, .55) 0%, rgba(5, 6, 10, .88) 70%);
+  backdrop-filter: blur(3px); animation: sg-in .8s ease both;
+}
+.sound-gate button {
+  font: 600 18px/1 var(--font-display); letter-spacing: .08em; text-transform: uppercase; color: #fff; cursor: pointer;
+  padding: 14px 30px; border-radius: 999px; background: rgba(58, 123, 255, .18); border: 1px solid #3a7bff;
+  box-shadow: 0 0 30px rgba(58, 123, 255, .35); transition: background .2s, box-shadow .2s;
+}
+.sound-gate button:hover, .sound-gate button:focus-visible { background: rgba(58, 123, 255, .4); box-shadow: 0 0 44px rgba(58, 123, 255, .55); outline: none; }
+.sound-gate p { margin: 0; font: 13px var(--font-body); color: #8b96ad; }
+@keyframes sg-in { from { opacity: 0; } }

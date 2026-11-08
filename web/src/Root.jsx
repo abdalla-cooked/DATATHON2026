@@ -2,6 +2,7 @@ import { lazy, Suspense, useCallback, useEffect, useRef, useState } from 'react'
 import { preloadAll } from './lib/dataCache.js';
 import { replay } from './lib/replay.js';
 import ScrollIntro from './intro/ScrollIntro.jsx';
+import { music } from './lib/music.js';
 
 // Page shell: the scroll intro, then the live app.
 //   intro      only the intro is mounted
@@ -29,6 +30,7 @@ export default function Root() {
   const [introFade, setIntroFade] = useState('in'); // in | out | entering (fading back in)
   const [appReplay, setAppReplay] = useState(false);
   const [appKey, setAppKey] = useState(0);
+  const [soundGate, setSoundGate] = useState(false); // "Begin" screen when the browser blocks autoplay
   const gate = useRef({ ready: false, settled: false, done: false });
   const timers = useRef([]);
   const later = (f, ms) => { timers.current.push(setTimeout(f, ms)); };
@@ -38,7 +40,16 @@ export default function Root() {
     loadApp();
     preloadAll();
     if (phase === 'app') replay.off();
-    return () => timers.current.forEach(clearTimeout);
+    // Ambient music from the very first frame: try to autostart; if the browser blocks it, the Begin gate
+    // collects the click it needs. Any other first gesture anywhere also starts it.
+    if (phase !== 'app') music.tryAutostart().then((ok) => { if (!ok) setSoundGate(true); });
+    const startMusic = () => { music.start(); setSoundGate(false); };
+    const gestures = ['pointerdown', 'keydown', 'touchstart'];
+    gestures.forEach((g) => window.addEventListener(g, startMusic, { once: true, capture: true }));
+    return () => {
+      timers.current.forEach(clearTimeout);
+      gestures.forEach((g) => window.removeEventListener(g, startMusic, { capture: true }));
+    };
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Both conditions met: fade the intro out, drop it, start the replay.
@@ -93,6 +104,8 @@ export default function Root() {
           <App key={appKey} replay={appReplay} onReady={onAppReady} onReplayIntro={onReplayIntro} />
         </Suspense>
       )}
+      <MusicToggle inApp={phase === 'app'} />
+      {soundGate && <SoundGate onBegin={() => { music.start(); setSoundGate(false); }} />}
       {showIntro && (
         <div className={'intro-layer' + (introFade === 'in' ? '' : ' faded')}
           style={{ transitionDuration: fadeMs + 'ms' }} aria-hidden={introFade === 'out'}>
@@ -100,5 +113,36 @@ export default function Root() {
         </div>
       )}
     </>
+  );
+}
+
+// Ambient music on/off, on every screen (intro and app).
+function MusicToggle({ inApp }) {
+  const [on, setOn] = useState(music.isOn());
+  useEffect(() => music.onChange(setOn), []);
+  return (
+    <button type="button" className={'music-toggle' + (on ? ' on' : '') + (inApp ? ' in-app' : '')} aria-pressed={on}
+      onClick={() => music.setOn(!on)} title={on ? 'Turn the ambient music off' : 'Turn the ambient music on'}>
+      {on ? '♫ Music on' : '♫ Music off'}
+    </button>
+  );
+}
+
+// Shown over the opening only when the browser blocks autoplay: one click starts the intro with its music.
+function SoundGate({ onBegin }) {
+  const ref = useRef(null);
+  useEffect(() => {
+    // keep the intro from scrolling underneath while the gate is up
+    const el = ref.current;
+    const block = (e) => { e.preventDefault(); e.stopPropagation(); };
+    el.addEventListener('wheel', block, { passive: false });
+    el.addEventListener('touchmove', block, { passive: false });
+    return () => { el.removeEventListener('wheel', block); el.removeEventListener('touchmove', block); };
+  }, []);
+  return (
+    <div ref={ref} className="sound-gate" onClick={onBegin} role="dialog" aria-label="Begin">
+      <button type="button" autoFocus onClick={(e) => { e.stopPropagation(); onBegin(); }}>▶ Begin</button>
+      <p>🎧 Best with sound on</p>
+    </div>
   );
 }

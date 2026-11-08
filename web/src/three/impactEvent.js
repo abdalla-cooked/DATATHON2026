@@ -13,6 +13,7 @@ import * as THREE from 'three';
 import { CSS2DObject } from 'three/examples/jsm/renderers/CSS2DRenderer.js';
 import { mergeVertices } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import { playAct, signalLost, sfx, stop as stopNarration } from '../lib/narration.js';
+import { music } from '../lib/music.js';
 
 const R_EARTH = 0.27;
 const R_ROCK = 0.05;
@@ -349,6 +350,7 @@ export function createImpactEvent({ scene, camera, controls, earth, time, canvas
   function impact() {
     const o = objs;
     signalLost();                               // both voices cut out mid-word
+    music.cut();                                // and the music with them
     sfx('impact');
     setPhase('impact');
     o.tPhase = 0;
@@ -561,6 +563,7 @@ export function createImpactEvent({ scene, camera, controls, earth, time, canvas
   function restore(resume = true) {
     epoch++;
     stopNarration();
+    music.uncut();
     clear();
     controls.enabled = true;
     if (saved && resume) { time.playing = true; time.dirty = true; }

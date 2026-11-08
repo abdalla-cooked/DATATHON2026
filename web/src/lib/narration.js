@@ -6,6 +6,7 @@
 // No API key ever reaches the browser. Subtitles always show, so it also works with the sound off.
 import L from './lines.js';
 import { buildLines, isPanic, paramsFor, stripTags, toQuery } from './dialogue.js';
+import { music } from './music.js';
 
 let manifest = null;
 let live = false;
@@ -23,7 +24,10 @@ const ready = Promise.all([
 ]);
 
 // subtitles never show the [delivery tags] that tell the voice how to act
-const caption = (c) => listeners.forEach((fn) => fn(c && { ...c, text: stripTags(c.text) }));
+const caption = (c) => {
+  music.duck(c?.who === 'CAPCOM' || c?.who === 'INTERN'); // the music sits under the voices
+  listeners.forEach((fn) => fn(c && { ...c, text: stripTags(c.text) }));
+};
 const wait = (ms) => new Promise((r) => setTimeout(r, ms));
 const readingTime = (text) => Math.max(1200, stripTags(text).length * 65);
 
