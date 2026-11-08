@@ -267,10 +267,6 @@ export default {
     "That's strange. It's not in NASA's catalog. Never documented. Not once."
    ],
    [
-    "CAPCOM",
-    "Looks like our model just found a brand-new asteroid."
-   ],
-   [
     "INTERN",
     "[excited, nervous] We found one? We FOUND one! Do we get to name it?"
    ]
@@ -282,15 +278,7 @@ export default {
    ],
    [
     "CAPCOM",
-    "Relax, rookie. It's still millions of kilometers out. Most of these swing right past."
-   ],
-   [
-    "INTERN",
-    "[anxious] It's getting bigger. Why is it getting BIGGER?!"
-   ],
-   [
-    "CAPCOM",
-    "Breathe. We don't worry until it gets close."
+    "Relax, rookie. It's still millions of kilometers out."
    ],
    [
     "INTERN",
@@ -309,14 +297,6 @@ export default {
    [
     "CAPCOM",
     "[shouting] Launch the emergency rockets! Get everyone off the planet, NOW!"
-   ],
-   [
-    "INTERN",
-    "[screaming] I TOLD YOU! I TOLD YOU IT WAS COMING!"
-   ],
-   [
-    "CAPCOM",
-    "[yelling] JUST HIT THE LAUNCH BUTTON!"
    ],
    [
     "INTERN",
@@ -342,7 +322,7 @@ export default {
    ],
    [
     "CAPCOM",
-    "And Model B just flagged it hazardous. No closest-approach data. It read the danger straight from the shape of the orbit."
+    "And Model B just flagged it hazardous, from the shape of its orbit alone."
    ],
    [
     "INTERN",
@@ -350,7 +330,7 @@ export default {
    ],
    [
     "CAPCOM",
-    "As in, we act now, while it's still far out. Arming the planetary defense interceptor."
+    "As in, we act now. Arming the planetary defense interceptor."
    ]
   ],
   "event_approach_b": [
@@ -376,15 +356,7 @@ export default {
    ],
    [
     "CAPCOM",
-    "Good. This shot is yours."
-   ],
-   [
-    "INTERN",
-    "[quiet, surprised] Mine?"
-   ],
-   [
-    "CAPCOM",
-    "Yours. On my mark."
+    "Good. This shot is yours. On my mark."
    ]
   ],
   "event_countdown_b": [
@@ -414,15 +386,7 @@ export default {
    ],
    [
     "CAPCOM",
-    "You did, Intern. Steady hands. Bold call. That was hero work."
-   ],
-   [
-    "INTERN",
-    "[confident, proud] Hero. ...Can you put that in my performance review?"
-   ],
-   [
-    "CAPCOM",
-    "[laughs] Already writing it."
+    "Steady hands, Intern. That was hero work."
    ]
   ]
  },

@@ -30,7 +30,7 @@ const START_DIST = 9;      // spawn distance from Earth's center (far enough bac
 const CLOSE_S = 0.8;       // path fraction where "it's close" (about 1.6 units out) and the panic starts
 const ZOOM_SEC = 2.5;      // camera glide from wherever it was to the chase angle
 const CRUISE_MIN = 30;     // seconds from the click to "close", at least (the dialogue can stretch it)
-const FINAL = 23.3;        // seconds from "close" to impact: lands mid-scream in event_panic (alarm 1.5 s + lines)
+const FINAL = 17.6;        // seconds from "close" to impact: lands mid-scream on "I'M JUST AN INTERN" (alarm 1.5 s + lines)
 const KM_PER_UNIT = 14.96e6;
 const G = 0.035;           // ejecta gravity (units^3/s^2): escape speed at the surface is about 0.5 units/s
 const CARD_AT = 9;         // seconds after impact when the extinction card fades in
@@ -645,7 +645,8 @@ export function createImpactEvent({ scene, camera, controls, earth, time, canvas
         if (side.lengthSq() < 1e-6) side.set(1, 0, 0);
         side.normalize();
         const up2 = new THREE.Vector3().crossVectors(side, u);
-        const back = 0.16 + 0.26 * Math.min(d, 1.5) / 1.5;
+        // Model A, last seconds of entry: tighten in on the rock so the camera dives in with it
+        const back = (0.16 + 0.26 * Math.min(d, 1.5) / 1.5) * (phase === 'final' ? 1 - 0.4 * heat : 1);
         camTarget = rk.clone().addScaledVector(u, back).addScaledVector(side, back * 0.45).addScaledVector(up2, back * 0.3);
         if (o.zoom && o.zoom.t < 1) {         // zoom in from wherever the camera was
           o.zoom.t = Math.min(o.zoom.t + dt / ZOOM_SEC, 1);
@@ -764,14 +765,18 @@ export function createImpactEvent({ scene, camera, controls, earth, time, canvas
         c.mesh.material.emissiveIntensity = 2 * c.heat;
       }
 
-      // camera: kick + rumble, then pull back slowly to take it all in
+      // camera: from the chase angle it had at the moment of the hit, pan straight back out to see the whole
+      // planet (starts ~0.3 s after the collision, wide by ~4.3 s). Plus a kick + rumble.
       o.shake *= Math.exp(-dt * 0.9);
+      if (!o.hitCam) o.hitCam = { dir: camera.position.clone().sub(E).normalize(), d0: camera.position.distanceTo(E) };
+      const out = smooth(Math.min(Math.max((t - 0.3) / 4, 0), 1));
+      const dist = THREE.MathUtils.lerp(o.hitCam.d0, 3.0, out);
+      const look = o.P.clone().lerp(E, out);
       // once the card is up, look a little below Earth so the planet sits above the card
-      const look = phase === 'aftermath' ? E.clone().addScaledVector(tmp2.set(0, 1, 0).applyQuaternion(camera.quaternion), -0.32) : E;
-      controls.target.lerp(look, 1 - Math.exp(-dt * (phase === 'aftermath' ? 0.8 : 1.5)));
-      const dist = 1.9 + 1.1 * smooth(Math.min(t / 10, 1));
-      camTarget = controls.target.clone().addScaledVector(camDir(), dist);
-      camera.position.lerp(camTarget, 1 - Math.exp(-dt * 1.2));
+      if (phase === 'aftermath') look.addScaledVector(tmp2.set(0, 1, 0).applyQuaternion(camera.quaternion), -0.32);
+      controls.target.lerp(look, 1 - Math.exp(-dt * 5));
+      camTarget = E.clone().addScaledVector(o.hitCam.dir, dist);
+      camera.position.lerp(camTarget, 1 - Math.exp(-dt * 5));
       if (o.shake > 0.002) camera.position.add(tmp.set(rand(-1, 1), rand(-1, 1), rand(-1, 1)).multiplyScalar(0.05 * o.shake));
 
       if (phase === 'impact' && t >= CARD_AT) setPhase('aftermath');
