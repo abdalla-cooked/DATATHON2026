@@ -16,6 +16,31 @@ Talking points for the pitch and for judge questions. Every number here comes fr
 
 ---
 
+## 1b. "What was the purpose of Model B, and how did it save the world?"
+
+**Purpose of Model B:**
+> "NASA's hazardous label depends on one number, MOID: the closest gap between an asteroid's orbit and Earth's. Model A was given that number, and it simply relearned NASA's rule. That proved the machine learned real physics, but it was close to being handed the answer.
+>
+> So we built Model B to answer a harder question: **can a machine tell whether an asteroid is dangerous without being told MOID?** Instead of the distance, it reads the *shape* of the orbit: does it reach Earth's distance from the Sun, is it pointed the right way, is it tilted too steeply? It still catches **95%** of hazardous asteroids. It learned what a near-miss orbit looks like on its own."
+
+**Why that matters:**
+> "A model that trusts one number is only as good as that number. For a newly discovered asteroid, MOID starts out as a rough estimate. Model B is a second opinion that doesn't depend on it. And we saw it work: near NASA's cutoffs, Model B caught **21 real hazardous asteroids** that the MOID-based model missed. For one of them, (2011 CX46), Model A gave a risk score of 31 and Model B gave 78."
+
+**How it saved the world (the dramatization):**
+> "Our ending is a simulated scenario based on that result. A fictional asteroid is found three nights ago. Its rough MOID estimate is slightly wrong and lands just outside the danger line.
+>
+> - With **Model A**, that one bad number makes it say *safe*. Mission Control stands down, and the asteroid hits.
+> - With **Model B**, the orbit's shape still looks dangerous, so it raises the alarm. Telescopes are pointed at it, the refined orbit confirms a collision course, and a DART-style spacecraft nudges it off course in time.
+>
+> The lesson: **a model that relies on one number breaks when that number is wrong. A model that looks at the whole picture doesn't.**"
+
+**If a judge pushes back:**
+> "To be clear, Model B isn't better than NASA. It was trained on NASA's labels, and NASA runs separate impact-monitoring systems (Scout for brand-new objects, Sentry for known ones). Model B isn't better than Model A overall either: A is more precise. B's value is being a second opinion that doesn't depend on MOID, which matters most when MOID is uncertain."
+
+**Motivation, in one honest line:** say *"a model that trusts only MOID would have missed this,"* **not** *"NASA would have missed this."*
+
+---
+
 ## 2. Key terms (say these simply)
 
 | Term | Plain-English version |
