@@ -16,3 +16,5 @@
 .mc-caption.alert { border-left-color: #ff3030; color: #ffb3b3; font-weight: 600; }
 .mc-caption.radio { border-left-color: #7dff3a; color: #9aa4b8; font-style: italic; }
 .mc-caption b { margin-right: 6px; }
+.mc-speed { left: 178px; min-width: 52px; font-variant-numeric: tabular-nums; } /* sits right of the mute button */
+@media (max-width: 760px) { body .mc-speed { bottom: 104px; left: auto; right: 16px; } } /* phones: stack above the mute button */

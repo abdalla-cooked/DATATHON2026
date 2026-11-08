@@ -13,6 +13,10 @@ let live = false;
 let scripted = false;                // Claude writes the dialogue (api/script)
 const SCRIPT_TIMEOUT_MS = 15000;      // Opus at low effort measured 4.5-8.5 s per script; past this, fall back
 let on = true;                       // clicking an asteroid is a user gesture, so sound is allowed
+// Narration speed (Mission Control speed button). Applies to every voice clip and to subtitle-only timing.
+export const SPEEDS = [0.5, 0.75, 1, 1.25, 1.5, 2];
+let rate = 1;
+try { const saved = Number(localStorage.getItem('mc-rate')); if (SPEEDS.includes(saved)) rate = saved; } catch { /* storage blocked */ }
 let current = null;
 let token = 0;                       // bumps on every new dialogue, so a newer one cancels an older one
 const listeners = new Set();         // subtitle listeners: ({ who, text } | null) => void
@@ -34,7 +38,7 @@ const caption = (c) => {
   listeners.forEach((fn) => fn(c && { ...c, hero: c.who === 'INTERN' && heroTag(c.text), text: stripTags(c.text) }));
 };
 const wait = (ms) => new Promise((r) => setTimeout(r, ms));
-const readingTime = (text) => Math.max(1200, stripTags(text).length * 65);
+const readingTime = (text) => Math.max(1200, stripTags(text).length * 65) / rate; // subtitle-only lines speed up too
 
 // Starts loading a clip right away (so the next line is ready when this one ends).
 function load(src) {
@@ -49,6 +53,7 @@ function playClip(audio, text, mine) {
   return new Promise((resolve) => {
     if (!audio) return wait(readingTime(text)).then(resolve);
     current = audio;
+    audio.playbackRate = rate;       // browsers keep the voice's pitch natural when sped up or slowed down
     const fallback = () => { if (mine === token) wait(readingTime(text)).then(resolve); else resolve(); };
     audio.onended = () => resolve();
     audio.onerror = fallback;
@@ -136,6 +141,14 @@ export function setOn(value) {
 }
 
 export const isOn = () => on;
+export const getRate = () => rate;
+
+// Changes the speed right away, including the line that's playing now, and remembers it for next time.
+export function setRate(value) {
+  rate = value;
+  if (current) current.playbackRate = value;
+  try { localStorage.setItem('mc-rate', String(value)); } catch { /* storage blocked */ }
+}
 export const isLive = () => live;
 export const isScripted = () => scripted;
 
