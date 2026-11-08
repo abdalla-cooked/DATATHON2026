@@ -66,6 +66,7 @@ const hh = m.hidden_hazards;
 const facts = `DATASET
 - ${m.counts.neos_used.toLocaleString('en-US')} near-Earth asteroids from NASA JPL (train ${m.counts.train}, test ${m.counts.test}); ${pct(m.counts.pha_rate)} are labeled potentially hazardous (PHA).
 - NASA's PHA rule: MOID at most 0.05 AU and H at most 22.0 (roughly 140 m or bigger).
+- H runs backwards: a HIGHER H means fainter, so smaller. H 22.57 is just past the 22.0 cutoff on the small side (too faint to qualify); H 21.5 is on the big side.
 - ${m.score_note}
 
 WHAT THE MODELS LEARNED
