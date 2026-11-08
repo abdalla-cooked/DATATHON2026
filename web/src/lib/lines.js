@@ -66,15 +66,11 @@ export default {
   "welcome": [
    [
     "CAPCOM",
-    "Welcome, Intern. Glad you could make it. Hope you're ready to get started."
+    "Welcome, Intern. Glad you could make it. Hope you're ready to get started. Your job: watch the asteroids near Earth. Each one gets a risk score. High score, we watch it closer."
    ],
    [
     "INTERN",
-    "[nervous, eager] Y-yes, sir! Ready. Very ready. I read the whole manual last night. Twice. Space still scares me a little, but... I won't let you down."
-   ],
-   [
-    "CAPCOM",
-    "Noted. Eyes on the board. The model is sizing up every near-Earth asteroid we know of."
+    "[nervous, eager] Watch the rocks, check the scores. Y-yes, sir. I won't let you down."
    ]
   ],
   "risk_on": [
