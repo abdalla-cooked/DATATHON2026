@@ -511,6 +511,12 @@ export default function SolarSystem({ asteroids, metrics, view, onSelect, pickRe
       <canvas id="scene" ref={canvasRef} />
       <TimeControls time={timeRef} />
       <ImpactOverlay phase={impactPhase} model={sceneRef.current?.impact.model} onBackToStart={onReplayIntro} />
+      {/* TEMPORARY: plays the impact event on demand, for testing. Model A ends in extinction, Model B saves Earth. */}
+      {impactPhase === 'idle' && (
+        <button type="button" className="impact-test" onClick={() => sceneRef.current?.impact.start(view.model)}>
+          TEST: impact event (Model {view.model})
+        </button>
+      )}
       <ViewButtons views={VIEWS} initial="earth" onView={(name) => sceneRef.current?.flyTo(name)}>
         {counts.total > 0 && (
           <div className="cloud-info">
