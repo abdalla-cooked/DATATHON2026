@@ -1,0 +1,109 @@
+/* Impact shot: everything on screen for it, including the DOM that three/impactShot.js creates
+   (.impact-fx overlay, .impact-ring-label tags) and the hiding of the normal UI while it runs (.app.impact-on). */
+
+/* "Simulate impact": bottom-right on wide screens, above the Mission Control toggle's row on phones. */
+.impact-btn {
+  position: fixed; right: 16px; bottom: 16px; z-index: 6;
+  padding: 9px 14px; font: 600 13px system-ui, sans-serif; color: #fff; cursor: pointer;
+  background: linear-gradient(180deg, #d8352a, #a5211a); border: 1px solid #ff6a5e; border-radius: 8px;
+  box-shadow: 0 4px 18px rgba(255, 59, 48, .35);
+}
+.impact-btn:hover { filter: brightness(1.1); }
+.impact-btn:focus-visible, .impact-skip:focus-visible, .ic-back:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
+@media (min-width: 761px) and (max-width: 1120px) { .impact-btn { bottom: 68px; } } /* clear of the time bar */
+
+/* Normal UI slides out during the shot (same moves as the replay's .ui-out). */
+.impact-on #topbar { transform: translateY(-100%); opacity: 0; pointer-events: none; }
+.impact-on .time-controls { transform: translateX(-50%) translateY(24px); opacity: 0; pointer-events: none; }
+.impact-on .mc-toggle { transform: translateY(24px); opacity: 0; pointer-events: none; }
+.impact-on .view-buttons { transform: translateX(-24px); opacity: 0; pointer-events: none; }
+.impact-on #mockBanner { display: none; }
+
+/* Overlay made by impactShot.js: flash, title, countdown. Above the 3D labels (z 1), under the HUD. */
+.impact-fx { position: fixed; inset: 0; z-index: 4; pointer-events: none; font-family: system-ui, sans-serif; }
+.impact-flash { position: absolute; inset: 0; z-index: 1; background: #fff; opacity: 0; }
+.impact-title, .impact-count {
+  position: absolute; left: 50%; width: min(640px, calc(100vw - 32px)); text-align: center;
+  transform: translate(-50%, -8px); opacity: 0; transition: opacity .5s ease, transform .5s ease;
+  text-shadow: 0 0 6px #000, 0 0 16px #000;
+}
+.impact-title.on, .impact-count.on { opacity: 1; transform: translate(-50%, 0); }
+.impact-title { top: 32px; }
+.impact-title b { display: block; font-size: 26px; font-weight: 700; color: #fff; }
+.impact-title span { display: block; margin-top: 4px; font-size: 13px; color: #ffb3a8; }
+.impact-count { top: 112px; }
+.impact-count b { display: block; font-size: 22px; font-weight: 700; color: #ff6b5e; font-variant-numeric: tabular-nums; }
+.impact-count span { display: block; margin-top: 2px; font-size: 13px; color: #aab3c6; font-variant-numeric: tabular-nums; }
+
+/* Ring labels on the globe (CSS2D, one per ring). */
+.impact-ring-label {
+  font: 600 12px system-ui, sans-serif; white-space: nowrap; transform: translate(8px, -50%);
+  padding: 2px 7px; border-radius: 4px; background: rgba(5, 6, 10, .7); border-left: 3px solid currentColor;
+  text-shadow: 0 0 4px #000;
+}
+.impact-ring-label.fireball { color: #fff1c8; }
+.impact-ring-label.blast { color: #ff8a2a; }
+.impact-ring-label.burns { color: #ff5a4f; }
+
+/* Skip while the shot plays. */
+.impact-skip {
+  position: fixed; right: 16px; bottom: 16px; z-index: 9;
+  padding: 8px 14px; font: 600 13px system-ui, sans-serif; color: #dde3f0; cursor: pointer;
+  background: rgba(10, 14, 25, .7); border: 1px solid #3a4560; border-radius: 8px; backdrop-filter: blur(6px);
+}
+.impact-skip:hover { color: #fff; border-color: #6a7896; }
+
+/* Results card: right side on wide screens (the shot shifts the picture left), bottom sheet on phones. */
+.impact-card {
+  position: fixed; right: 24px; top: 50%; transform: translateY(-50%); z-index: 9;
+  width: 360px; max-height: calc(100vh - 48px); overflow-y: auto; box-sizing: border-box;
+  padding: 20px 22px 18px; color: #dde3f0; font-family: system-ui, sans-serif;
+  background: rgba(10, 14, 25, .88); backdrop-filter: blur(8px);
+  border: 1px solid #3a2a30; border-top: 3px solid #ff3b30; border-radius: 12px;
+  animation: impact-card-in .5s cubic-bezier(.2, .8, .2, 1);
+}
+@keyframes impact-card-in { from { opacity: 0; transform: translateY(-50%) translateX(24px); } }
+.impact-card h2 { margin: 2px 0 12px; font-size: 21px; line-height: 1.2; color: #fff; }
+.ic-kicker { margin: 0; font-size: 11px; text-transform: uppercase; letter-spacing: 1.2px; color: #ff6b5e; }
+.ic-energy { margin: 0 0 14px; }
+.ic-energy b { display: block; font-size: 30px; line-height: 1.1; color: #ffd28a; font-variant-numeric: tabular-nums; }
+.ic-energy span { font-size: 13px; color: #aab3c6; }
+.ic-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 14px; margin: 0 0 14px; }
+.ic-stats dt { font-size: 11px; color: #8b96ad; }
+.ic-stats dd { margin: 2px 0 0; font-size: 15px; font-weight: 600; font-variant-numeric: tabular-nums; }
+.ic-rings { list-style: none; margin: 0 0 12px; padding: 10px 0 0; border-top: 1px solid #23304a; font-size: 13px; }
+.ic-rings li { display: flex; align-items: center; gap: 8px; padding: 3px 0; }
+.ic-rings i { width: 9px; height: 9px; border-radius: 50%; flex: none; }
+.ic-rings span { margin-left: auto; font-variant-numeric: tabular-nums; color: #aab3c6; }
+.ic-note { margin: 0 0 14px; font-size: 11px; line-height: 1.45; color: #8b96ad; }
+.ic-back {
+  width: 100%; padding: 9px 12px; font: 600 13px system-ui, sans-serif; color: #fff; cursor: pointer;
+  background: #1c2740; border: 1px solid #3a4a6a; border-radius: 8px;
+}
+.ic-back:hover { background: #26345a; }
+
+@media (max-width: 760px) {
+  .impact-btn { right: auto; left: 16px; bottom: 68px; }
+  .impact-on .view-buttons { transform: translateY(-24px); }
+  /* Captions go to the top so the title / countdown and the results sheet keep the bottom. */
+  body .impact-on .mc-caption { top: 12px; bottom: auto; }
+  .impact-title { top: auto; bottom: 150px; }
+  .impact-title b { font-size: 20px; }
+  .impact-count { top: auto; bottom: 74px; }
+  .impact-count b { font-size: 19px; }
+  .impact-card {
+    left: 0; right: 0; top: auto; bottom: 0; transform: none; width: auto; max-height: 52vh;
+    padding: 16px 16px 14px; border-radius: 12px 12px 0 0; border-left: 0; border-right: 0; border-bottom: 0;
+    animation-name: impact-sheet-in;
+  }
+  @keyframes impact-sheet-in { from { opacity: 0; transform: translateY(40px); } }
+  .impact-card h2 { font-size: 18px; margin-bottom: 8px; }
+  .ic-energy b { font-size: 24px; }
+  .ic-stats { grid-template-columns: 1fr 1fr 1fr; gap: 8px 10px; }
+  .ic-stats dd { font-size: 13px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .impact-title, .impact-count { transition-duration: .01s; }
+  .impact-card { animation: none; }
+}

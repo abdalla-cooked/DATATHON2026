@@ -6,6 +6,7 @@ import MissionControl from './components/MissionControl.jsx';
 import SolarSystem from './three/SolarSystem.jsx';
 import TopBar from './components/TopBar.jsx';
 import ReplayHud from './components/ReplayHud.jsx';
+import ImpactHud from './components/ImpactHud.jsx';
 
 // Shared state replaces the window CustomEvents from PLAN.md Contract 4:
 //   view       <- 'view-changed'       (TopBar sets it, SolarSystem reads it)
@@ -36,10 +37,23 @@ export default function App({ replay = false, onReady, onReplayIntro }) {
   // (so clicking the same asteroid again comments again, and the browser counts it as a user gesture).
   const viewRef = useRef(view);
   viewRef.current = view;
+  const [selected, setSelected] = useState(null);
   const onSelect = useCallback((a) => {
+    setSelected(a);
     const part = viewRef.current.showHidden && a.hidden ? 'hidden' : 'report';
     playAsteroid(a, part, metrics?.B?.threshold);
   }, [metrics]);
+
+  // Impact shot (three/impactShot.js): "Simulate impact" bends the selected orbit onto Earth and plays the shot.
+  // impact = the latest command for SolarSystem; impactState = what the shot reports back (null = not running).
+  const [impact, setImpact] = useState(null);
+  const [impactState, setImpactState] = useState(null);
+  const impactCmd = useCallback((cmd, a) => setImpact((prev) => ({ cmd, a, n: (prev?.n ?? 0) + 1 })), []);
+  const simulateImpact = () => {
+    if (!selected) return;
+    playAsteroid(selected, 'whatif', metrics?.B?.threshold);
+    impactCmd('start', selected);
+  };
 
   const prevView = useRef(view);
   useEffect(() => {
@@ -52,12 +66,19 @@ export default function App({ replay = false, onReady, onReplayIntro }) {
   }, [view]);
 
   return (
-    <div className={'app' + (uiIn ? '' : ' ui-out')}>
+    <div className={'app' + (uiIn ? '' : ' ui-out') + (impactState ? ' impact-on' : '')}>
       <SolarSystem asteroids={asteroids} metrics={metrics} view={view} onSelect={onSelect}
-        onReady={onReady} />
+        onReady={onReady} impact={impact} onImpact={setImpactState} />
       <TopBar view={view} setView={setView} onReplayIntro={onReplayIntro} />
       <MissionControl />
       {replay && <ReplayHud asteroids={asteroids} metrics={metrics} />}
+      {uiIn && selected && selected.e < 1 && !impactState && (
+        <button type="button" className="impact-btn" onClick={simulateImpact}
+          title="Play a hypothetical collision with Earth for this asteroid">
+          ☄️ Simulate impact
+        </button>
+      )}
+      <ImpactHud state={impactState} onSkip={() => impactCmd('skip')} onBack={() => impactCmd('back')} />
       {metrics?._mock && <div id="mockBanner">Mock data. Real model results load when ML pushes the exports.</div>}
       {error && <div className="error">Couldn't load data: {String(error.message)}</div>}
     </div>
