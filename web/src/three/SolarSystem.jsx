@@ -99,6 +99,9 @@ export default function SolarSystem({ asteroids, metrics, view, onSelect, pickRe
   // Shared clock (see TimeControls.jsx). Starts at today and begins playing once the intro hands off.
   const timeRef = useRef({ jd: jdFromDate(new Date()), playing: false, speed: 1, dirty: true, onTick: null });
   const [showAll, setShowAll] = useState(false);              // false = thinned cloud (see cloudFilter.js)
+  const [hideOrbits, setHideOrbits] = useState(false);        // "Hide orbits": planet + hidden-hazard orbit lines
+  const hideOrbitsRef = useRef(hideOrbits);
+  hideOrbitsRef.current = hideOrbits;
   // false = plain rock; true = red high risk / blue low risk. Off by default, even after "Watch the AI learn".
   const [highlightRisk, setHighlightRisk] = useState(false);
   const [counts, setCounts] = useState({ shown: 0, total: 0, hidden: 0 }); // for the "Showing X of Y" caption
@@ -135,6 +138,7 @@ export default function SolarSystem({ asteroids, metrics, view, onSelect, pickRe
     Object.assign(labelRenderer.domElement.style, { position: 'fixed', inset: '0', pointerEvents: 'none', zIndex: '1' });
     canvas.parentElement.appendChild(labelRenderer.domElement);
     const planets = addPlanets(scene, time.jd);
+    for (const { ring } of planets) ring.visible = !hideOrbitsRef.current;
 
     function resize() {
       const w = canvas.clientWidth, h = canvas.clientHeight;
@@ -151,6 +155,8 @@ export default function SolarSystem({ asteroids, metrics, view, onSelect, pickRe
       replayU: { value: replay.progress() } };
     let readySent = false;
     sceneRef.current = ctx;
+    ctx.planets = planets;
+    ctx.hiddenLines = [];
 
     // The impact event: a fictional asteroid that ends the world (impactEvent.js).
     ctx.impact = createImpactEvent({
@@ -373,6 +379,15 @@ export default function SolarSystem({ asteroids, metrics, view, onSelect, pickRe
     };
   }, [asteroids, metrics, view.model, view.testOnly, view.showMistakes, view.showHidden, showAll, highlightRisk]);
 
+  // "Hide orbits": the planets' (and dwarf planets') orbit rings and the hidden hazards' lime orbits.
+  // A selected asteroid's own white orbit stays, since you picked it.
+  useEffect(() => {
+    const ctx = sceneRef.current;
+    if (!ctx) return;
+    for (const { ring } of ctx.planets ?? []) ring.visible = !hideOrbits;
+    for (const l of ctx.hiddenLines ?? []) l.visible = !hideOrbits;
+  }, [hideOrbits]);
+
   // Act 4: draw the hidden hazards' orbits in lime, so judges see them all threading Earth's orbit,
   // and glide to Earth's neighborhood where they live.
   useEffect(() => {
@@ -381,6 +396,8 @@ export default function SolarSystem({ asteroids, metrics, view, onSelect, pickRe
     const lines = asteroids
       .filter((a) => isMeasuredHidden(a) && a.e < 1 && (!view.testOnly || a.test))
       .map((a) => orbitLine(a, LIME_HEX, 0.35));
+    for (const l of lines) l.visible = !hideOrbitsRef.current;
+    ctx.hiddenLines = lines;
     ctx.scene.add(...lines);
 
     // Name tags on the biggest ones (by measured size), so judges can read who they are.
@@ -402,6 +419,7 @@ export default function SolarSystem({ asteroids, metrics, view, onSelect, pickRe
     timeRef.current.dirty = true; // place the tags at the current date on the next frame
     ctx.flyTo('earth');
     return () => {
+      ctx.hiddenLines = [];
       for (const l of lines) { ctx.scene.remove(l); l.geometry.dispose(); l.material.dispose(); }
       for (const { obj } of ctx.hiddenTags) ctx.scene.remove(obj); // CSS2DObject removes its own <div>
       ctx.hiddenTags = [];
@@ -542,6 +560,10 @@ export default function SolarSystem({ asteroids, metrics, view, onSelect, pickRe
                   if (e.target.checked && !showAllExplained) { showAllExplained = true; playAct('show_all_on'); }
                 }} />
               {' '}Show all asteroids
+            </label>
+            <label>
+              <input type="checkbox" id="hideOrbits" checked={hideOrbits} onChange={(e) => setHideOrbits(e.target.checked)} />
+              {' '}Hide orbits
             </label>
             {view.showMistakes && !view.showHidden && (
               <small className="risk-key"><span className="mag">●</span> missed hazard · <span className="yel">●</span> false alarm</small>
