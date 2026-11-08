@@ -15,8 +15,7 @@ const SCRIPT_TIMEOUT_MS = 15000;      // Opus at low effort measured 4.5-8.5 s p
 let on = true;                       // clicking an asteroid is a user gesture, so sound is allowed
 // Narration speed (Mission Control speed button). Applies to every voice clip and to subtitle-only timing.
 export const SPEEDS = [0.5, 0.75, 1, 1.25, 1.5, 2];
-let rate = 1;
-try { const saved = Number(localStorage.getItem('mc-rate')); if (SPEEDS.includes(saved)) rate = saved; } catch { /* storage blocked */ }
+let rate = 1;                        // always starts at 1x when the app loads (not remembered between visits)
 let current = null;
 let token = 0;                       // bumps on every new dialogue, so a newer one cancels an older one
 const listeners = new Set();         // subtitle listeners: ({ who, text } | null) => void
@@ -143,11 +142,10 @@ export function setOn(value) {
 export const isOn = () => on;
 export const getRate = () => rate;
 
-// Changes the speed right away, including the line that's playing now, and remembers it for next time.
+// Changes the speed right away, including the line that's playing now (for this visit only).
 export function setRate(value) {
   rate = value;
   if (current) current.playbackRate = value;
-  try { localStorage.setItem('mc-rate', String(value)); } catch { /* storage blocked */ }
 }
 export const isLive = () => live;
 export const isScripted = () => scripted;
