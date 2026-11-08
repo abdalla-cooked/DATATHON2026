@@ -131,7 +131,9 @@ export function onCaption(fn) {
 
 export async function playAct(key) {
   await ready;
-  return playDialogue(manifest?.acts?.[key], { before: 'radio' });
+  const lines = manifest?.acts?.[key]
+    ?? L.acts[key]?.map(([who, text]) => ({ who, text: text.replace('{hidden_measured}', 'Dozens'), src: null }));
+  return playDialogue(lines, { before: 'radio' });
 }
 
 export async function playReaction(key) {
@@ -177,7 +179,7 @@ export async function sfx(key) {
 // Hooks for the side-panel tabs and the "Try one" sliders.
 let lastTier = null;
 export const narration = {
-  tab(t) { if (t === 'learned') playAct('act1'); else if (t === 'custom') playAct('custom'); },
+  tab(t) { if (t === 'learned') playAct('act1'); else if (t === 'results') playAct('results'); else if (t === 'custom') playAct('custom'); },
   // speak when the tier changes, not on every slider tick
   custom({ pB, thr = 0.6, sizeM, speedKms, energyMt }) {
     const t = pB < 0.2 ? 'chill' : pB < thr ? 'sus' : 'screwed';

@@ -11,6 +11,7 @@ import { planetElementsAt } from './planets.js';
 import { addPlanets, addSunAndLights, loader, BG_COLOR } from './bodies.js';
 import { ALWAYS_SHOW, sampled, SAMPLE_EVERY } from './cloudFilter.js';
 import { replay, revealOf, REPLAY_GREY, SPREAD } from '../lib/replay.js';
+import { playAct } from '../lib/narration.js';
 import { MAX_JD, jdFromDate, meanAnomalyAt } from './time.js';
 import TimeControls from './TimeControls.jsx';
 import ViewButtons from './ViewButtons.jsx';
@@ -83,6 +84,10 @@ const ease = (t) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
 // measured it at >= 140 m. Dark surfaces make them look faint (H > 22), so the brightness rule misses them.
 export const isMeasuredHidden = (a) => !!a.hidden && (a.D_meas ?? 0) >= 140;
 
+// CAPCOM explains these toggles once per page load (remounting the app on Replay intro doesn't repeat them)
+let riskExplained = false;
+let showAllExplained = false;
+
 export default function SolarSystem({ asteroids, metrics, view, onSelect, pickRequest, custom, onReady }) {
   const onReadyRef = useRef(onReady);
   onReadyRef.current = onReady;
@@ -91,9 +96,8 @@ export default function SolarSystem({ asteroids, metrics, view, onSelect, pickRe
   // Shared clock (see TimeControls.jsx). Starts at today and begins playing once the intro hands off.
   const timeRef = useRef({ jd: jdFromDate(new Date()), playing: false, speed: 1, dirty: true, onTick: null });
   const [showAll, setShowAll] = useState(false);              // false = thinned cloud (see cloudFilter.js)
-  // false = plain rock; true = red high risk / blue low risk. On after "Watch the AI learn", so the replay
-  // reveals the model's verdicts instead of turning grey dots into rock-colored ones.
-  const [highlightRisk, setHighlightRisk] = useState(() => replay.mode !== 'off');
+  // false = plain rock; true = red high risk / blue low risk. Off by default, even after "Watch the AI learn".
+  const [highlightRisk, setHighlightRisk] = useState(false);
   const [counts, setCounts] = useState({ shown: 0, total: 0, hidden: 0 }); // for the "Showing X of Y" caption
 
   // Create the scene once; clean up on unmount.
@@ -458,7 +462,11 @@ export default function SolarSystem({ asteroids, metrics, view, onSelect, pickRe
           <div className="cloud-info">
             <button
               type="button" className={`risk-toggle${highlightRisk ? ' on' : ''}`} aria-pressed={highlightRisk}
-              onClick={() => setHighlightRisk((h) => !h)}
+              onClick={() => {
+                // CAPCOM explains the colors the first time only; later toggles stay quiet
+                if (!riskExplained) { riskExplained = true; playAct('risk_on'); }
+                setHighlightRisk(!highlightRisk);
+              }}
               disabled={view.showMistakes || view.showHidden}
               title={view.showMistakes || view.showHidden ? 'Mistakes / hidden-hazards mode uses its own colors' : undefined}
             >
@@ -468,7 +476,11 @@ export default function SolarSystem({ asteroids, metrics, view, onSelect, pickRe
               <small className="risk-key"><span className="hot">●</span> high risk · <span className="cold">●</span> low risk</small>
             )}
             <label>
-              <input type="checkbox" id="showAllAsteroids" checked={showAll} onChange={(e) => setShowAll(e.target.checked)} />
+              <input type="checkbox" id="showAllAsteroids" checked={showAll}
+                onChange={(e) => {
+                  setShowAll(e.target.checked);
+                  if (e.target.checked && !showAllExplained) { showAllExplained = true; playAct('show_all_on'); }
+                }} />
               {' '}Show all asteroids
             </label>
             <small>

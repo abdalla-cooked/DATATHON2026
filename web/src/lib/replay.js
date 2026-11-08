@@ -11,11 +11,11 @@ export const SPREAD = 0.06;          // each dot fades in over this share of the
 // to draw its dots at the same on-screen size as the app.
 export const appPixelRatio = () => Math.min(window.devicePixelRatio || 1, 2);
 
-const state = { mode: 'off', t0: 0, listeners: new Set() }; // mode: off | armed | running
+const state = { mode: 'off', t0: 0, listeners: new Set(), starters: new Set() }; // mode: off | armed | running
 
 export const replay = {
   arm() { state.mode = 'armed'; },
-  start() { state.mode = 'running'; state.t0 = performance.now(); },
+  start() { state.mode = 'running'; state.t0 = performance.now(); state.starters.forEach((f) => f()); },
   off() { state.mode = 'off'; },
   get mode() { return state.mode; },
   // 0..1 (1 = every dot colored). Eased so it starts gently and settles.
@@ -27,6 +27,7 @@ export const replay = {
     return t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
   },
   onDone(f) { state.listeners.add(f); return () => state.listeners.delete(f); },
+  onStart(f) { state.starters.add(f); return () => state.starters.delete(f); },
 };
 
 // Stable 0..1 value per asteroid: when the replay reveals it. Its own hash (FNV-1a + a murmur

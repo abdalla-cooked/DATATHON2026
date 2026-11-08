@@ -36,6 +36,9 @@ export default function App({ replay = false, onReady, onReplayIntro }) {
     return replayStore.onDone(() => setUiIn(true));
   }, [replay]);
 
+  // "Watch the AI learn": CAPCOM welcomes the intern as the dots start lighting up.
+  useEffect(() => (replay ? replayStore.onStart(() => playAct('welcome')) : undefined), [replay]);
+
   // Mission Control Live: the commentators react to every click, straight from the click handler
   // (so clicking the same asteroid again comments again, and the browser counts it as a user gesture).
   const viewRef = useRef(view);
@@ -55,6 +58,7 @@ export default function App({ replay = false, onReady, onReplayIntro }) {
     if (view.showHidden && !was.showHidden) playAct('act4');
     else if (view.showMistakes && !was.showMistakes) playAct('mistakes');
     else if (view.model !== was.model) playAct(view.model === 'B' ? 'act2' : 'act1');
+    else if (view.testOnly && !was.testOnly) playAct('test_only');
   }, [view]);
 
   return (
