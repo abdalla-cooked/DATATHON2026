@@ -12,10 +12,10 @@ const liveVoiceInDev = (mode) => ({
   configureServer(server) {
     const env = loadEnv(mode, fileURLToPath(new URL('..', import.meta.url)), '');
     for (const k of ['ELEVENLABS_API_KEY', 'CAPCOM_VOICE_ID', 'INTERN_VOICE_ID', 'ANTHROPIC_API_KEY',
-                     'LIVE_SCRIPT_MODEL', 'LIVE_SCRIPT_EFFORT']) {
+                     'LIVE_SCRIPT_MODEL', 'LIVE_SCRIPT_EFFORT', 'CAPCOM_CHAT_MODEL', 'CAPCOM_CHAT_EFFORT']) {
       if (env[k] && !process.env[k]) process.env[k] = env[k];
     }
-    for (const name of ['say', 'script', 'health']) {
+    for (const name of ['say', 'script', 'chat', 'health']) {
       server.middlewares.use(`/api/${name}`, async (req, res) => {
         const mod = await server.ssrLoadModule(`/api/${name}.js`);
         await mod.default(req, res);

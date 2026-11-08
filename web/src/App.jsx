@@ -7,6 +7,7 @@ import SolarSystem from './three/SolarSystem.jsx';
 import TopBar from './components/TopBar.jsx';
 import ReplayHud from './components/ReplayHud.jsx';
 import AsteroidDetails from './components/AsteroidDetails.jsx';
+import AskCapcom from './components/AskCapcom.jsx';
 
 // Shared state replaces the window CustomEvents from PLAN.md Contract 4:
 //   view       <- 'view-changed'       (TopBar sets it, SolarSystem reads it)
@@ -73,6 +74,7 @@ export default function App({ replay = false, onReady, onReplayIntro }) {
       <AsteroidDetails asteroid={selected} model={view.model} onClose={() => sceneApi.current?.deselect()} />
       <TopBar view={view} setView={setView} onReplayIntro={onReplayIntro} />
       <MissionControl />
+      {uiIn && <AskCapcom />}
       {replay && <ReplayHud asteroids={asteroids} metrics={metrics} />}
       {metrics?._mock && <div id="mockBanner">Mock data. Real model results load when ML pushes the exports.</div>}
       {error && <div className="error">Couldn't load data: {String(error.message)}</div>}
