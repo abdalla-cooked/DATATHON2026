@@ -32,6 +32,7 @@ const SIZE = { safe: 3, hazard: 5, correct: 2, falseAlarm: 4, miss: 5, hidden: 8
 const PULSE = 0.3;                       // dots swell by up to 30% while pulsing (mistakes + hidden-hazards modes)
 const HIDDEN_TAGS = 5;                   // Act 4: name tags on this many of the biggest hidden hazards
 const MARKER_SIZE = 18;                  // pixels: white ring around the selected asteroid
+const FOCUS_DIST = 4;                    // scene units (0.4 AU): how close the camera gets when zooming in on a selection
 const PICK_RADIUS = 10;                  // pixels: how close a click must be to a dot to select it
 
 // Asteroid sprite: a lumpy, lit rock with a few craters. Drawn in greys, so the per-dot color tints it.
@@ -90,7 +91,7 @@ export const isMeasuredHidden = (a) => !!a.hidden && (a.D_meas ?? 0) >= 140;
 let riskExplained = false;
 let showAllExplained = false;
 
-export default function SolarSystem({ asteroids, metrics, view, onSelect, pickRequest, custom, onReady, onReplayIntro }) {
+export default function SolarSystem({ asteroids, metrics, view, onSelect, pickRequest, custom, onReady, onReplayIntro, apiRef }) {
   const onReadyRef = useRef(onReady);
   onReadyRef.current = onReady;
   const canvasRef = useRef(null);
@@ -184,13 +185,28 @@ export default function SolarSystem({ asteroids, metrics, view, onSelect, pickRe
     // Smooth camera glide to a preset (view buttons). Always ends looking at the Sun.
     let flight = null;
     const ORIGIN = new THREE.Vector3();
+    const reduceMotion = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
     ctx.flyTo = (name) => {
       const v = VIEWS[name];
       if (!v) return;
-      const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+      ctx.follow = false;
       flight = {
-        from: camera.position.clone(), to: new THREE.Vector3(...v.pos),
-        fromT: controls.target.clone(), start: performance.now(), dur: reduce ? 1 : 1400,
+        from: camera.position.clone(), to: new THREE.Vector3(...v.pos), toT: ORIGIN,
+        fromT: controls.target.clone(), start: performance.now(), dur: reduceMotion() ? 1 : 1400,
+      };
+    };
+
+    // Zoom in on the selected asteroid and keep it centered as it moves along its orbit.
+    // The camera keeps its current viewing angle and ends FOCUS_DIST units (1 unit = 0.1 AU) from the rock.
+    const focusPos = new THREE.Vector3();
+    const livePos = () => positionAt(ctx.selected, meanAnomalyAt(ctx.selected, time.jd), focusPos);
+    ctx.focusOn = () => {
+      if (!ctx.selected) return;
+      const offset = camera.position.clone().sub(controls.target).setLength(FOCUS_DIST);
+      ctx.follow = true;
+      flight = {
+        from: camera.position.clone(), fromT: controls.target.clone(), offset,
+        start: performance.now(), dur: reduceMotion() ? 1 : 1600,
       };
     };
 
@@ -222,11 +238,22 @@ export default function SolarSystem({ asteroids, metrics, view, onSelect, pickRe
       if (time.dirty) { placeAll(time.jd); time.dirty = false; }
 
       if (ctx.impact.active) { flight = null; ctx.impact.update(dt); } // the event drives the camera
+      if (ctx.impact.active && ctx.selected) ctx.dropSelection?.();     // close the details card so the event has the screen
       if (flight) {
         const t = Math.min((now - flight.start) / flight.dur, 1), k = ease(t);
-        camera.position.lerpVectors(flight.from, flight.to, k);
-        controls.target.lerpVectors(flight.fromT, ORIGIN, k);
+        if (flight.offset && ctx.selected) {          // zooming in on a moving asteroid: aim at where it is now
+          const p = livePos();
+          controls.target.lerpVectors(flight.fromT, p, k);
+          camera.position.lerpVectors(flight.from, p.clone().add(flight.offset), k);
+        } else if (!flight.offset) {
+          camera.position.lerpVectors(flight.from, flight.to, k);
+          controls.target.lerpVectors(flight.fromT, flight.toT, k);
+        }
         if (t >= 1) flight = null;
+      } else if (ctx.follow && ctx.selected) {         // after the zoom: ride along, the user can still orbit around it
+        const delta = livePos().clone().sub(controls.target);
+        controls.target.add(delta);
+        camera.position.add(delta);
       }
       controls.update();
       updateLabels();
@@ -402,6 +429,7 @@ export default function SolarSystem({ asteroids, metrics, view, onSelect, pickRe
         obj.material.dispose();
       }
       selectedLine = ctx.marker = ctx.selected = null;
+      ctx.follow = false;
     };
 
     const onPointerDown = (ev) => { down = { x: ev.clientX, y: ev.clientY }; };
@@ -437,10 +465,20 @@ export default function SolarSystem({ asteroids, metrics, view, onSelect, pickRe
       ctx.selected = a;
       ctx.scene.add(selectedLine, ctx.marker);
       timeRef.current.dirty = true; // places the marker at the current date
+      ctx.focusOn();                // glide in and follow it
       onSelectRef.current?.(a);
     };
 
+    // Close the details card: drop the selection and glide back to Earth's neighborhood.
+    const deselect = () => {
+      clearSelection();
+      ctx.flyTo('earth');
+      onSelectRef.current?.(null);
+    };
+
     ctx.select = select;
+    ctx.dropSelection = () => { clearSelection(); onSelectRef.current?.(null); }; // no camera move (the impact event uses this)
+    if (apiRef) apiRef.current = { deselect, select };
     canvas.addEventListener('pointerdown', onPointerDown);
     canvas.addEventListener('pointerup', onPointerUp);
     return () => {
