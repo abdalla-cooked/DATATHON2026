@@ -23,7 +23,11 @@ export default function App({ replay = false, onReady, onReplayIntro }) {
   const [view, setView] = useState({ model: 'A', testOnly: false, showMistakes: false, showHidden: false });
   const [uiIn, setUiIn] = useState(!replay);
   const [selected, setSelected] = useState(null); // asteroid shown in the details card (camera zooms in on it)
-  const sceneApi = useRef(null);                  // SolarSystem's deselect(), for the card's close button
+  const sceneApi = useRef(null);                  // SolarSystem's deselect() (card's close button) and startImpact()
+  // The impact event starts on its own once the viewer has inspected two different asteroids (once per visit to
+  // the app; "Back to the start" remounts it). Model A ends in extinction, Model B saves Earth.
+  const inspected = useRef(new Set());
+  const impactQueued = useRef(false);
 
   useEffect(() => {
     if (!replay) { setUiIn(true); return undefined; }
@@ -43,7 +47,13 @@ export default function App({ replay = false, onReady, onReplayIntro }) {
     setSelected(a);
     if (!a) return;                               // deselected (card closed): no commentary
     const part = viewRef.current.showHidden && a.hidden ? 'hidden' : 'report';
-    playAsteroid(a, part, metrics?.B?.threshold);
+    const talking = playAsteroid(a, part, metrics?.B?.threshold);
+    if (impactQueued.current) return;
+    inspected.current.add(a.pdes);
+    if (inspected.current.size < 2) return;
+    impactQueued.current = true;
+    // let CAPCOM finish the second asteroid's commentary, then something new shows up on the radar
+    Promise.resolve(talking).then(() => setTimeout(() => sceneApi.current?.startImpact(viewRef.current.model), 1500));
   }, [metrics]);
 
   const prevView = useRef(view);
@@ -60,7 +70,7 @@ export default function App({ replay = false, onReady, onReplayIntro }) {
     <div className={'app' + (uiIn ? '' : ' ui-out')}>
       <SolarSystem asteroids={asteroids} metrics={metrics} view={view} onSelect={onSelect} onReplayIntro={onReplayIntro}
         onReady={onReady} apiRef={sceneApi} />
-      <AsteroidDetails asteroid={selected} onClose={() => sceneApi.current?.deselect()} />
+      <AsteroidDetails asteroid={selected} model={view.model} onClose={() => sceneApi.current?.deselect()} />
       <TopBar view={view} setView={setView} onReplayIntro={onReplayIntro} />
       <MissionControl />
       {replay && <ReplayHud asteroids={asteroids} metrics={metrics} />}

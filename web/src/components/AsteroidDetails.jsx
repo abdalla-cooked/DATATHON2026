@@ -20,11 +20,13 @@ function sizeOf(a) {
   return { m: 1329e3 / Math.sqrt(0.14) * 10 ** (-a.H / 5), how: 'estimated from brightness' };
 }
 
-export default function AsteroidDetails({ asteroid: a, onClose }) {
+// model: 'A' or 'B', whichever is selected in the top bar. Only that model's score is shown.
+export default function AsteroidDetails({ asteroid: a, model = 'A', onClose }) {
   if (!a) return null;
   const size = sizeOf(a);
-  const tier = tierOf(a.pB ?? 0);
-  const why = L.why?.[a.why]?.[0];
+  const p = (model === 'B' ? a.pB : a.pA) ?? 0;
+  const tier = tierOf(p);
+  const why = model === 'B' ? L.why?.[a.why]?.[0] : null; // the explanations come from Model B
   return (
     <aside className="asteroid-details" role="dialog" aria-label={`Details for ${a.name}`}>
       <button type="button" className="ad-close" onClick={onClose} aria-label="Close details and zoom out">×</button>
@@ -42,8 +44,7 @@ export default function AsteroidDetails({ asteroid: a, onClose }) {
       )}
 
       <div className="ad-scores">
-        <div><span>Model A risk</span><b>{score100(a.pA ?? 0)}</b></div>
-        <div><span>Model B risk</span><b>{score100(a.pB ?? 0)}</b><em className={`badge ${tier}`}>{TIER_LABEL[tier]}</em></div>
+        <div><span>Model {model} risk</span><b>{score100(p)}</b><em className={`badge ${tier}`}>{TIER_LABEL[tier]}</em></div>
       </div>
       {why && <p className="ad-why">Model B's main reason: {why}.</p>}
 

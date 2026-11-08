@@ -78,13 +78,6 @@
 .impact-card.saved { border-color: #1f4a8a; background: rgba(4, 8, 16, .84); }
 .impact-card.saved .ic-kicker { color: #5aa2ff; }
 
-/* TEMPORARY test trigger */
-.impact-test {
-  position: fixed; right: 16px; bottom: 16px; z-index: 6; padding: 6px 10px; cursor: pointer;
-  font: 600 11px system-ui, sans-serif; letter-spacing: .05em; color: #ffb3ad;
-  background: rgba(40, 8, 6, .85); border: 1px dashed #ff3b30; border-radius: 6px;
-}
-@media (max-width: 760px) { .impact-test { bottom: 112px; } }
 
 @media (prefers-reduced-motion: reduce) {
   .impact-banner, .impact-vignette, .impact-reticle i { animation: none; }
