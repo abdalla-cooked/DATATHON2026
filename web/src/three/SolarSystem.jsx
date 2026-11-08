@@ -1,6 +1,6 @@
 // P2 owns this file. The Three.js scene, mounted once inside React (PLAN.md §6).
 // Steps done: 1 bare scene · 2 orbits · 3 asteroid cloud · 4 toggles · 5 click to inspect · planets · time slider ·
-// Act 4 hidden hazards.
+// Act 4 hidden hazards · impact event (impactEvent.js) · impact shot (impactShot.js).
 // Props replace the window events of PLAN.md Contract 4.
 import { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
@@ -17,6 +17,7 @@ import TimeControls from './TimeControls.jsx';
 import ViewButtons from './ViewButtons.jsx';
 import { createImpactEvent } from './impactEvent.js';
 import './ImpactEvent.css';
+import { createImpactShot } from './impactShot.js';
 
 const ROCK = new THREE.Color(0xa89a88); // default: plain rock, no risk coloring
 const COLD = new THREE.Color(0x3d7bff); // "Highlight risk" on: below the model's threshold (low risk)
@@ -91,9 +92,15 @@ export const isMeasuredHidden = (a) => !!a.hidden && (a.D_meas ?? 0) >= 140;
 let riskExplained = false;
 let showAllExplained = false;
 
-export default function SolarSystem({ asteroids, metrics, view, onSelect, pickRequest, custom, onReady, onReplayIntro, apiRef }) {
+// impact: { cmd: 'start' | 'skip' | 'back', a, n } drives the impact shot (the "Simulate impact" what-if for a
+// selected asteroid); onImpact(state) reports its phase ({ phase: 'running', a } | { phase: 'results', a, effects } | null).
+// The shot and the impact event never run at the same time: each one refuses to start while the other is on.
+export default function SolarSystem({ asteroids, metrics, view, onSelect, pickRequest, custom, onReady, onReplayIntro, apiRef,
+  impact, onImpact }) {
   const onReadyRef = useRef(onReady);
   onReadyRef.current = onReady;
+  const onImpactRef = useRef(onImpact);
+  onImpactRef.current = onImpact;
   const canvasRef = useRef(null);
   const sceneRef = useRef(null); // { scene, camera, points, shown, cloud, ... } shared by the effects below
   // Shared clock (see TimeControls.jsx). Starts at today and begins playing once the intro hands off.
@@ -103,6 +110,7 @@ export default function SolarSystem({ asteroids, metrics, view, onSelect, pickRe
   const [highlightRisk, setHighlightRisk] = useState(false);
   const [counts, setCounts] = useState({ shown: 0, total: 0, hidden: 0 }); // for the "Showing X of Y" caption
   const [impactPhase, setImpactPhase] = useState('idle'); // the impact event (impactEvent.js)
+  const [shotOn, setShotOn] = useState(false);            // the impact shot (impactShot.js) is playing or showing results
 
   // Create the scene once; clean up on unmount.
   useEffect(() => {
@@ -147,7 +155,7 @@ export default function SolarSystem({ asteroids, metrics, view, onSelect, pickRe
     resize();
 
     // replayU: 0..1 progress of the "Watch the AI learn" replay (1 = every dot in its model color).
-    const ctx = { scene, camera, points: null, shown: [], cloud: null, pulse: false, selected: null, marker: null, hiddenTags: [],
+    const ctx = { scene, camera, points: null, shown: [], cloud: null, pulse: false, selected: null, marker: null, selectedLine: null, hiddenTags: [],
       replayU: { value: replay.progress() } };
     let readySent = false;
     sceneRef.current = ctx;
@@ -157,6 +165,36 @@ export default function SolarSystem({ asteroids, metrics, view, onSelect, pickRe
       scene, camera, controls, time, canvas, earth: planets.find((p) => p.planet.name === 'Earth'),
     });
     const offImpact = ctx.impact.onPhase(setImpactPhase);
+
+    // The impact shot: driven from the animation loop below, started / skipped / ended through the impact prop.
+    // While it runs the asteroid's own dot, marker and orbit line are hidden (the shot draws its own rock).
+    let hiddenDot = null;
+    const hideAsteroid = (a, hide) => {
+      if (hide) {
+        const k = ctx.shown.indexOf(a), attr = ctx.points?.geometry.attributes.dotSize;
+        if (attr && k >= 0) {
+          hiddenDot = { points: ctx.points, k, size: attr.getX(k) };
+          attr.setX(k, 0);
+          attr.needsUpdate = true;
+        }
+      } else if (hiddenDot) {
+        if (hiddenDot.points === ctx.points) { // the cloud may have been rebuilt meanwhile
+          const attr = ctx.points.geometry.attributes.dotSize;
+          attr.setX(hiddenDot.k, hiddenDot.size);
+          attr.needsUpdate = true;
+        }
+        hiddenDot = null;
+      }
+      if (ctx.marker) ctx.marker.visible = !hide;
+      if (ctx.selectedLine) ctx.selectedLine.visible = !hide;
+    };
+    ctx.shot = createImpactShot({
+      scene, camera, controls, time, hideAsteroid,
+      earth: planets.find((p) => p.planet.name === 'Earth'),
+      host: canvas.parentElement,
+      size: () => ({ w: canvas.clientWidth, h: canvas.clientHeight }),
+      onState: (st) => { setShotOn(!!st); onImpactRef.current?.(st); },
+    });
 
     // Move everything to Julian Date `jd`.
     const tmp = new THREE.Vector3();
@@ -212,13 +250,16 @@ export default function SolarSystem({ asteroids, metrics, view, onSelect, pickRe
 
     // Hide labels of bodies that sit almost on top of the Sun on screen (e.g. Mercury–Mars in the wide view).
     const sunPx = new THREE.Vector3(), bodyPx = new THREE.Vector3();
-    function updateLabels() {
+    // All of them (and the Act 4 name tags) stay hidden during the impact shot.
+    function updateLabels(shot) {
       const w = canvas.clientWidth, h = canvas.clientHeight;
       sunPx.set(0, 0, 0).project(camera);
       for (const { body, label } of planets) {
+        if (shot) { label.visible = false; continue; }
         bodyPx.copy(body.position).project(camera);
         label.visible = Math.hypot((bodyPx.x - sunPx.x) * w / 2, (bodyPx.y - sunPx.y) * h / 2) >= LABEL_MIN_PX;
       }
+      for (const { obj } of ctx.hiddenTags) obj.visible = !shot;
     }
 
     let last = performance.now();
@@ -229,6 +270,9 @@ export default function SolarSystem({ asteroids, metrics, view, onSelect, pickRe
       // Start the clock as soon as the intro is out of the way: replay 'armed' means the intro still covers
       // the app (its last frame matches these dot positions), so wait until it starts or is skipped.
       if (!autoStarted && replay.mode !== 'armed') { autoStarted = true; time.playing = true; }
+      // The impact shot owns the clock and the camera while it runs (it pauses time.playing itself).
+      ctx.shot.update(now);
+      const shot = ctx.shot.active;
       if (time.playing) {
         time.jd = Math.min(time.jd + time.speed * dt, MAX_JD);
         if (time.jd >= MAX_JD) time.playing = false;
@@ -239,7 +283,8 @@ export default function SolarSystem({ asteroids, metrics, view, onSelect, pickRe
 
       if (ctx.impact.active) { flight = null; ctx.impact.update(dt); } // the event drives the camera
       if (ctx.impact.active && ctx.selected) ctx.dropSelection?.();     // close the details card so the event has the screen
-      if (flight) {
+      if (shot) flight = null;                                          // the shot drives the camera
+      else if (flight) {
         const t = Math.min((now - flight.start) / flight.dur, 1), k = ease(t);
         if (flight.offset && ctx.selected) {          // zooming in on a moving asteroid: aim at where it is now
           const p = livePos();
@@ -255,10 +300,11 @@ export default function SolarSystem({ asteroids, metrics, view, onSelect, pickRe
         controls.target.add(delta);
         camera.position.add(delta);
       }
-      controls.update();
-      updateLabels();
+      if (!shot) controls.update();
+      updateLabels(shot);
       sun.rotation.y += dt * 0.05; // slow cosmetic spin (not tied to the time slider)
       for (const { globe, planet } of planets) {
+        if (shot) break;                                                // frozen so the impact site stays put
         if (!(ctx.impact.active && planet.name === 'Earth')) globe.rotation.y += dt * 0.15; // Earth holds still for the event
       }
       if (ctx.points) {
@@ -273,6 +319,7 @@ export default function SolarSystem({ asteroids, metrics, view, onSelect, pickRe
     });
 
     return () => {
+      ctx.shot.back();
       offImpact();
       ctx.impact.dispose();
       removeEventListener('resize', resize);
@@ -418,22 +465,23 @@ export default function SolarSystem({ asteroids, metrics, view, onSelect, pickRe
     const ctx = sceneRef.current;
     const canvas = canvasRef.current;
     if (!ctx) return;
-    let down = null, selectedLine = null;
+    let down = null;
     const v = new THREE.Vector3();
 
     const clearSelection = () => {
-      for (const obj of [selectedLine, ctx.marker]) {
+      for (const obj of [ctx.selectedLine, ctx.marker]) {
         if (!obj) continue;
         ctx.scene.remove(obj);
         obj.geometry.dispose();
         obj.material.dispose();
       }
-      selectedLine = ctx.marker = ctx.selected = null;
+      ctx.selectedLine = ctx.marker = ctx.selected = null;
       ctx.follow = false;
     };
 
     const onPointerDown = (ev) => { down = { x: ev.clientX, y: ev.clientY }; };
     const onPointerUp = (ev) => {
+      if (ctx.shot?.active) return; // no picking during the impact shot
       if (!down || Math.hypot(ev.clientX - down.x, ev.clientY - down.y) > 5) return; // it was a drag
       const r = canvas.getBoundingClientRect();
       const mx = ev.clientX - r.left, my = ev.clientY - r.top;
@@ -456,14 +504,14 @@ export default function SolarSystem({ asteroids, metrics, view, onSelect, pickRe
     // Also used by the UI (presets, worst-miss list) through the pickRequest prop below.
     const select = (a) => {
       clearSelection();
-      selectedLine = orbitLine(a, 0xffffff, 1);
+      ctx.selectedLine = orbitLine(a, 0xffffff, 1);
       ctx.marker = new THREE.Points(
         new THREE.BufferGeometry().setFromPoints([new THREE.Vector3()]),
         new THREE.PointsMaterial({ size: MARKER_SIZE, sizeAttenuation: false, map: RING, transparent: true, depthTest: false }),
       );
       ctx.marker.frustumCulled = false;
       ctx.selected = a;
-      ctx.scene.add(selectedLine, ctx.marker);
+      ctx.scene.add(ctx.selectedLine, ctx.marker);
       timeRef.current.dirty = true; // places the marker at the current date
       ctx.focusOn();                // glide in and follow it
       onSelectRef.current?.(a);
@@ -478,7 +526,13 @@ export default function SolarSystem({ asteroids, metrics, view, onSelect, pickRe
 
     ctx.select = select;
     ctx.dropSelection = () => { clearSelection(); onSelectRef.current?.(null); }; // no camera move (the impact event uses this)
-    if (apiRef) apiRef.current = { deselect, select, startImpact: (model) => ctx.impact.start(model) };
+    // startImpact returns false (and does nothing) while the impact shot is on, so the app can try again later.
+    const startImpact = (model) => {
+      if (ctx.shot.active) return false;
+      ctx.impact.start(model);
+      return true;
+    };
+    if (apiRef) apiRef.current = { deselect, select, startImpact };
     canvas.addEventListener('pointerdown', onPointerDown);
     canvas.addEventListener('pointerup', onPointerUp);
     return () => {
@@ -497,6 +551,15 @@ export default function SolarSystem({ asteroids, metrics, view, onSelect, pickRe
     if (a) ctx.select(a);
   }, [pickRequest, asteroids]);
 
+  // Impact shot commands from the app (each command is a new object, so repeating one still fires).
+  useEffect(() => {
+    const ctx = sceneRef.current;
+    if (!ctx?.shot || !impact) return;
+    if (impact.cmd === 'start') { if (!ctx.impact.active) ctx.shot.start(impact.a); }
+    else if (impact.cmd === 'skip') ctx.shot.skip();
+    else if (impact.cmd === 'back') ctx.shot.back();
+  }, [impact]);
+
   // "Design your own asteroid": draw the custom orbit in cyan.
   useEffect(() => {
     const ctx = sceneRef.current;
@@ -512,7 +575,7 @@ export default function SolarSystem({ asteroids, metrics, view, onSelect, pickRe
       <TimeControls time={timeRef} />
       <ImpactOverlay phase={impactPhase} model={sceneRef.current?.impact.model} onBackToStart={onReplayIntro} />
       {/* TEMPORARY: plays the impact event on demand, for testing. Model A ends in extinction, Model B saves Earth. */}
-      {impactPhase === 'idle' && (
+      {impactPhase === 'idle' && !shotOn && (
         <button type="button" className="impact-test" onClick={() => sceneRef.current?.impact.start(view.model)}>
           TEST: impact event (Model {view.model})
         </button>

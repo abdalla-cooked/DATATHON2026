@@ -21,7 +21,8 @@ function sizeOf(a) {
 }
 
 // model: 'A' or 'B', whichever is selected in the top bar. Only that model's score is shown.
-export default function AsteroidDetails({ asteroid: a, model = 'A', onClose }) {
+// onSimulate: when set, a "Simulate impact" button plays the impact shot for this asteroid (bound orbits only).
+export default function AsteroidDetails({ asteroid: a, model = 'A', onClose, onSimulate }) {
   if (!a) return null;
   const size = sizeOf(a);
   const p = (model === 'B' ? a.pB : a.pA) ?? 0;
@@ -55,6 +56,12 @@ export default function AsteroidDetails({ asteroid: a, model = 'A', onClose }) {
         <dt>Orbit</dt><dd>{a.a} AU wide · tilt {a.i}° · stretch {a.e}</dd>
         {a.E_mt > 0 && <><dt>If it ever hit (what-if)</dt><dd>~{fmtMt(a.E_mt)} of TNT</dd></>}
       </dl>
+      {onSimulate && (
+        <button type="button" className="impact-btn" onClick={onSimulate}
+          title="Play a hypothetical collision with Earth for this asteroid">
+          ☄️ Simulate impact
+        </button>
+      )}
       <p className="ad-note">Risk scores are the model's 0–100 rating, not a chance of impact. Drag to look around; it stays centered.</p>
     </aside>
   );

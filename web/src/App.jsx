@@ -7,6 +7,7 @@ import SolarSystem from './three/SolarSystem.jsx';
 import TopBar from './components/TopBar.jsx';
 import ReplayHud from './components/ReplayHud.jsx';
 import AsteroidDetails from './components/AsteroidDetails.jsx';
+import ImpactHud from './components/ImpactHud.jsx';
 
 // Shared state replaces the window CustomEvents from PLAN.md Contract 4:
 //   view       <- 'view-changed'       (TopBar sets it, SolarSystem reads it)
@@ -28,6 +29,14 @@ export default function App({ replay = false, onReady, onReplayIntro }) {
   // the app; "Back to the start" remounts it). Model A ends in extinction, Model B saves Earth.
   const inspected = useRef(new Set());
   const impactQueued = useRef(false);
+  const impactWaiting = useRef(false);            // the event was due while the impact shot was on: start it after
+
+  // Impact shot (three/impactShot.js): "Simulate impact" in the details card bends the selected orbit onto Earth
+  // and plays a hypothetical collision. impact = the latest command for SolarSystem; impactState = what the
+  // shot reports back (null = not running).
+  const [impact, setImpact] = useState(null);
+  const [impactState, setImpactState] = useState(null);
+  const impactCmd = useCallback((cmd, a) => setImpact((prev) => ({ cmd, a, n: (prev?.n ?? 0) + 1 })), []);
 
   useEffect(() => {
     if (!replay) { setUiIn(true); return undefined; }
@@ -53,8 +62,25 @@ export default function App({ replay = false, onReady, onReplayIntro }) {
     if (inspected.current.size < 2) return;
     impactQueued.current = true;
     // let CAPCOM finish the second asteroid's commentary, then something new shows up on the radar
-    Promise.resolve(talking).then(() => setTimeout(() => sceneApi.current?.startImpact(viewRef.current.model), 1500));
+    Promise.resolve(talking).then(() => setTimeout(startImpactEvent, 1500));
   }, [metrics]);
+
+  // The impact event refuses to start while the impact shot is on; then it waits until the shot is closed.
+  const startImpactEvent = () => {
+    if (sceneApi.current?.startImpact(viewRef.current.model) === false) impactWaiting.current = true;
+  };
+  useEffect(() => {
+    if (impactState || !impactWaiting.current) return undefined;
+    impactWaiting.current = false;
+    const t = setTimeout(startImpactEvent, 1500);
+    return () => clearTimeout(t);
+  }, [impactState]);
+
+  const simulateImpact = () => {
+    if (!selected) return;
+    playAsteroid(selected, 'whatif', metrics?.B?.threshold);
+    impactCmd('start', selected);
+  };
 
   const prevView = useRef(view);
   useEffect(() => {
@@ -67,10 +93,12 @@ export default function App({ replay = false, onReady, onReplayIntro }) {
   }, [view]);
 
   return (
-    <div className={'app' + (uiIn ? '' : ' ui-out')}>
+    <div className={'app' + (uiIn ? '' : ' ui-out') + (impactState ? ' impact-on' : '')}>
       <SolarSystem asteroids={asteroids} metrics={metrics} view={view} onSelect={onSelect} onReplayIntro={onReplayIntro}
-        onReady={onReady} apiRef={sceneApi} />
-      <AsteroidDetails asteroid={selected} model={view.model} onClose={() => sceneApi.current?.deselect()} />
+        onReady={onReady} apiRef={sceneApi} impact={impact} onImpact={setImpactState} />
+      <AsteroidDetails asteroid={impactState ? null : selected} model={view.model} onClose={() => sceneApi.current?.deselect()}
+        onSimulate={selected && selected.e < 1 ? simulateImpact : null} />
+      <ImpactHud state={impactState} onSkip={() => impactCmd('skip')} onBack={() => impactCmd('back')} />
       <TopBar view={view} setView={setView} onReplayIntro={onReplayIntro} />
       <MissionControl />
       {replay && <ReplayHud asteroids={asteroids} metrics={metrics} />}
