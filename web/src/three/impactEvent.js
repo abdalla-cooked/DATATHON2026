@@ -21,7 +21,7 @@
 import * as THREE from 'three';
 import { CSS2DObject } from 'three/examples/jsm/renderers/CSS2DRenderer.js';
 import { mergeVertices } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
-import { playAct, signalLost, sfx, stop as stopNarration } from '../lib/narration.js';
+import { getRate, playAct, signalLost, sfx, stop as stopNarration } from '../lib/narration.js';
 import { music } from '../lib/music.js';
 
 const R_EARTH = 0.27;
@@ -563,7 +563,12 @@ export function createImpactEvent({ scene, camera, controls, earth, time, canvas
   };
 
   // ------------------------------------------------ per frame
-  function update(dt) {
+  // Before the impact / intercept, the event's clock runs at the narration speed (Mission Control ⏩ button), so the
+  // rock, the countdown and the interceptor keep pace with the voices and the impact still lands on the scream.
+  // The blast and aftermath play at normal speed.
+  const AFTER = new Set(['impact', 'aftermath', 'destroyed', 'saved']);
+  function update(realDt) {
+    const dt = AFTER.has(phase) ? realDt : realDt * getRate();
     if (!objs) return;
     const o = objs, E = earthPos();
     o.t += dt; o.tPhase += dt;
