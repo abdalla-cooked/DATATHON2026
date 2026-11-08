@@ -339,22 +339,94 @@ export default {
     "[screaming] HOLD ON TO SOMETHING!"
    ]
   ],
-  "event_wake": [
+  "event_found_b": [
    [
-    "INTERN",
-    "[gasps, waking up with a start] PRESS ALL OF THEM! ...Wh-what? Where's the asteroid?"
+    "CAPCOM",
+    "That's strange. It's not in NASA's catalog. Never documented."
    ],
    [
     "CAPCOM",
-    "[long, disappointed sigh] There is no asteroid, rookie. You fell asleep at the console."
+    "And Model B just flagged it hazardous. No closest-approach data. It read the danger straight from the shape of the orbit."
    ],
    [
     "INTERN",
-    "[shaky, relieved] It was a dream? Oh, thank goodness. It hit us. Earth melted. You were SCREAMING."
+    "[panicking] Hazardous?! As in, hazardous to US?!"
    ],
    [
     "CAPCOM",
-    "[sighs, shaking his head] I don't scream. Wipe the drool off the radar and get back to work."
+    "As in, we act now, while it's still far out. Arming the planetary defense interceptor."
+   ]
+  ],
+  "event_approach_b": [
+   [
+    "INTERN",
+    "[panicking, breathing fast] I can't do this. I'm just an intern!"
+   ],
+   [
+    "CAPCOM",
+    "Rookie. Look at me. You read the manual. Twice."
+   ],
+   [
+    "INTERN",
+    "[shaky] ...Interceptor armed. Target locked. I think."
+   ],
+   [
+    "CAPCOM",
+    "You think, or you know?"
+   ],
+   [
+    "INTERN",
+    "[nervous, steadier] ...I know."
+   ],
+   [
+    "CAPCOM",
+    "Good. This shot is yours."
+   ],
+   [
+    "INTERN",
+    "[quiet, surprised] Mine?"
+   ],
+   [
+    "CAPCOM",
+    "Yours. On my mark."
+   ]
+  ],
+  "event_countdown_b": [
+   [
+    "INTERN",
+    "[deep breath, determined] Ready."
+   ],
+   [
+    "CAPCOM",
+    "Three. Two. One. Mark!"
+   ]
+  ],
+  "event_fire_b": [
+   [
+    "INTERN",
+    "[bold, shouting with confidence] INTERCEPTOR AWAY!"
+   ],
+   [
+    "CAPCOM",
+    "[tense, quiet] Come on... come on..."
+   ]
+  ],
+  "event_saved_b": [
+   [
+    "INTERN",
+    "[stunned, then triumphant] Direct hit... Target destroyed! I DID IT! Earth is SAFE!"
+   ],
+   [
+    "CAPCOM",
+    "You did, Intern. Steady hands. Bold call. That was hero work."
+   ],
+   [
+    "INTERN",
+    "[confident, proud] Hero. ...Can you put that in my performance review?"
+   ],
+   [
+    "CAPCOM",
+    "[laughs] Already writing it."
    ]
   ]
  },

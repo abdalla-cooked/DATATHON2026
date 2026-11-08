@@ -90,7 +90,7 @@ export const isMeasuredHidden = (a) => !!a.hidden && (a.D_meas ?? 0) >= 140;
 let riskExplained = false;
 let showAllExplained = false;
 
-export default function SolarSystem({ asteroids, metrics, view, onSelect, pickRequest, custom, onReady }) {
+export default function SolarSystem({ asteroids, metrics, view, onSelect, pickRequest, custom, onReady, onReplayIntro }) {
   const onReadyRef = useRef(onReady);
   onReadyRef.current = onReady;
   const canvasRef = useRef(null);
@@ -102,7 +102,6 @@ export default function SolarSystem({ asteroids, metrics, view, onSelect, pickRe
   const [highlightRisk, setHighlightRisk] = useState(false);
   const [counts, setCounts] = useState({ shown: 0, total: 0, hidden: 0 }); // for the "Showing X of Y" caption
   const [impactPhase, setImpactPhase] = useState('idle'); // the impact event (impactEvent.js)
-  const [waking, setWaking] = useState(0);                 // Restore Earth: it was all a dream (fade in from black)
 
   // Create the scene once; clean up on unmount.
   useEffect(() => {
@@ -473,18 +472,11 @@ export default function SolarSystem({ asteroids, metrics, view, onSelect, pickRe
     <>
       <canvas id="scene" ref={canvasRef} />
       <TimeControls time={timeRef} />
-      <ImpactOverlay phase={impactPhase} onRestore={() => {
-        // It was all a nightmare: the intern wakes up at the console, CAPCOM is not impressed.
-        sceneRef.current?.impact.restore();
-        sceneRef.current?.flyTo('earth');
-        setWaking(Date.now());
-        playAct('event_wake', {});
-      }} />
-      {waking > 0 && <div key={waking} className="impact-wake" aria-hidden="true" onAnimationEnd={() => setWaking(0)} />}
-      {/* TEMPORARY: plays the impact event on demand, for testing */}
+      <ImpactOverlay phase={impactPhase} model={sceneRef.current?.impact.model} onBackToStart={onReplayIntro} />
+      {/* TEMPORARY: plays the impact event on demand, for testing. Model A ends in extinction, Model B saves Earth. */}
       {impactPhase === 'idle' && (
-        <button type="button" className="impact-test" onClick={() => sceneRef.current?.impact.start()}>
-          TEST: impact event
+        <button type="button" className="impact-test" onClick={() => sceneRef.current?.impact.start(view.model)}>
+          TEST: impact event (Model {view.model})
         </button>
       )}
       <ViewButtons views={VIEWS} initial="earth" onView={(name) => sceneRef.current?.flyTo(name)}>
@@ -535,16 +527,34 @@ export default function SolarSystem({ asteroids, metrics, view, onSelect, pickRe
   );
 }
 
-// HTML layer of the impact event: radar alert banner, red vignette, impact flash, extinction card.
-function ImpactOverlay({ phase, onRestore }) {
+// HTML layer of the impact event: banners, red vignette, flashes, and the ending cards.
+// Model A: extinction. Model B: flags MC-1 hazardous early, the intern takes the shot, Earth is saved.
+function ImpactOverlay({ phase, model, onBackToStart }) {
   if (phase === 'idle') return null;
+  const back = onBackToStart && <button type="button" onClick={onBackToStart}>Back to the start</button>;
   return (
     <>
       {phase === 'detected' && (
         <div className="impact-banner" role="alert">⚠ Unidentified object on radar <small>click it to identify</small></div>
       )}
-      {phase === 'tracking' && (
+      {phase === 'tracking' && model !== 'B' && (
         <div className="impact-banner tracking" role="status">Tracking MC-1 <small>not in NASA's catalog</small></div>
+      )}
+      {phase === 'tracking' && model === 'B' && (
+        <div className="impact-banner hazard" role="alert">⚠ MC-1 flagged hazardous <small>by Model B, without MOID · interceptor arming</small></div>
+      )}
+      {phase === 'defense' && <div className="impact-banner defense" role="status">Interceptor armed <small>target locked</small></div>}
+      {phase === 'intercept' && <div className="impact-banner defense" role="status">Interceptor away</div>}
+      {phase === 'destroyed' && <div className="impact-flash small" aria-hidden="true" />}
+      {phase === 'saved' && (
+        <div className="impact-card saved" role="dialog" aria-label="Earth saved">
+          <p className="ic-kicker">Target destroyed</p>
+          <h2>Earth saved</h2>
+          <p>Model B flagged MC-1 as hazardous from the shape of its orbit alone, with no closest-approach data.
+            That early warning gave the intern time to take the shot.</p>
+          <p className="ic-note">This was fiction. MC-1 doesn't exist, and no known asteroid is on a collision course with Earth.</p>
+          {back}
+        </div>
       )}
       {phase === 'final' && <div className="impact-banner final" role="alert">⚠ Collision course</div>}
       {phase === 'final' && <div className="impact-vignette" aria-hidden="true" />}
@@ -555,7 +565,7 @@ function ImpactOverlay({ phase, onRestore }) {
           <h2>Extinction-level event</h2>
           <p>The crust melted. The oceans boiled away. Nothing survived.</p>
           <p className="ic-note">This was fiction. MC-1 doesn't exist, and no known asteroid is on a collision course with Earth.</p>
-          <button type="button" onClick={onRestore}>Restore Earth</button>
+          {back}
         </div>
       )}
     </>

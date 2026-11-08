@@ -24,9 +24,14 @@ const ready = Promise.all([
 ]);
 
 // subtitles never show the [delivery tags] that tell the voice how to act
+// The intern's hero moments (Model B's ending): read from the line's delivery tag before it's stripped.
+const heroTag = (text) => {
+  const tag = (text.match(/^\[([^\]]*)\]/)?.[1] || '').toLowerCase();
+  return /bold|triumph|proud|confiden/.test(tag) || (/determined/.test(tag) && !/timid/.test(tag));
+};
 const caption = (c) => {
   music.duck(c?.who === 'CAPCOM' || c?.who === 'INTERN'); // the music sits under the voices
-  listeners.forEach((fn) => fn(c && { ...c, text: stripTags(c.text) }));
+  listeners.forEach((fn) => fn(c && { ...c, hero: c.who === 'INTERN' && heroTag(c.text), text: stripTags(c.text) }));
 };
 const wait = (ms) => new Promise((r) => setTimeout(r, ms));
 const readingTime = (text) => Math.max(1200, stripTags(text).length * 65);

@@ -53,7 +53,7 @@ export default function App({ replay = false, onReady, onReplayIntro }) {
 
   return (
     <div className={'app' + (uiIn ? '' : ' ui-out')}>
-      <SolarSystem asteroids={asteroids} metrics={metrics} view={view} onSelect={onSelect}
+      <SolarSystem asteroids={asteroids} metrics={metrics} view={view} onSelect={onSelect} onReplayIntro={onReplayIntro}
         onReady={onReady} />
       <TopBar view={view} setView={setView} onReplayIntro={onReplayIntro} />
       <MissionControl />

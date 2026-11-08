@@ -5,7 +5,15 @@
 //   tracking  -> clicked: "not in NASA's catalog", it starts falling      (identify())
 //   final     -> close: CAPCOM panics, alarm, countdown, atmospheric entry
 //   impact    -> voices cut mid-word, flash, fireball, ejecta, the magma front sweeps the globe
-//   aftermath -> molten, ash-choked planet + the extinction card          (restore() puts Earth back)
+//   aftermath -> molten, ash-choked planet + the extinction card
+//
+// With Model B selected the story branches after the click: Model B flags MC-1 hazardous from its orbit's shape
+// alone (no MOID), so there's time to act:
+//   tracking  -> CAPCOM arms the interceptor and talks the intern into taking the shot
+//   defense   -> countdown ("On my mark")
+//   intercept -> the intern fires: a missile climbs out of Earth's atmosphere and homes in on MC-1
+//   destroyed -> direct hit: flash, fireball, the rock breaks apart and burns up
+//   saved     -> the "Earth saved" card
 //
 // Units are the scene's: 1 unit = 0.1 AU, Earth's (exaggerated) radius is 0.27. Earth's spin and the clock are
 // frozen while the event runs, so everything is placed relative to Earth's position when it started.
@@ -24,6 +32,7 @@ const FINAL = 23.3;        // seconds from "close" to impact: lands mid-scream i
 const KM_PER_UNIT = 14.96e6;
 const G = 0.035;           // ejecta gravity (units^3/s^2): escape speed at the surface is about 0.5 units/s
 const CARD_AT = 9;         // seconds after impact when the extinction card fades in
+const MISSILE_T = 7;       // Model B: seconds from launch to intercept
 
 const UP = new THREE.Vector3(0, 1, 0);
 const smooth = (t) => t * t * (3 - 2 * t);
@@ -99,8 +108,8 @@ function ramp(f, out, i) {
 }
 
 class Particles {
-  constructor(cap, { additive, smoke = false }) {
-    this.cap = cap; this.smoke = smoke; this.next = 0;
+  constructor(cap, { additive, smoke = false, vapor = false }) {
+    this.cap = cap; this.smoke = smoke; this.vapor = vapor; this.next = 0;
     this.pos = new Float32Array(cap * 3); this.col = new Float32Array(cap * 3);
     this.alpha = new Float32Array(cap); this.size = new Float32Array(cap);
     this.vel = new Float32Array(cap * 3); this.age = new Float32Array(cap); this.life = new Float32Array(cap);
@@ -146,7 +155,10 @@ class Particles {
       pos[i3] += vel[i3] * dt; pos[i3 + 1] += vel[i3 + 1] * dt; pos[i3 + 2] += vel[i3 + 2] * dt;
       const f = Math.min(age[i] / life[i], 1);
       size[i] = this.size0[i] * (1 + this.grow[i] * f);
-      if (this.smoke) {
+      if (this.vapor) {
+        alpha[i] = 0.32 * Math.pow(1 - f, 1.6);
+        col[i3] = 0.62; col[i3 + 1] = 0.72; col[i3 + 2] = 0.9;
+      } else if (this.smoke) {
         alpha[i] = 0.3 * Math.sin(Math.PI * Math.min(f * 1.4, 1)) * (1 - f * 0.3);
         const c = 0.07 + 0.06 * (1 - f); col[i3] = c * 1.25; col[i3 + 1] = c; col[i3 + 2] = c * 0.85;
       } else {
@@ -271,32 +283,34 @@ export function createImpactEvent({ scene, camera, controls, earth, time, canvas
 
     const fire = new Particles(16000, { additive: true });
     const ash = new Particles(5000, { additive: false, smoke: true });
-    scene.add(fire.points, ash.points);
+    const vapor = new Particles(6000, { additive: true, vapor: true });
+    scene.add(fire.points, ash.points, vapor.points);
 
-    return { E, curve, sHit, group, rock, spin, glow, line, tag, reticle, fire, ash,
+    return { E, curve, sHit, group, rock, spin, glow, line, tag, reticle, fire, ash, vapor,
       s: 0, t: 0, tPhase: 0, camDist: 10, shake: 0 };
   }
 
   function clear() {
     if (!objs) return;
-    const { group, rock, glow, line, reticle, fire, ash, shell, ash2, flashLight, fireball, chunks } = objs;
+    const { group, rock, glow, line, reticle, fire, ash, vapor, shell, ash2, flashLight, fireball, chunks } = objs;
     reticle.element.remove();
     group.remove(reticle);
     rock.geometry.dispose(); rock.material.dispose();
     glow.material.map.dispose(); glow.material.dispose();
     line.geometry.dispose(); line.material.dispose();
-    scene.remove(group, fire.points, ash.points);
-    fire.dispose(); ash.dispose();
+    scene.remove(group, fire.points, ash.points, vapor.points);
+    fire.dispose(); ash.dispose(); vapor.dispose();
     for (const m of [shell, ash2]) if (m) { m.parent.remove(m); m.geometry.dispose(); m.material.dispose(); }
     if (flashLight) scene.remove(flashLight);
     if (fireball) { scene.remove(fireball); fireball.material.map.dispose(); fireball.material.dispose(); }
     for (const c of chunks ?? []) { scene.remove(c.mesh); c.mesh.geometry.dispose(); c.mesh.material.dispose(); }
+    removeMissile(objs);
     objs = null;
   }
 
   // ------------------------------------------------ phases
   let saved = null;
-  function start() {
+  function start(model = 'A') {
     restore(false);
     const mine = ++epoch;
     saved = { playing: time.playing };
@@ -304,6 +318,7 @@ export function createImpactEvent({ scene, camera, controls, earth, time, canvas
     time.onTick?.(time.jd, false);
     controls.enabled = false;
     objs = build();
+    objs.model = model;
     // frame Earth and the newcomer together
     const mid = objs.E.clone().lerp(objs.curve.getPoint(0).add(objs.E), 0.5);
     objs.camFrom = camera.position.clone(); objs.targetFrom = controls.target.clone();
@@ -325,15 +340,118 @@ export function createImpactEvent({ scene, camera, controls, earth, time, canvas
     const mine = epoch;
     setPhase('tracking');
     objs.tPhase = 0;
-    objs.tag.querySelector('b').textContent = 'MC-1 · UNCATALOGUED';
+    const B = objs.model === 'B';
+    objs.tag.querySelector('b').textContent = B ? 'MC-1 · HAZARDOUS (MODEL B)' : 'MC-1 · UNCATALOGUED';
     objs.tag.classList.add('tracking');
-    const found = playAct('event_found');
-    await found;
+    if (B) objs.tag.classList.add('hazard');
+    await playAct(B ? 'event_found_b' : 'event_found');
     if (mine !== epoch) return;
-    const approach = playAct('event_approach');
+    const approach = playAct(B ? 'event_approach_b' : 'event_approach');
     await Promise.all([approach, until(() => mine !== epoch || objs.tPhase >= CRUISE_MIN)]);
     if (mine !== epoch) return;
-    goFinal();
+    if (B) goDefense(); else goFinal();
+  }
+
+  // ------------------------------------------------ Model B: planetary defense
+  const rockWorld = () => objs.group.localToWorld(objs.rock.position.clone());
+
+  async function goDefense() {
+    const mine = epoch, o = objs;
+    o.sFinal = o.s; o.tB = 0; o.tPhase = 0;
+    setPhase('defense');
+    await playAct('event_countdown_b', {});
+    if (mine !== epoch) return;
+    launch();
+  }
+
+  function launch() {
+    const o = objs, E = earthPos();
+    setPhase('intercept');
+    o.tPhase = 0;
+    playAct('event_fire_b', {});
+    sfx('whoosh');
+    // lift off from the point on Earth facing MC-1, arc up and out, then home in on the rock
+    const n0 = rockWorld().sub(E).normalize();
+    o.mL0 = E.clone().addScaledVector(n0, R_EARTH * 1.01);
+    o.mC = E.clone().addScaledVector(n0, R_EARTH + 0.45).addScaledVector(UP, 0.3);
+    const group = new THREE.Group();
+    const metal = new THREE.MeshStandardMaterial({ color: 0xe8ecf2, roughness: 0.45, metalness: 0.4 });
+    const body = new THREE.Mesh(new THREE.CylinderGeometry(0.005, 0.006, 0.04, 14), metal);
+    const nose = new THREE.Mesh(new THREE.ConeGeometry(0.005, 0.015, 14), metal);
+    nose.position.y = 0.0275;
+    const flame = new THREE.Sprite(new THREE.SpriteMaterial({
+      map: FIRE_GLOW(), blending: THREE.AdditiveBlending, transparent: true, depthWrite: false,
+    }));
+    flame.position.y = -0.03; flame.scale.setScalar(0.09);
+    group.add(body, nose, flame);
+    const tagEl = document.createElement('div');
+    tagEl.className = 'impact-interceptor';
+    tagEl.textContent = 'INTERCEPTOR';
+    const label = new CSS2DObject(tagEl);
+    group.add(label);
+    group.position.copy(o.mL0);
+    scene.add(group);
+    o.missile = { group, body, nose, flame, label, metal };
+  }
+
+  function removeMissile(o) {
+    const M = o?.missile;
+    if (!M) return;
+    M.label.element.remove();
+    scene.remove(M.group);
+    M.body.geometry.dispose(); M.nose.geometry.dispose(); M.metal.dispose();
+    M.flame.material.map.dispose(); M.flame.material.dispose();
+    o.missile = null;
+  }
+
+  function destroyRock() {
+    const o = objs, mine = epoch, P = rockWorld(), E = earthPos();
+    removeMissile(o);
+    setPhase('destroyed');
+    o.tPhase = 0;
+    o.boom = P;
+    sfx('impact');
+    o.rock.visible = false; o.glow.visible = false; o.line.visible = false; o.reticle.visible = false;
+    o.reticle.element.style.display = 'none';
+
+    o.flashLight = new THREE.PointLight(0xffd0a0, 0, 1.2, 0);
+    o.flashLight.position.copy(P);
+    scene.add(o.flashLight);
+    o.fireball = new THREE.Sprite(new THREE.SpriteMaterial({
+      map: FIRE_GLOW(), blending: THREE.AdditiveBlending, transparent: true, depthWrite: false,
+    }));
+    o.fireball.position.copy(P);
+    scene.add(o.fireball);
+    // the blast: a sphere of fire and a slower cloud of dust
+    for (let k = 0; k < 2600; k++) {
+      const d = new THREE.Vector3(rand(-1, 1), rand(-1, 1), rand(-1, 1)).normalize();
+      o.fire.emit(P.clone().addScaledVector(d, R_ROCK * 0.5), d.multiplyScalar(0.03 + Math.pow(Math.random(), 2) * 0.5),
+        rand(1.5, 5), rand(0.012, 0.04), { grow: 1.5, drag: 0.45 });
+    }
+    for (let k = 0; k < 1800; k++) {   // shock shell: one thin, fast, expanding sphere of glowing vapor
+      const d = new THREE.Vector3(rand(-1, 1), rand(-1, 1), rand(-1, 1)).normalize();
+      o.vapor.emit(P.clone(), d.multiplyScalar(rand(0.3, 0.34)), rand(1.6, 2.2), rand(0.012, 0.02), { grow: 2, drag: 0.6 });
+    }
+    for (let k = 0; k < 320; k++) {
+      const d = new THREE.Vector3(rand(-1, 1), rand(-1, 1), rand(-1, 1)).normalize();
+      o.ash.emit(P.clone(), d.multiplyScalar(rand(0.01, 0.07)), rand(4, 9), rand(0.025, 0.06), { grow: 3, drag: 0.3 });
+    }
+    // what's left of MC-1: hot fragments flung outward, most of them carried away from Earth
+    const away = P.clone().sub(E).normalize();
+    o.chunks = Array.from({ length: 30 }, (_, k) => {
+      const mesh = new THREE.Mesh(rockGeometry(rand(0.004, 0.013), k * 0.9 + 3), new THREE.MeshStandardMaterial({
+        color: 0x4a4038, roughness: 1, emissive: 0xff6a20, emissiveIntensity: 1.5,
+      }));
+      mesh.position.copy(P);
+      scene.add(mesh);
+      const v = new THREE.Vector3(rand(-1, 1), rand(-1, 1), rand(-1, 1)).normalize().multiplyScalar(rand(0.04, 0.2))
+        .addScaledVector(away, 0.05);
+      return { mesh, v, w: new THREE.Vector3(rand(-5, 5), rand(-5, 5), rand(-5, 5)), heat: 1 };
+    });
+    o.shake = 0.45;
+    playAct('event_saved_b', {}).then(() => {
+      if (mine === epoch && phase === 'destroyed') setTimeout(() => { if (mine === epoch) setPhase('saved'); }, 900);
+    });
   }
 
   function goFinal() {
@@ -419,6 +537,7 @@ export function createImpactEvent({ scene, camera, controls, earth, time, canvas
     const H = canvas.height || 800;
     o.fire.material.uniforms.uScale.value = H * 0.96;
     o.ash.material.uniforms.uScale.value = H * 0.96;
+    o.vapor.material.uniforms.uScale.value = H * 0.96;
 
     // camera: initial glide to frame the scene
     let camTarget = null;
@@ -429,9 +548,13 @@ export function createImpactEvent({ scene, camera, controls, earth, time, canvas
       controls.target.lerpVectors(o.targetFrom, o.targetTo, k);
     }
 
-    if (phase === 'detected' || phase === 'tracking' || phase === 'final') {
+    const defending = phase === 'defense' || phase === 'intercept';
+    if (o.tB !== undefined) o.tB += dt;
+    if (phase === 'detected' || phase === 'tracking' || phase === 'final' || defending) {
       // path progress
       if (phase === 'tracking') o.s = CLOSE_S * (1 - Math.exp(-o.tPhase / (CRUISE_MIN * 0.45)));
+      // Model B: it keeps coming, slowly; the interceptor meets it well short of Earth
+      if (defending) o.s = o.sFinal + (o.sHit - o.sFinal) * 0.3 * (1 - Math.exp(-o.tB / 25));
       if (phase === 'final') {
         const f = Math.min(o.tPhase / FINAL, 1);
         o.s = o.sFinal + (o.sHit - o.sFinal) * Math.pow(f, 2.4);
@@ -446,6 +569,7 @@ export function createImpactEvent({ scene, camera, controls, earth, time, canvas
       const km = alt >= 1.5 ? alt * KM_PER_UNIT : 1.5 * KM_PER_UNIT * Math.pow(Math.max(alt, 0) / 1.5, 3);
       const em = o.tag.querySelector('em');
       if (phase === 'tracking') em.textContent = `${fmtKm(km)} from Earth`;
+      if (defending) em.textContent = `${phase === 'intercept' ? 'INTERCEPT INBOUND' : 'TARGET LOCKED'} · ${fmtKm(km)}`;
       if (phase === 'final') {
         const left = Math.max(FINAL - o.tPhase, 0);
         em.textContent = `IMPACT IN 00:${String(Math.ceil(left)).padStart(2, '0')} · ${fmtKm(km)}`;
@@ -476,11 +600,54 @@ export function createImpactEvent({ scene, camera, controls, earth, time, canvas
         const k = phase === 'final' ? 0.5 * smooth(Math.min(o.tPhase / FINAL, 1)) : 0;
         const wantTarget = E.clone().lerp(o.group.localToWorld(p.clone()), 0.45 - k * 0.5);
         controls.target.lerp(wantTarget, 1 - Math.exp(-dt * 0.8));
-        const dist = phase === 'final' ? 3.4 - 1.5 * smooth(Math.min(o.tPhase / FINAL, 1)) : 5.2;
+        const dist = phase === 'final' ? 3.4 - 1.5 * smooth(Math.min(o.tPhase / FINAL, 1)) : defending ? (phase === 'intercept' ? 2.7 : 3.2) : 5.2;
         camTarget = controls.target.clone().addScaledVector(camDir(), dist);
         camera.position.lerp(camTarget, 1 - Math.exp(-dt * 0.6));
       }
       if (phase === 'final' && o.s >= o.sHit - 1e-4) impact();
+
+      // the interceptor: accelerating along an arc that ends on the rock's current position
+      if (phase === 'intercept' && o.missile) {
+        const M = o.missile, f = Math.min(o.tPhase / MISSILE_T, 1), end = rockWorld();
+        const bez = (u, out) => out.copy(o.mL0).multiplyScalar((1 - u) * (1 - u))
+          .addScaledVector(o.mC, 2 * u * (1 - u)).addScaledVector(end, u * u);
+        const u = Math.pow(f, 1.5);
+        const pos = bez(u, new THREE.Vector3()), dir = bez(Math.min(u + 0.01, 1), new THREE.Vector3()).sub(pos);
+        if (dir.lengthSq() > 1e-12) M.group.quaternion.setFromUnitVectors(UP, dir.normalize());
+        M.group.position.copy(pos);
+        M.flame.scale.setScalar(0.08 + Math.random() * 0.04);
+        const tail = pos.clone().addScaledVector(dir, -0.028);
+        for (let k = 0; k < 30; k++) {
+          o.fire.emit(tail, dir.clone().multiplyScalar(-rand(0.04, 0.16)).add(new THREE.Vector3(rand(-1, 1), rand(-1, 1), rand(-1, 1)).multiplyScalar(0.01)),
+            rand(0.25, 0.6), rand(0.012, 0.026), { grow: 1 });
+        }
+        for (let k = 0; k < 6; k++) {   // the sunlit contrail lingers behind it
+          o.vapor.emit(tail.clone().add(new THREE.Vector3(rand(-1, 1), rand(-1, 1), rand(-1, 1)).multiplyScalar(0.004)),
+            dir.clone().multiplyScalar(-0.004), rand(5, 8), rand(0.012, 0.02), { grow: 3 });
+        }
+        if (f >= 1) destroyRock();
+      }
+    } else if (phase === 'destroyed' || phase === 'saved') {
+      const t = o.tPhase;
+      const fb = t < 0.3 ? smooth(t / 0.3) : Math.exp(-(t - 0.3) * 1.1);
+      o.fireball.scale.setScalar(0.06 + 0.75 * smooth(Math.min(t / 1, 1)));
+      o.fireball.material.opacity = fb;
+      o.flashLight.intensity = 8 * fb;
+      for (const c of o.chunks) {
+        c.mesh.position.addScaledVector(c.v, dt);
+        c.v.multiplyScalar(1 - 0.05 * dt);
+        c.mesh.rotation.x += c.w.x * dt; c.mesh.rotation.y += c.w.y * dt;
+        c.heat = Math.max(c.heat - dt * 0.25, 0);
+        c.mesh.material.emissiveIntensity = 1.5 * c.heat;
+        if (c.heat > 0.3 && Math.random() < 0.5) o.fire.emit(c.mesh.position, c.v.clone().multiplyScalar(-0.1), rand(0.3, 0.7), 0.008);
+      }
+      o.shake *= Math.exp(-dt * 1.5);
+      const mid = E.clone().lerp(o.boom, 0.55);
+      if (phase === 'saved') mid.addScaledVector(tmp2.set(0, 1, 0).applyQuaternion(camera.quaternion), -0.62); // above the card
+      controls.target.lerp(mid, 1 - Math.exp(-dt * (phase === 'saved' ? 0.8 : 1.2)));
+      camTarget = controls.target.clone().addScaledVector(camDir(), 3.4 + 0.6 * smooth(Math.min(t / 8, 1)));
+      camera.position.lerp(camTarget, 1 - Math.exp(-dt * 1));
+      if (o.shake > 0.002) camera.position.add(tmp.set(rand(-1, 1), rand(-1, 1), rand(-1, 1)).multiplyScalar(0.04 * o.shake));
     } else if (phase === 'impact' || phase === 'aftermath') {
       const t = o.tPhase;
       const n = o.n;
@@ -557,6 +724,7 @@ export function createImpactEvent({ scene, camera, controls, earth, time, canvas
 
     o.fire.update(dt, E);
     o.ash.update(dt, E);
+    o.vapor.update(dt, E);
   }
 
   // Puts Earth back the way it was (the card's "Restore Earth" button, or before a new run).
@@ -587,6 +755,7 @@ export function createImpactEvent({ scene, camera, controls, earth, time, canvas
     start, identify, restore, update, onClick,
     get active() { return phase !== 'idle'; },
     get phase() { return phase; },
+    get model() { return objs?.model ?? 'A'; },
     onPhase(f) { listeners.add(f); return () => listeners.delete(f); },
     dispose() { restore(false); listeners.clear(); },
   };

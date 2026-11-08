@@ -12,6 +12,7 @@
   background: rgba(10, 14, 25, .92); border-left: 3px solid #3a7bff; border-radius: 6px;
 }
 .mc-caption.intern { border-left-color: #ff3030; }
+.mc-caption.intern.hero { border-left-color: #ffc83d; } /* the intern's hero moment: gold, not alarm-red */
 .mc-caption.alert { border-left-color: #ff3030; color: #ffb3b3; font-weight: 600; }
 .mc-caption.radio { border-left-color: #7dff3a; color: #9aa4b8; font-style: italic; }
 .mc-caption b { margin-right: 6px; }

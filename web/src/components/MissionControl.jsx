@@ -23,8 +23,8 @@ export default function MissionControl() {
         {enabled ? '🔊 Mission Control Live' : '🔇 Mission Control Live'}
       </button>
       {line && (
-        <div className={`mc-caption ${line.who.toLowerCase()}`} role="status" aria-live="polite">
-          <b>{{ CAPCOM: '🎙️ CAPCOM', INTERN: '😱 INTERN', RADIO: '📡', ALERT: '🚨' }[line.who] ?? line.who}</b> {line.text}
+        <div className={`mc-caption ${line.who.toLowerCase()}${line.hero ? ' hero' : ''}`} role="status" aria-live="polite">
+          <b>{line.hero ? '🦸 INTERN' : { CAPCOM: '🎙️ CAPCOM', INTERN: '😱 INTERN', RADIO: '📡', ALERT: '🚨' }[line.who] ?? line.who}</b> {line.text}
         </div>
       )}
     </>
