@@ -1,0 +1,40 @@
+.asteroid-details {
+  position: fixed; right: 16px; top: 72px; z-index: 5;
+  width: min(340px, calc(100vw - 32px)); max-height: calc(100vh - 160px); overflow-y: auto;
+  padding: 16px 18px 14px; box-sizing: border-box;
+  background: rgba(10, 14, 26, 0.92); border: 1px solid #23304a; border-radius: 12px;
+  backdrop-filter: blur(8px); color: var(--text, #dde3f0); font-size: 13px; line-height: 1.45;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+  animation: ad-in 0.35s ease-out;
+}
+@keyframes ad-in { from { opacity: 0; transform: translateX(16px); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { .asteroid-details { animation: none; } }
+
+.asteroid-details h2 { font-family: var(--font-display, system-ui); font-size: 20px; margin: 2px 28px 4px 0; line-height: 1.2; }
+.ad-eyebrow { font-size: 11px; letter-spacing: .6px; text-transform: uppercase; color: var(--muted, #8b96ad); }
+.ad-label { margin: 0 0 10px; color: var(--muted, #8b96ad); }
+.ad-label.hot { color: #ff7a7a; font-weight: 600; }
+.ad-close {
+  position: absolute; top: 8px; right: 8px; width: 30px; height: 30px; border-radius: 8px;
+  background: transparent; border: 1px solid #334; color: #dde; font-size: 18px; line-height: 1; cursor: pointer;
+}
+.ad-close:hover { background: #1a2233; }
+.ad-close:focus-visible { outline: 2px solid var(--accent, #5aa2ff); outline-offset: 2px; }
+
+.ad-hidden { color: #9dff3a; background: rgba(157, 255, 58, 0.08); border-radius: 8px; padding: 8px 10px; margin: 0 0 10px; }
+.ad-scores { display: flex; gap: 24px; margin: 6px 0 8px; }
+.ad-scores div { display: flex; flex-direction: column; gap: 2px; }
+.ad-scores span { font-size: 11px; color: var(--muted, #8b96ad); }
+.ad-scores b { font-size: 28px; font-variant-numeric: tabular-nums; line-height: 1; }
+.ad-scores em { font-style: normal; align-self: flex-start; margin-top: 4px; }
+.ad-why { margin: 0 0 10px; color: #c9d3e6; }
+
+.ad-facts { display: grid; grid-template-columns: 1fr; gap: 1px; margin: 0 0 10px; }
+.ad-facts dt { font-size: 11px; color: var(--muted, #8b96ad); margin-top: 6px; }
+.ad-facts dd { margin: 0; font-variant-numeric: tabular-nums; }
+.ad-facts small { color: var(--muted, #8b96ad); }
+.ad-note { font-size: 11px; color: var(--muted, #8b96ad); margin: 0; }
+
+@media (max-width: 700px) {
+  .asteroid-details { top: auto; bottom: 12px; right: 12px; left: 12px; width: auto; max-height: 45vh; }
+}
