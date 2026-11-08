@@ -6,6 +6,7 @@ import MissionControl from './components/MissionControl.jsx';
 import SolarSystem from './three/SolarSystem.jsx';
 import TopBar from './components/TopBar.jsx';
 import ReplayHud from './components/ReplayHud.jsx';
+import AsteroidDetails from './components/AsteroidDetails.jsx';
 
 // Shared state replaces the window CustomEvents from PLAN.md Contract 4:
 //   view       <- 'view-changed'       (TopBar sets it, SolarSystem reads it)
@@ -21,6 +22,8 @@ export default function App({ replay = false, onReady, onReplayIntro }) {
   const { asteroids, metrics, error } = useData();
   const [view, setView] = useState({ model: 'A', testOnly: false, showMistakes: false, showHidden: false });
   const [uiIn, setUiIn] = useState(!replay);
+  const [selected, setSelected] = useState(null); // asteroid shown in the details card (camera zooms in on it)
+  const sceneApi = useRef(null);                  // SolarSystem's deselect(), for the card's close button
 
   useEffect(() => {
     if (!replay) { setUiIn(true); return undefined; }
@@ -37,6 +40,8 @@ export default function App({ replay = false, onReady, onReplayIntro }) {
   const viewRef = useRef(view);
   viewRef.current = view;
   const onSelect = useCallback((a) => {
+    setSelected(a);
+    if (!a) return;                               // deselected (card closed): no commentary
     const part = viewRef.current.showHidden && a.hidden ? 'hidden' : 'report';
     playAsteroid(a, part, metrics?.B?.threshold);
   }, [metrics]);
@@ -54,7 +59,8 @@ export default function App({ replay = false, onReady, onReplayIntro }) {
   return (
     <div className={'app' + (uiIn ? '' : ' ui-out')}>
       <SolarSystem asteroids={asteroids} metrics={metrics} view={view} onSelect={onSelect} onReplayIntro={onReplayIntro}
-        onReady={onReady} />
+        onReady={onReady} apiRef={sceneApi} />
+      <AsteroidDetails asteroid={selected} onClose={() => sceneApi.current?.deselect()} />
       <TopBar view={view} setView={setView} onReplayIntro={onReplayIntro} />
       <MissionControl />
       {replay && <ReplayHud asteroids={asteroids} metrics={metrics} />}
