@@ -483,11 +483,12 @@ export default function SolarSystem({ asteroids, metrics, view, onSelect, pickRe
                 }} />
               {' '}Show all asteroids
             </label>
+            {view.showMistakes && !view.showHidden && (
+              <small className="risk-key"><span className="mag">●</span> missed hazard · <span className="yel">●</span> false alarm</small>
+            )}
             <small>
               Showing {counts.shown.toLocaleString()} of {counts.total.toLocaleString()}
-              {!showAll && (view.showHidden ? <><br />every hidden hazard included;<br />1 in {SAMPLE_EVERY} of the rest</>
-                : view.showMistakes ? <><br />every mistake included;<br />1 in {SAMPLE_EVERY} of the rest</>
-                : <><br />1 in {SAMPLE_EVERY} of every asteroid,<br />high and low risk alike</>)}
+              {!showAll && !view.showHidden && !view.showMistakes && ` (1 in ${SAMPLE_EVERY})`}
             </small>
             {view.showHidden && (
               <p className="hidden-card">

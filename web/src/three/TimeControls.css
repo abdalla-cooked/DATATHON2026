@@ -16,7 +16,5 @@
 .time-controls input[type="range"] { flex: 1; min-width: 60px; accent-color: #3a7bff; }
 .time-controls :focus-visible { outline: 2px solid #3a7bff; outline-offset: 2px; }
 
-/* keep clear of the legend (bottom-left) on mid-size screens */
-@media (max-width: 1480px) { .time-controls { bottom: 52px; } }
-/* phones: the side panel moves to the bottom 45vh */
-@media (max-width: 760px) { .time-controls { bottom: calc(45vh + 44px); } .time-controls .tc-today { display: none; } }
+/* phones: hide the Today button to save room */
+@media (max-width: 760px) { .time-controls .tc-today { display: none; } }
