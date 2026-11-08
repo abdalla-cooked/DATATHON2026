@@ -115,6 +115,12 @@ export function stop() {
   caption(null);
 }
 
+// The voices cut out mid-word (the impact event): silence, then a dead-radio caption.
+export function signalLost() {
+  stop();
+  caption({ who: 'RADIO', text: '— signal lost —' });
+}
+
 export function setOn(value) {
   on = value;
   if (!on) stop();
@@ -129,11 +135,11 @@ export function onCaption(fn) {
   return () => listeners.delete(fn);
 }
 
-export async function playAct(key) {
+export async function playAct(key, sfx = { before: 'radio' }) {
   await ready;
   const lines = manifest?.acts?.[key]
     ?? L.acts[key]?.map(([who, text]) => ({ who, text: text.replace('{hidden_measured}', 'Dozens'), src: null }));
-  return playDialogue(lines, { before: 'radio' });
+  return playDialogue(lines, sfx);
 }
 
 export async function playReaction(key) {

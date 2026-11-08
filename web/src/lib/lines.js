@@ -246,6 +246,90 @@ export default {
     "INTERN",
     "[nervous] Please don't make a big one. Please don't make a big one."
    ]
+  ],
+  "event_detect": [
+   [
+    "INTERN",
+    "[nervous] W-wait, CAPCOM. I'm getting a reading. What... what is THAT?!"
+   ],
+   [
+    "CAPCOM",
+    "Hm. Click on it. Let's see what the model makes of it."
+   ]
+  ],
+  "event_found": [
+   [
+    "CAPCOM",
+    "That's strange. It's not in NASA's catalog. Never documented. Not once."
+   ],
+   [
+    "CAPCOM",
+    "Looks like our model just found a brand-new asteroid."
+   ],
+   [
+    "INTERN",
+    "[excited, nervous] We found one? We FOUND one! Do we get to name it?"
+   ]
+  ],
+  "event_approach": [
+   [
+    "INTERN",
+    "[nervous] Um... CAPCOM? Is it just me, or is it heading straight for us?"
+   ],
+   [
+    "CAPCOM",
+    "Relax, rookie. It's still millions of kilometers out. Most of these swing right past."
+   ],
+   [
+    "INTERN",
+    "[anxious] It's getting bigger. Why is it getting BIGGER?!"
+   ],
+   [
+    "CAPCOM",
+    "Breathe. We don't worry until it gets close."
+   ],
+   [
+    "INTERN",
+    "[whimpering] How close is close?"
+   ],
+   [
+    "CAPCOM",
+    "Closer than that. ...Probably."
+   ]
+  ],
+  "event_panic": [
+   [
+    "CAPCOM",
+    "[alarmed] Okay. That's close. That's WAY too close!"
+   ],
+   [
+    "CAPCOM",
+    "[shouting] Launch the emergency rockets! Get everyone off the planet, NOW!"
+   ],
+   [
+    "INTERN",
+    "[screaming] I TOLD YOU! I TOLD YOU IT WAS COMING!"
+   ],
+   [
+    "CAPCOM",
+    "[yelling] JUST HIT THE LAUNCH BUTTON!"
+   ],
+   [
+    "INTERN",
+    "[screaming] WHICH ONE?! THEY'RE ALL RED!"
+   ],
+   [
+    "CAPCOM",
+    "[screaming] ALL OF THEM! PRESS ALL OF THEM!"
+   ],
+   [
+    "INTERN",
+    "[screaming, crying] I'M JUST AN INTERN! I'M JUST AN INTERRRN!"
+   ],
+   [
+    "CAPCOM",
+    "[screaming] HOLD ON TO SOMETHING!"
+   ]
   ]
  },
  "reactions": {
@@ -580,6 +664,15 @@ export default {
   "impact": {
    "text": "Massive asteroid impact explosion, deep rumbling boom with long debris rumble",
    "seconds": 4
+  }
+ },
+ "capcom_tones": {
+  "_readme": "CAPCOM is calm by default (voices.CAPCOM). A line tagged [shouting] / [yelling] / [alarmed] / [screaming] uses 'panic' instead (scripts/narrate.py tone_of). Only the impact event uses it.",
+  "panic": {
+   "stability": 0.15,
+   "similarity_boost": 0.75,
+   "style": 0.9,
+   "speed": 1.12
   }
  }
 };

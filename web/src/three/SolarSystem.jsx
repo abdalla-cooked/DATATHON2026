@@ -15,6 +15,8 @@ import { playAct } from '../lib/narration.js';
 import { MAX_JD, jdFromDate, meanAnomalyAt } from './time.js';
 import TimeControls from './TimeControls.jsx';
 import ViewButtons from './ViewButtons.jsx';
+import { createImpactEvent } from './impactEvent.js';
+import './ImpactEvent.css';
 
 const ROCK = new THREE.Color(0xa89a88); // default: plain rock, no risk coloring
 const COLD = new THREE.Color(0x3d7bff); // "Highlight risk" on: below the model's threshold (low risk)
@@ -99,6 +101,7 @@ export default function SolarSystem({ asteroids, metrics, view, onSelect, pickRe
   // false = plain rock; true = red high risk / blue low risk. Off by default, even after "Watch the AI learn".
   const [highlightRisk, setHighlightRisk] = useState(false);
   const [counts, setCounts] = useState({ shown: 0, total: 0, hidden: 0 }); // for the "Showing X of Y" caption
+  const [impactPhase, setImpactPhase] = useState('idle'); // the impact event (impactEvent.js)
 
   // Create the scene once; clean up on unmount.
   useEffect(() => {
@@ -147,6 +150,12 @@ export default function SolarSystem({ asteroids, metrics, view, onSelect, pickRe
       replayU: { value: replay.progress() } };
     let readySent = false;
     sceneRef.current = ctx;
+
+    // The impact event: a fictional asteroid that ends the world (impactEvent.js).
+    ctx.impact = createImpactEvent({
+      scene, camera, controls, time, canvas, earth: planets.find((p) => p.planet.name === 'Earth'),
+    });
+    const offImpact = ctx.impact.onPhase(setImpactPhase);
 
     // Move everything to Julian Date `jd`.
     const tmp = new THREE.Vector3();
@@ -212,6 +221,7 @@ export default function SolarSystem({ asteroids, metrics, view, onSelect, pickRe
       }
       if (time.dirty) { placeAll(time.jd); time.dirty = false; }
 
+      if (ctx.impact.active) { flight = null; ctx.impact.update(dt); } // the event drives the camera
       if (flight) {
         const t = Math.min((now - flight.start) / flight.dur, 1), k = ease(t);
         camera.position.lerpVectors(flight.from, flight.to, k);
@@ -221,7 +231,9 @@ export default function SolarSystem({ asteroids, metrics, view, onSelect, pickRe
       controls.update();
       updateLabels();
       sun.rotation.y += dt * 0.05; // slow cosmetic spin (not tied to the time slider)
-      for (const { globe } of planets) globe.rotation.y += dt * 0.15;
+      for (const { globe, planet } of planets) {
+        if (!(ctx.impact.active && planet.name === 'Earth')) globe.rotation.y += dt * 0.15; // Earth holds still for the event
+      }
       if (ctx.points) {
         ctx.points.material.size = ctx.pulse ? 1 + PULSE * (1 + Math.sin(now / 200)) / 2 : 1;
       }
@@ -234,6 +246,8 @@ export default function SolarSystem({ asteroids, metrics, view, onSelect, pickRe
     });
 
     return () => {
+      offImpact();
+      ctx.impact.dispose();
       removeEventListener('resize', resize);
       renderer.setAnimationLoop(null);
       controls.dispose();
@@ -395,6 +409,7 @@ export default function SolarSystem({ asteroids, metrics, view, onSelect, pickRe
       if (!down || Math.hypot(ev.clientX - down.x, ev.clientY - down.y) > 5) return; // it was a drag
       const r = canvas.getBoundingClientRect();
       const mx = ev.clientX - r.left, my = ev.clientY - r.top;
+      if (ctx.impact?.onClick(mx, my, r)) return; // the event takes every click while it runs
       const pos = ctx.points?.geometry.attributes.position;
       if (!pos) return;
 
@@ -457,6 +472,13 @@ export default function SolarSystem({ asteroids, metrics, view, onSelect, pickRe
     <>
       <canvas id="scene" ref={canvasRef} />
       <TimeControls time={timeRef} />
+      <ImpactOverlay phase={impactPhase} onRestore={() => { sceneRef.current?.impact.restore(); sceneRef.current?.flyTo('earth'); }} />
+      {/* TEMPORARY: plays the impact event on demand, for testing */}
+      {impactPhase === 'idle' && (
+        <button type="button" className="impact-test" onClick={() => sceneRef.current?.impact.start()}>
+          TEST: impact event
+        </button>
+      )}
       <ViewButtons views={VIEWS} initial="earth" onView={(name) => sceneRef.current?.flyTo(name)}>
         {counts.total > 0 && (
           <div className="cloud-info">
@@ -501,6 +523,33 @@ export default function SolarSystem({ asteroids, metrics, view, onSelect, pickRe
           </div>
         )}
       </ViewButtons>
+    </>
+  );
+}
+
+// HTML layer of the impact event: radar alert banner, red vignette, impact flash, extinction card.
+function ImpactOverlay({ phase, onRestore }) {
+  if (phase === 'idle') return null;
+  return (
+    <>
+      {phase === 'detected' && (
+        <div className="impact-banner" role="alert">⚠ Unidentified object on radar <small>click it to identify</small></div>
+      )}
+      {phase === 'tracking' && (
+        <div className="impact-banner tracking" role="status">Tracking MC-1 <small>not in NASA's catalog</small></div>
+      )}
+      {phase === 'final' && <div className="impact-banner final" role="alert">⚠ Collision course</div>}
+      {phase === 'final' && <div className="impact-vignette" aria-hidden="true" />}
+      {(phase === 'impact' || phase === 'aftermath') && <div className="impact-flash" aria-hidden="true" />}
+      {phase === 'aftermath' && (
+        <div className="impact-card" role="dialog" aria-label="Extinction-level event">
+          <p className="ic-kicker">Signal lost</p>
+          <h2>Extinction-level event</h2>
+          <p>The crust melted. The oceans boiled away. Nothing survived.</p>
+          <p className="ic-note">This was fiction. MC-1 doesn't exist, and no known asteroid is on a collision course with Earth.</p>
+          <button type="button" onClick={onRestore}>Restore Earth</button>
+        </div>
+      )}
     </>
   );
 }

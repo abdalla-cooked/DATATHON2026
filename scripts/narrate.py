@@ -49,11 +49,16 @@ PANIC_OVER = 90                      # risk score over 90: the rookie panics and
 
 
 def tone_of(speaker, text):
-    """Python twin of dialogue.js toneOf: the line's [tag] picks the INTERN's voice settings."""
-    if speaker != "INTERN" or not text.startswith("["):
+    """Python twin of dialogue.js toneOf: the line's [tag] picks the INTERN's voice settings
+    (and CAPCOM's rare 'capcom_panic', for the impact event)."""
+    if not text.startswith("["):
         return ""
     tag = text[1:text.find("]")].lower()
-    if re.search(r"panick|scream|hyperventil|whimper|horrified", tag):
+    if speaker == "CAPCOM":
+        return "capcom_panic" if re.search(r"shout|yell|scream|alarm", tag) else ""
+    if speaker != "INTERN":
+        return ""
+    if re.search(r"panick|scream|hyperventil|whimper|horrified|crying", tag):
         return "panic"
     if re.search(r"relie|sigh|exhale", tag):
         return "relieved"
@@ -225,7 +230,8 @@ def main():
     thr = metrics["B"]["threshold"]
     os.makedirs(args.out, exist_ok=True)
     studio = Studio(args.out, None, L["voices"], args.dry_run,
-                    {k: v for k, v in L.get("intern_tones", {}).items() if not k.startswith("_")})
+                    {**{k: v for k, v in L.get("intern_tones", {}).items() if not k.startswith("_")},
+                     **{f"capcom_{k}": v for k, v in L.get("capcom_tones", {}).items() if not k.startswith("_")}})
     hh = metrics.get("hidden_hazards", {})
     fill = dict(hidden_count=hh.get("count", "hundreds of"), hidden_measured=hh.get("measured", "Dozens"))
 

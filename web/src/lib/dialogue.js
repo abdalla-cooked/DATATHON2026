@@ -33,7 +33,7 @@ export const stripTags = (text) => text.replace(/\[[^\]]*\]\s*/g, '').trim();
 export function toneOf(who, text) {
   if (who !== 'INTERN') return '';
   const tag = (text.match(/^\[([^\]]*)\]/)?.[1] || '').toLowerCase();
-  if (/panick|scream|hyperventil|whimper|horrified/.test(tag)) return 'panic';
+  if (/panick|scream|hyperventil|whimper|horrified|crying/.test(tag)) return 'panic';
   if (/relie|sigh|exhale/.test(tag)) return 'relieved';
   if (/nervous|anxious|uneasy|shak|voice crack/.test(tag)) return 'worried';
   return '';
