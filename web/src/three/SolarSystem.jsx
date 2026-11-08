@@ -88,8 +88,8 @@ export default function SolarSystem({ asteroids, metrics, view, onSelect, pickRe
   onReadyRef.current = onReady;
   const canvasRef = useRef(null);
   const sceneRef = useRef(null); // { scene, camera, points, shown, cloud, ... } shared by the effects below
-  // Shared clock (see TimeControls.jsx). Starts paused at today.
-  const timeRef = useRef({ jd: jdFromDate(new Date()), playing: false, speed: 30, dirty: true, onTick: null });
+  // Shared clock (see TimeControls.jsx). Starts at today and begins playing once the intro hands off.
+  const timeRef = useRef({ jd: jdFromDate(new Date()), playing: false, speed: 1, dirty: true, onTick: null });
   const [showAll, setShowAll] = useState(false);              // false = thinned cloud (see cloudFilter.js)
   // false = plain rock; true = red high risk / blue low risk. On after "Watch the AI learn", so the replay
   // reveals the model's verdicts instead of turning grey dots into rock-colored ones.
@@ -193,9 +193,13 @@ export default function SolarSystem({ asteroids, metrics, view, onSelect, pickRe
     }
 
     let last = performance.now();
+    let autoStarted = false;
     renderer.setAnimationLoop((now) => {
       const dt = Math.min((now - last) / 1000, 0.1); // seconds; capped so a background tab doesn't jump years
       last = now;
+      // Start the clock as soon as the intro is out of the way: replay 'armed' means the intro still covers
+      // the app (its last frame matches these dot positions), so wait until it starts or is skipped.
+      if (!autoStarted && replay.mode !== 'armed') { autoStarted = true; time.playing = true; }
       if (time.playing) {
         time.jd = Math.min(time.jd + time.speed * dt, MAX_JD);
         if (time.jd >= MAX_JD) time.playing = false;

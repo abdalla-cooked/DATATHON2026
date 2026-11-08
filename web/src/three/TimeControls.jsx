@@ -24,7 +24,7 @@ export default function TimeControls({ time }) {
   const [speed, setSpeed] = useState(t.speed);
 
   useEffect(() => {
-    t.onTick = (newJd, stillPlaying) => { setJd(newJd); if (!stillPlaying) setPlaying(false); };
+    t.onTick = (newJd, stillPlaying) => { setJd(newJd); setPlaying(stillPlaying); }; // also picks up the scene's auto-start
     return () => { t.onTick = null; };
   }, [t]);
 
