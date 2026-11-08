@@ -65,6 +65,12 @@
 .impact-card button:hover { background: #3a7bff; }
 @keyframes ic-in { from { opacity: 0; transform: translate(-50%, 12px); } }
 
+/* Restore Earth = waking up from the nightmare: eyes open from black, a blink, then the room comes back */
+.impact-wake { position: fixed; inset: 0; z-index: 32; pointer-events: none; background: #000; animation: iw-wake 2.6s ease-out forwards; }
+@keyframes iw-wake {
+  0% { opacity: 1; } 30% { opacity: .55; } 42% { opacity: .9; } 60% { opacity: .35; } 100% { opacity: 0; }
+}
+
 /* TEMPORARY test trigger */
 .impact-test {
   position: fixed; right: 16px; bottom: 16px; z-index: 6; padding: 6px 10px; cursor: pointer;

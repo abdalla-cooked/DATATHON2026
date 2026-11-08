@@ -102,6 +102,7 @@ export default function SolarSystem({ asteroids, metrics, view, onSelect, pickRe
   const [highlightRisk, setHighlightRisk] = useState(false);
   const [counts, setCounts] = useState({ shown: 0, total: 0, hidden: 0 }); // for the "Showing X of Y" caption
   const [impactPhase, setImpactPhase] = useState('idle'); // the impact event (impactEvent.js)
+  const [waking, setWaking] = useState(0);                 // Restore Earth: it was all a dream (fade in from black)
 
   // Create the scene once; clean up on unmount.
   useEffect(() => {
@@ -472,7 +473,14 @@ export default function SolarSystem({ asteroids, metrics, view, onSelect, pickRe
     <>
       <canvas id="scene" ref={canvasRef} />
       <TimeControls time={timeRef} />
-      <ImpactOverlay phase={impactPhase} onRestore={() => { sceneRef.current?.impact.restore(); sceneRef.current?.flyTo('earth'); }} />
+      <ImpactOverlay phase={impactPhase} onRestore={() => {
+        // It was all a nightmare: the intern wakes up at the console, CAPCOM is not impressed.
+        sceneRef.current?.impact.restore();
+        sceneRef.current?.flyTo('earth');
+        setWaking(Date.now());
+        playAct('event_wake', {});
+      }} />
+      {waking > 0 && <div key={waking} className="impact-wake" aria-hidden="true" onAnimationEnd={() => setWaking(0)} />}
       {/* TEMPORARY: plays the impact event on demand, for testing */}
       {impactPhase === 'idle' && (
         <button type="button" className="impact-test" onClick={() => sceneRef.current?.impact.start()}>

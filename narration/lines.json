@@ -329,6 +329,24 @@
         "CAPCOM",
         "[screaming] HOLD ON TO SOMETHING!"
       ]
+    ],
+    "event_wake": [
+      [
+        "INTERN",
+        "[gasps, waking up with a start] PRESS ALL OF THEM! ...Wh-what? Where's the asteroid?"
+      ],
+      [
+        "CAPCOM",
+        "[long, disappointed sigh] There is no asteroid, rookie. You fell asleep at the console."
+      ],
+      [
+        "INTERN",
+        "[shaky, relieved] It was a dream? Oh, thank goodness. It hit us. Earth melted. You were SCREAMING."
+      ],
+      [
+        "CAPCOM",
+        "[sighs, shaking his head] I don't scream. Wipe the drool off the radar and get back to work."
+      ]
     ]
   },
   "reactions": {
