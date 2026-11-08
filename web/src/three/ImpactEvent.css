@@ -1,7 +1,7 @@
 /* The impact event (impactEvent.js + ImpactOverlay in SolarSystem.jsx). */
 
 /* radar reticle that rides on the asteroid (CSS2D label) */
-.impact-reticle { position: relative; width: 36px; height: 36px; cursor: pointer; font: 600 11px system-ui, sans-serif; color: #ff5a4f; }
+.impact-reticle { position: relative; width: 36px; height: 36px; font: 600 11px system-ui, sans-serif; color: #ff5a4f; }
 .impact-reticle i {
   position: absolute; left: 0; top: 0; width: 36px; height: 36px; box-sizing: border-box;
   border: 2px solid #ff3b30; border-radius: 50%; box-shadow: 0 0 10px #ff3b30aa, inset 0 0 8px #ff3b3066;
@@ -20,6 +20,14 @@
 .impact-reticle.tracking i { animation: none; border-style: dashed; }
 .impact-reticle.final i { animation: ir-ping .45s ease-out infinite; }
 .impact-reticle.final em { color: #fff; font-weight: 700; }
+/* Model A before the threat is clear: the same plain white ring as a normally selected asteroid (SolarSystem RING) */
+.impact-reticle.plain i {
+  left: 3px; top: 3px; width: 30px; height: 30px; border: 1.5px solid #fff; /* wide enough to sit around the rock */ border-style: solid;
+  box-shadow: none; animation: none;
+}
+.impact-reticle.plain i::before, .impact-reticle.plain i::after { display: none; }
+.impact-reticle.plain span { color: #dde3f0; }
+.impact-reticle.plain em { color: #9aa4b8; }
 @keyframes ir-ping { 0% { transform: scale(1.5); opacity: .2; } 60% { transform: scale(1); opacity: 1; } 100% { transform: scale(1); opacity: 1; } }
 
 /* alert banner under the top bar */

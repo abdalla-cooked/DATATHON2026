@@ -1,8 +1,9 @@
 // The impact event: a fictional, uncatalogued asteroid shows up on the radar, the viewer clicks it, it falls
 // toward Earth while CAPCOM and the intern talk, and it ends the world. Pure fiction (the closing card says so).
 //
-//   detected  -> reticle + banner on screen, the intern spots it         (start())
-//   tracking  -> clicked: "not in NASA's catalog", it starts falling      (identify())
+//   detected  -> straight to the rock (chase cam), the intern spots it   (start())
+//   tracking  -> once he's said it: "not in NASA's catalog", it falls     (identify(), automatic)
+// MC-1 is always aimed at the USA: Earth is turned so the USA faces it, and the path ends there.
 //   final     -> close: CAPCOM panics, alarm, countdown, atmospheric entry
 //   impact    -> voices cut mid-word, flash, fireball, ejecta, the magma front sweeps the globe
 //   aftermath -> molten, ash-choked planet + the extinction card
@@ -24,9 +25,10 @@ import { playAct, signalLost, sfx, stop as stopNarration } from '../lib/narratio
 import { music } from '../lib/music.js';
 
 const R_EARTH = 0.27;
-const R_ROCK = 0.05;
-const START_DIST = 7;      // spawn distance from Earth's center
+const R_ROCK = 0.008;     // small rock, as in the impact-sim branch (impactShot.js)
+const START_DIST = 9;      // spawn distance from Earth's center (far enough back to be falling while the intern talks)
 const CLOSE_S = 0.8;       // path fraction where "it's close" (about 1.6 units out) and the panic starts
+const ZOOM_SEC = 2.5;      // camera glide from wherever it was to the chase angle
 const CRUISE_MIN = 30;     // seconds from the click to "close", at least (the dialogue can stretch it)
 const FINAL = 23.3;        // seconds from "close" to impact: lands mid-scream in event_panic (alarm 1.5 s + lines)
 const KM_PER_UNIT = 14.96e6;
@@ -234,6 +236,23 @@ export function createImpactEvent({ scene, camera, controls, earth, time, canvas
   const setPhase = (p) => { phase = p; listeners.forEach((f) => f(p)); };
 
   const earthPos = () => earth.body.position;
+
+  // The USA (about 39°N, 98°W) in the globe's own frame. three.js spheres map texture u to phi = lon + 180°.
+  const USA_LAT = 39 * Math.PI / 180, USA_PHI = (-98 + 180) * Math.PI / 180, USA_THETA = Math.PI / 2 - USA_LAT;
+  const USA_LOCAL = new THREE.Vector3(-Math.cos(USA_PHI) * Math.sin(USA_THETA), Math.cos(USA_THETA),
+    Math.sin(USA_PHI) * Math.sin(USA_THETA));
+  // The spin angle that points the USA most directly at `dir` (Earth-relative), keeping the axial tilt.
+  function usaFacingSpin(dir) {
+    const q = new THREE.Quaternion(), v = new THREE.Vector3();
+    let best = 0, bestDot = -2;
+    for (let k = 0; k < 360; k++) {
+      earth.globe.rotation.y = k * Math.PI / 180;
+      earth.globe.updateMatrixWorld(true);
+      const d = v.copy(USA_LOCAL).applyQuaternion(earth.globe.getWorldQuaternion(q)).dot(dir);
+      if (d > bestDot) { bestDot = d; best = earth.globe.rotation.y; }
+    }
+    return best;
+  }
   const tmp = new THREE.Vector3(), tmp2 = new THREE.Vector3();
 
   function build() {
@@ -243,8 +262,13 @@ export function createImpactEvent({ scene, camera, controls, earth, time, canvas
     // Comes in from the dayside, a little above the ecliptic, bending in like a falling orbit.
     const u0 = eHat.clone().multiplyScalar(-0.45).addScaledVector(side, 0.85).addScaledVector(UP, 0.3).normalize();
     const u1 = eHat.clone().multiplyScalar(-0.8).addScaledVector(side, 0.25).addScaledVector(UP, 0.15).normalize();
+    // Aim at the USA: turn the (frozen) globe so the USA faces the incoming rock, then end the path on it.
+    earth.globe.rotation.y = usaFacingSpin(u1);
+    earth.globe.updateMatrixWorld(true);
+    const target = USA_LOCAL.clone().applyQuaternion(earth.globe.getWorldQuaternion(new THREE.Quaternion()))
+      .multiplyScalar(R_EARTH);                                // Earth-relative, on the surface
     const curve = new THREE.QuadraticBezierCurve3(u0.clone().multiplyScalar(START_DIST),
-      u1.clone().multiplyScalar(START_DIST * 0.45), new THREE.Vector3());
+      u1.clone().multiplyScalar(START_DIST * 0.45), target);
     // impact where the path crosses the surface
     let sHit = 1;
     for (let s = 0.9; s <= 1; s += 0.0005) if (curve.getPoint(s).length() <= R_EARTH + R_ROCK * 0.6) { sHit = s; break; }
@@ -270,14 +294,13 @@ export function createImpactEvent({ scene, camera, controls, earth, time, canvas
     const line = new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts),
       new THREE.LineDashedMaterial({ color: 0xff3b30, dashSize: 0.08, gapSize: 0.06, transparent: true, opacity: 0 }));
     line.computeLineDistances();
+    line.visible = false; // the dashed path isn't drawn (kept so the rest of the event code stays unchanged)
     group.add(line);
 
     // radar reticle + readout (HTML, clickable)
     const tag = document.createElement('div');
     tag.className = 'impact-reticle';
-    tag.innerHTML = '<i></i><span><b>UNKNOWN OBJECT</b><em>click to identify</em></span>';
-    tag.style.pointerEvents = 'auto';
-    tag.addEventListener('click', (e) => { e.stopPropagation(); identify(); });
+    tag.innerHTML = '<i></i><span><b>UNKNOWN OBJECT</b><em>incoming</em></span>';
     const reticle = new CSS2DObject(tag);
     group.add(reticle);
 
@@ -313,19 +336,21 @@ export function createImpactEvent({ scene, camera, controls, earth, time, canvas
   function start(model = 'A') {
     restore(false);
     const mine = ++epoch;
-    saved = { playing: time.playing };
-    time.playing = false;                       // freeze the clock so Earth holds still
-    time.onTick?.(time.jd, false);
+    saved = { playing: time.playing };          // the clock keeps running; it's frozen only at impact / intercept
     controls.enabled = false;
     objs = build();
     objs.model = model;
-    // frame Earth and the newcomer together
-    const mid = objs.E.clone().lerp(objs.curve.getPoint(0).add(objs.E), 0.5);
-    objs.camFrom = camera.position.clone(); objs.targetFrom = controls.target.clone();
-    objs.camTo = mid.clone().addScaledVector(camDir(), 9.5); objs.targetTo = mid;
-    objs.flyT = 0;
+    // Model A: just another asteroid at first (the normal white selection ring); it turns into the red target
+    // circle only when CAPCOM realises it's a threat ("That's WAY too close!", goFinal).
+    if (model === 'A') objs.tag.classList.add('plain');
+    objs.flyT = 1;        // no overview: the camera zooms straight to the chase angle behind the rock
+    objs.zoom = { t: 0, pos: camera.position.clone(), tgt: controls.target.clone() };
     setPhase('detected');
-    setTimeout(() => { if (mine === epoch) playAct('event_detect'); }, 900);
+    setTimeout(async () => {
+      if (mine !== epoch) return;
+      await playAct('event_detect');            // "W-wait, CAPCOM. I'm getting a reading. What... what is THAT?!"
+      if (mine === epoch) identify();
+    }, 600);
   }
 
   // where the camera sits relative to what it looks at: sunward of Earth, above the plane, off to one side
@@ -365,6 +390,7 @@ export function createImpactEvent({ scene, camera, controls, earth, time, canvas
   }
 
   function launch() {
+    freezeClock(); // the interceptor flies from a fixed launch point, so Earth holds still from here
     const o = objs, E = earthPos();
     setPhase('intercept');
     o.tPhase = 0;
@@ -389,6 +415,7 @@ export function createImpactEvent({ scene, camera, controls, earth, time, canvas
     tagEl.textContent = 'INTERCEPTOR';
     const label = new CSS2DObject(tagEl);
     group.add(label);
+    group.scale.setScalar(0.4); // in proportion with the small rock
     group.position.copy(o.mL0);
     scene.add(group);
     o.missile = { group, body, nose, flame, label, metal };
@@ -404,7 +431,13 @@ export function createImpactEvent({ scene, camera, controls, earth, time, canvas
     o.missile = null;
   }
 
+  function freezeClock() {
+    time.playing = false;
+    time.onTick?.(time.jd, false);
+  }
+
   function destroyRock() {
+    freezeClock();
     const o = objs, mine = epoch, P = rockWorld(), E = earthPos();
     removeMissile(o);
     setPhase('destroyed');
@@ -456,6 +489,7 @@ export function createImpactEvent({ scene, camera, controls, earth, time, canvas
 
   function goFinal() {
     objs.sFinal = objs.s; objs.tPhase = 0;
+    objs.tag.classList.remove('plain');
     objs.tag.classList.add('final');
     setPhase('final');
     playAct('event_panic', { before: 'alarm' });
@@ -466,6 +500,7 @@ export function createImpactEvent({ scene, camera, controls, earth, time, canvas
   }
 
   function impact() {
+    freezeClock();
     const o = objs;
     signalLost();                               // both voices cut out mid-word
     music.cut();                                // and the music with them
@@ -552,7 +587,7 @@ export function createImpactEvent({ scene, camera, controls, earth, time, canvas
     if (o.tB !== undefined) o.tB += dt;
     if (phase === 'detected' || phase === 'tracking' || phase === 'final' || defending) {
       // path progress
-      if (phase === 'tracking') o.s = CLOSE_S * (1 - Math.exp(-o.tPhase / (CRUISE_MIN * 0.45)));
+      if (phase === 'detected' || phase === 'tracking') o.s = CLOSE_S * (1 - Math.exp(-o.t / (CRUISE_MIN * 0.45)));
       // Model B: it keeps coming, slowly; the interceptor meets it well short of Earth
       if (defending) o.s = o.sFinal + (o.sHit - o.sFinal) * 0.3 * (1 - Math.exp(-o.tB / 25));
       if (phase === 'final') {
@@ -580,7 +615,7 @@ export function createImpactEvent({ scene, camera, controls, earth, time, canvas
       o.rock.material.emissiveIntensity = heat * 1.6;
       o.glow.position.copy(p);
       o.glow.material.opacity = heat;
-      o.glow.scale.setScalar(R_ROCK * (2 + heat * 3.5));
+      o.glow.scale.setScalar(0.035 + 0.1 * heat); // entry glow, sized like impactShot.js
       if (heat > 0.02) {
         const vdir = o.curve.getTangent(Math.min(o.s, o.sHit)).normalize();
         const wp = o.group.localToWorld(p.clone());
@@ -595,14 +630,29 @@ export function createImpactEvent({ scene, camera, controls, earth, time, canvas
         }
       }
 
-      // close in on Earth as it falls; in the final seconds, push in hard
-      if (o.flyT >= 1 && phase !== 'detected') {
-        const k = phase === 'final' ? 0.5 * smooth(Math.min(o.tPhase / FINAL, 1)) : 0;
-        const wantTarget = E.clone().lerp(o.group.localToWorld(p.clone()), 0.45 - k * 0.5);
-        controls.target.lerp(wantTarget, 1 - Math.exp(-dt * 0.8));
-        const dist = phase === 'final' ? 3.4 - 1.5 * smooth(Math.min(o.tPhase / FINAL, 1)) : defending ? (phase === 'intercept' ? 2.7 : 3.2) : 5.2;
-        camTarget = controls.target.clone().addScaledVector(camDir(), dist);
-        camera.position.lerp(camTarget, 1 - Math.exp(-dt * 0.6));
+      // Chase cam (from the impact-sim branch, impactShot.js chaseCam): once it's identified, ride just behind the
+      // rock, a little off to the side and above, looking down its path at Earth. Zooms in when the event starts.
+      if (o.flyT >= 1) {
+        const rk = o.group.localToWorld(p.clone());
+        const d = rk.distanceTo(E);
+        const u = rk.clone().sub(E).divideScalar(d);
+        const side = new THREE.Vector3().crossVectors(u, UP);
+        if (side.lengthSq() < 1e-6) side.set(1, 0, 0);
+        side.normalize();
+        const up2 = new THREE.Vector3().crossVectors(side, u);
+        const back = 0.16 + 0.26 * Math.min(d, 1.5) / 1.5;
+        camTarget = rk.clone().addScaledVector(u, back).addScaledVector(side, back * 0.45).addScaledVector(up2, back * 0.3);
+        if (o.zoom && o.zoom.t < 1) {         // zoom in from wherever the camera was
+          o.zoom.t = Math.min(o.zoom.t + dt / ZOOM_SEC, 1);
+          const z = smooth(o.zoom.t);
+          camera.position.lerpVectors(o.zoom.pos, camTarget, z);
+          controls.target.lerpVectors(o.zoom.tgt, E, z);
+        } else {                              // then ride along tightly
+          const k = 1 - Math.exp(-dt * 2.5);
+          controls.target.lerp(E, k);
+          camera.position.lerp(camTarget, k);
+        }
+        if (phase === 'final') camera.position.add(tmp.set(rand(-1, 1), rand(-1, 1), rand(-1, 1)).multiplyScalar(0.004 * heat));
       }
       if (phase === 'final' && o.s >= o.sHit - 1e-4) impact();
 
@@ -739,16 +789,9 @@ export function createImpactEvent({ scene, camera, controls, earth, time, canvas
     if (phase !== 'idle') setPhase('idle');
   }
 
-  // Click on the canvas: identify the object if the click lands near it. Returns true if the event took the click
-  // (while it runs, the event swallows clicks so the dot commentary can't talk over it).
-  function onClick(mx, my, rect) {
-    if (phase === 'idle') return false;
-    if (phase === 'detected') {
-      tmp.copy(objs.rock.position).applyMatrix4(objs.group.matrixWorld).project(camera);
-      const sx = (tmp.x + 1) / 2 * rect.width, sy = (1 - tmp.y) / 2 * rect.height;
-      if (Math.hypot(sx - mx, sy - my) < 40) identify();
-    }
-    return true;
+  // Clicks on the canvas: while the event runs it takes them all (so the dot commentary can't talk over it).
+  function onClick() {
+    return phase !== 'idle';
   }
 
   return {

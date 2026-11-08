@@ -259,10 +259,6 @@ export default {
    [
     "INTERN",
     "[nervous] W-wait, CAPCOM. I'm getting a reading. What... what is THAT?!"
-   ],
-   [
-    "CAPCOM",
-    "Hm. Click on it. Let's see what the model makes of it."
    ]
   ],
   "event_found": [

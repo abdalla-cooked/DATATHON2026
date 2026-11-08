@@ -573,7 +573,7 @@ function ImpactOverlay({ phase, model, onBackToStart }) {
   return (
     <>
       {phase === 'detected' && (
-        <div className="impact-banner" role="alert">⚠ Unidentified object on radar <small>click it to identify</small></div>
+        <div className="impact-banner" role="alert">⚠ Unidentified object on radar <small>incoming</small></div>
       )}
       {phase === 'tracking' && model !== 'B' && (
         <div className="impact-banner tracking" role="status">Tracking MC-1 <small>not in NASA's catalog</small></div>
