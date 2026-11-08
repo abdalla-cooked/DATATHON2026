@@ -238,6 +238,7 @@ export default function SolarSystem({ asteroids, metrics, view, onSelect, pickRe
       if (time.dirty) { placeAll(time.jd); time.dirty = false; }
 
       if (ctx.impact.active) { flight = null; ctx.impact.update(dt); } // the event drives the camera
+      if (ctx.impact.active && ctx.selected) ctx.dropSelection?.();     // close the details card so the event has the screen
       if (flight) {
         const t = Math.min((now - flight.start) / flight.dur, 1), k = ease(t);
         if (flight.offset && ctx.selected) {          // zooming in on a moving asteroid: aim at where it is now
@@ -249,8 +250,6 @@ export default function SolarSystem({ asteroids, metrics, view, onSelect, pickRe
           controls.target.lerpVectors(flight.fromT, flight.toT, k);
         }
         if (t >= 1) flight = null;
-      } else if (ctx.follow && ctx.selected && ctx.impact.active) {
-        ctx.follow = false;                            // the impact event drives the camera: stop riding along
       } else if (ctx.follow && ctx.selected) {         // after the zoom: ride along, the user can still orbit around it
         const delta = livePos().clone().sub(controls.target);
         controls.target.add(delta);
@@ -478,6 +477,7 @@ export default function SolarSystem({ asteroids, metrics, view, onSelect, pickRe
     };
 
     ctx.select = select;
+    ctx.dropSelection = () => { clearSelection(); onSelectRef.current?.(null); }; // no camera move (the impact event uses this)
     if (apiRef) apiRef.current = { deselect, select };
     canvas.addEventListener('pointerdown', onPointerDown);
     canvas.addEventListener('pointerup', onPointerUp);
