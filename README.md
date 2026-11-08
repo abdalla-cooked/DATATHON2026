@@ -2,7 +2,7 @@
 
 # ☄️ Is It Coming For Us?
 
-### Teaching a machine to spot hazardous asteroids, and showing every prediction in a live 3D solar system
+### Teaching a machine to spot hazardous asteroids, and showing every prediction in a live, narrated 3D solar system
 
 **Sheridan Datathon 2026 · NASA Track: Beyond Earth · Problem 2: Teach a Machine to See Space**
 
@@ -12,10 +12,12 @@
 ![React](https://img.shields.io/badge/React-18-61DAFB?logo=react&logoColor=black)
 ![Three.js](https://img.shields.io/badge/Three.js-3D-000000?logo=threedotjs&logoColor=white)
 ![Vite](https://img.shields.io/badge/Vite-5-646CFF?logo=vite&logoColor=white)
+![ElevenLabs](https://img.shields.io/badge/ElevenLabs-voice-000000)
+![Claude](https://img.shields.io/badge/Claude-live%20commentary-D97757)
 
-
-<!-- Replace with a screenshot or GIF of the 3D view: docs/img/hero.gif -->
+<!-- Add a screenshot or GIF of the 3D view, e.g. docs/img/hero.gif, then uncomment:
 <img src="docs/img/hero.gif" alt="3D solar system with 42,704 near-Earth asteroids colored by hazard risk" width="820">
+-->
 
 </div>
 
@@ -28,23 +30,25 @@ NASA calls an asteroid **potentially hazardous** if its orbit comes within **0.0
 | Act | Question | Answer |
 |---|---|---|
 | **1** | Given every feature, does a model rediscover NASA's rule? | **Yes.** A two-level decision tree writes down `H ≤ 22.035 AND MOID ≤ 0.050`, without being told. |
-| **2** | Remove the answer key (MOID). Can it work out the geometry from orbit shape alone? | **Mostly.** It still catches **95.1%** of hazardous asteroids on unseen data (ROC AUC **0.989**). |
-| **3** | Did the asteroids it flagged really fly closer to Earth? | **No, and we report it.** Small rocks are only found when they pass close, which skews the flyby record. |
-| **4** | Brightness is only a stand-in for size. Are there big, dark asteroids hiding under the cutoff? | **Yes.** **34** near-Earth asteroids were *measured* at ≥ 140 m with orbits inside 0.05 AU, yet aren't labelled hazardous. |
+| **2** | Remove the answer key (MOID). Can it work out the geometry from orbit shape? | **Mostly.** It still catches **95.1%** of hazardous asteroids on unseen data (ROC AUC **0.989**). |
+| **3** | Did the asteroids it flagged really fly closer to Earth? | **No, and we report it.** Small rocks are mostly found when they pass close, which skews the flyby record. |
+| **4** | Brightness is only a stand-in for size. Are big, dark asteroids hiding under the cutoff? | **Yes.** **34** near-Earth asteroids were *measured* at ≥ 140 m with orbits inside 0.05 AU, yet aren't labelled hazardous. |
 
-Every one of the **42,704** near-Earth asteroids is drawn on its real orbit, colored by the model's risk score, with **its mistakes highlighted**.
+Every one of the **42,704** near-Earth asteroids is drawn on its real orbit, colored by the model's risk score, with **its mistakes highlighted**, and a mission-control duo talks you through it.
 
 ---
 
 ## ✨ Features
 
-- 🪐 **Live 3D solar system.** Every near-Earth asteroid on its real orbit (Three.js), with planets, a time slider and click-to-inspect.
-- 🔀 **Model toggle.** Switch between Model A (everything) and Model B (no MOID) and watch the colors change.
-- 🎯 **Mistakes mode.** Missed hazards and false alarms are highlighted, not hidden.
+- 🎬 **Scroll-driven intro.** A cinematic scroll story (GSAP + Lenis) that ends on **"Watch the AI learn"**: every asteroid starts grey and takes on its model color while live counters show asteroids seen and hazards caught.
+- 🪐 **Live 3D solar system.** All 42,704 near-Earth asteroids on their real orbits, textured planets and dwarf planets, three camera views, a time slider, and click-to-inspect.
+- 🎙️ **Mission Control Live.** A calm **CAPCOM** and a panicky **AI intern**, voiced with **ElevenLabs**, react to every asteroid you click. Claude can write fresh banter from each asteroid's real data, so no two clicks sound the same. Subtitles are always on, and there's a mute button.
+- 🕵️ **Hidden hazards mode.** Everything fades except the **34** big, dark asteroids NASA's brightness rule misses. They blink in lime with their orbits drawn, and the five largest are labelled with their measured size.
+- 🔀 **Model A / Model B toggle.** Watch the risk colors change when the model loses the answer key.
+- 🎯 **Mistakes mode.** Missed hazards (magenta) and false alarms (yellow) are highlighted, not hidden.
 - 🧪 **Unseen test set filter.** Show only the 8,541 asteroids the models never trained on.
-- 🛠️ **Design your own asteroid.** Drag orbit sliders and the trained model scores it **live in your browser** (no server).
-- 📊 **Results panel.** Precision, recall, confusion matrix, ROC and PR curves, and the learned rules.
-- 🎙️ **Narrated tour.** Pre-generated ElevenLabs voice-over walks judges through the story.
+- 🛠️ **Design your own asteroid.** Drag orbit sliders, or start from Apophis, Bennu or Didymos, and the trained model scores it **live in your browser**, with its MOID computed on the spot.
+- 📊 **Results and "What did it learn?" panels.** Recall, precision, confusion matrix, ROC curves, feature importance, the learned rules, the flyby reality check and the model's worst misses.
 
 ---
 
@@ -53,24 +57,27 @@ Every one of the **42,704** near-Earth asteroids is drawn on its real orbit, col
 ```mermaid
 flowchart LR
     A[NASA JPL<br/>Small-Body Database<br/>1.58M objects] --> B[Filter + clean<br/>42,704 NEOs]
-    C[NASA close approaches<br/>1900–2200] --> F
+    C[NASA CNEOS<br/>close approaches] --> F
     B --> D[Stratified 80/20 split]
     D --> E1[Logistic regression<br/>baseline]
     D --> E2[Decision tree depth 2<br/>readable rules]
     D --> E3[Model A · LightGBM<br/>all features]
     D --> E4[Model B · LightGBM<br/>no MOID]
+    B --> S[Act 4 size model<br/>LightGBM quantile<br/>regression on albedo]
     E3 & E4 --> T[5-fold CV<br/>threshold for 95% recall]
     T --> F[Evaluate on unseen<br/>test set]
     F --> G[metrics.json<br/>asteroids.json]
+    S --> G
     E3 & E4 --> H[m2cgen<br/>model → JavaScript]
-    G & H --> W[React + Three.js site<br/>GitHub Pages]
+    G & H --> W[React + Three.js site]
+    W <--> V[api/ functions<br/>ElevenLabs voice<br/>Claude commentary]
 ```
 
 ### Data
 | Source | Rows | Used for |
 |---|---|---|
-| [NASA/JPL Small-Body Database](https://ssd.jpl.nasa.gov/tools/sbdb_query.html) | 1,582,869 objects → **42,704 near-Earth asteroids** | Training and testing |
-| [NASA/JPL CNEOS close approaches](https://cneos.jpl.nasa.gov/ca/) | 120,071 flybys within 0.1 AU, 1900–2200 | Act 3 check and the flyby timeline (**never a training feature**) |
+| [NASA/JPL Small-Body Database](https://ssd.jpl.nasa.gov/tools/sbdb_query.html) | 1,582,869 objects → **42,704 near-Earth asteroids** | Training, testing and the size model |
+| [NASA/JPL CNEOS close approaches](https://cneos.jpl.nasa.gov/ca/) | 120,071 flybys within 0.1 AU, 1900–2200 | Act 3 check, the flyby list and impact speeds (**never a training feature**) |
 
 **Cleaning:** kept `neo == "Y"` only (main-belt asteroids are never hazardous and would make the model look falsely perfect), dropped **346** rows missing the label, H or MOID, kept bound orbits (`e < 1`), and read designations as text so `"170903"` and `"2018 BM3"` join correctly. Result: **2,550 hazardous (6.0%)**.
 
@@ -90,6 +97,8 @@ flowchart LR
 - **Class imbalance:** `class_weight="balanced"`, so the models don't simply predict "safe" for everything.
 - **Cutoffs chosen for safety:** missing a real threat is worse than a false alarm, so each cutoff is the highest one that keeps **≥ 95% recall in 5-fold cross-validation on the training set**.
 - **Honest scores on the map:** each asteroid's color comes from a model that never saw it (out-of-fold scores for training rows, the final model for test rows).
+- **Why it was flagged:** each asteroid carries Model B's biggest reason for its verdict, taken from LightGBM's built-in SHAP values (`pred_contrib`). The commentators read it out when you click.
+- **Impact what-if:** for the commentary, each asteroid gets a *hypothetical* impact energy from its best size estimate, a 2,000 kg/m³ density and its flyby speed. This is clearly labelled as a what-if, not a prediction.
 
 ```python
 # Pick the decision threshold on training data only, never the test set
@@ -100,7 +109,7 @@ def pick_threshold(y, oof_scores, target_recall=0.95):
 ```
 
 ### Models in the browser
-Both LightGBM models are compiled to plain JavaScript with **m2cgen**, so the "Design your own asteroid" panel scores orbits instantly, with no backend and no API calls.
+Both LightGBM models are compiled to plain JavaScript with **m2cgen**, so the "Design your own asteroid" panel scores orbits instantly, with no backend call.
 
 ```js
 import { score } from './model/model_B.js';
@@ -108,6 +117,16 @@ import { score } from './model/model_B.js';
 const q = a * (1 - e), ad = a * (1 + e);
 const [pSafe, pHazard] = score([a, e, i, om, w, q, ad, H]);   // Apophis → 0.994
 ```
+
+### Mission Control Live
+The voices never expose an API key: they come from small server functions in `web/api/`, picking the best option available for each click.
+
+| Priority | Source | When |
+|---|---|---|
+| 1 | **Claude** writes a fresh CAPCOM / intern exchange, **ElevenLabs** voices it | `ANTHROPIC_API_KEY` + ElevenLabs keys set |
+| 2 | Pre-recorded clips from `scripts/narrate.py` | Audio generated locally |
+| 3 | Ready-made lines voiced live by **ElevenLabs** | ElevenLabs keys set |
+| 4 | Subtitles only | Offline, or static hosting with no keys |
 
 ---
 
@@ -173,6 +192,7 @@ Examples: **(2010 LV108)**, measured at 234 m with a MOID of just 0.002 AU, and 
 - **Act 3 did not confirm the model.** Asteroids flagged by Model B were *less* likely to have a recorded pass under 0.05 AU (42% vs 47%). Small asteroids are mostly discovered during close passes, which biases the flyby record, and a pass can never be closer than the orbit's MOID anyway.
 - **Scores are risk scores, not probabilities.** Balanced class weights inflate them, so "0.87" means "high risk", not "87% chance".
 - **The size range is rough.** Our "5–95%" size range contains the true size 79.5% of the time, not 90%.
+- **Impact energies are what-ifs.** They assume a density and speed, and are there for scale only.
 - **Catalog bias.** Small, dark and sun-side asteroids are under-counted, and orbits with few observations (condition code 7–9) are uncertain.
 - **Orbits change.** Planetary encounters shift orbits over decades. This is a snapshot.
 
@@ -180,7 +200,7 @@ Examples: **(2010 LV108)**, measured at 234 m with a MOID of just 0.002 AU, and 
 
 ## 🚀 Run it locally
 
-**Website**
+**1. Website**
 ```bash
 git clone https://github.com/abdalla-cooked/DATATHON2026.git
 cd DATATHON2026/web
@@ -188,18 +208,27 @@ npm install
 npm run dev          # open http://localhost:5173
 ```
 
-**Retrain the models** (needs `data/raw/sbdb.csv` and `data/raw/cad.csv`, shared separately because they're over GitHub's 100 MB limit)
+**2. Voices (optional).** Copy `.env.example` to `.env` **in the repo root** and fill in your own keys. `.env` is gitignored, so never commit it.
+```dotenv
+ELEVENLABS_API_KEY=...
+CAPCOM_VOICE_ID=...
+INTERN_VOICE_ID=...
+ANTHROPIC_API_KEY=...        # optional: Claude writes fresh commentary per click
+```
+Restart `npm run dev`, then open `http://localhost:5173/api/health`. `"live":true` means the voices are on, and `"script":true` means Claude is writing.
+
+**3. Pre-recorded act narration (optional)**
+```bash
+python scripts/narrate.py --dry-run   # shows the character count, no API calls
+python scripts/narrate.py             # writes web/public/audio/ (gitignored)
+```
+
+**4. Retrain the models** (needs `data/raw/sbdb.csv` and `data/raw/cad.csv`, shared separately because they're over GitHub's 100 MB limit)
 ```bash
 python -m venv .venv
 .venv\Scripts\activate            # macOS/Linux: source .venv/bin/activate
 pip install -r requirements.txt
-python scripts/train.py           # ~1 min: writes web/public/data/*.json and web/src/model/*.js
-```
-
-**Publish to GitHub Pages**
-```bash
-cd web && npm run build           # writes the static site to docs/
-git add docs && git commit -m "Rebuild site" && git push
+python scripts/train.py           # writes web/public/data/*.json and web/src/model/*.js
 ```
 
 <details>
@@ -208,6 +237,7 @@ git add docs && git commit -m "Rebuild site" && git push
 - `npm.ps1 cannot be loaded` → run `Set-ExecutionPolicy -Scope CurrentUser RemoteSigned`, or use `npm.cmd`.
 - `git` or `node` "not recognized" right after installing → close **all** VS Code windows and reopen.
 - `Deletion of directory failed` during `git pull` → pause OneDrive syncing and answer `n`.
+- `/api/health` shows `"live":false` → check that `.env` is in the repo root and saved, then restart `npm run dev`.
 
 </details>
 
@@ -218,17 +248,21 @@ git add docs && git commit -m "Rebuild site" && git push
 ```
 DATATHON2026/
 ├── scripts/
-│   └── train.py              # clean → train 4 models + size model → evaluate → export
-├── notebooks/train.ipynb     # the same pipeline with plots
+│   ├── train.py              # clean → 4 models + size model + SHAP reasons → evaluate → export
+│   └── narrate.py            # ElevenLabs → pre-recorded commentary clips
+├── narration/lines.json      # the CAPCOM / intern script
 ├── data/raw/                 # sbdb.csv, cad.csv (gitignored)
-├── narration/lines.json      # voice-over script
+├── .env.example              # keys to copy into .env (never commit .env)
 ├── web/                      # website source (React + Vite + Three.js)
+│   ├── api/                  # server functions: say (ElevenLabs), script (Claude), health
 │   ├── public/data/          # asteroids.json, metrics.json, approaches.json
 │   └── src/
-│       ├── model/            # model_A.js, model_B.js (LightGBM → JS via m2cgen)
-│       ├── three/            # SolarSystem.jsx, kepler.js, planets.js, time controls
-│       └── components/       # TopBar, SidePanel, Legend
-└── docs/                     # built site served by GitHub Pages (don't edit by hand)
+│       ├── intro/            # scroll-driven intro (GSAP + Lenis)
+│       ├── three/            # SolarSystem.jsx, orbits, planets, time controls, camera views
+│       ├── components/       # top bar, info / results / learned / design panels, Mission Control
+│       ├── lib/              # data loading, narration player, dialogue, MOID, replay
+│       └── model/            # model_A.js, model_B.js (LightGBM → JS via m2cgen)
+└── docs/                     # built site for GitHub Pages (don't edit by hand)
 ```
 
 ---
@@ -237,11 +271,11 @@ DATATHON2026/
 
 | Layer | Tools |
 |---|---|
-| Data and ML | Python, pandas, NumPy, scikit-learn, LightGBM, SHAP |
+| Data and ML | Python, pandas, NumPy, scikit-learn, LightGBM (classification, quantile regression, SHAP contributions) |
 | Model → browser | m2cgen (compiles trained trees to JavaScript) |
-| Front end | React 18, Vite 5, Three.js 0.160, Chart.js |
-| Voice | ElevenLabs text-to-speech (generated ahead of time, no key in the browser) |
-| Hosting | GitHub Pages |
+| Front end | React 18, Vite 5, Three.js 0.160, Chart.js, GSAP, Lenis |
+| Voice and AI | ElevenLabs text-to-speech, Anthropic Claude (live commentary writing) |
+| Hosting | Vercel (with server functions), GitHub Pages (static fallback) |
 
 ---
 
@@ -250,8 +284,8 @@ DATATHON2026/
 | Name | Role |
 |---|---|
 | **Jean-Paul Saliba** | ML lead: data cleaning, models, evaluation, browser export |
-| **Alexander Philippopoulos** | 3D lead: Three.js solar system, orbits, time controls, Act 4 size model |
-| **Abdalla Shaldam** | Story and UI lead: interface, charts, narration, deployment |
+| **Alexander Philippopoulos** | 3D lead: Three.js solar system, orbits, time controls, hidden hazards, Act 4 size model |
+| **Abdalla Shaldam** | Story and UI lead: interface, scroll intro, Mission Control narration, deployment |
 
 ---
 
@@ -259,10 +293,10 @@ DATATHON2026/
 
 - **NASA/JPL Small-Body Database** and **CNEOS** close-approach data, [ssd.jpl.nasa.gov](https://ssd.jpl.nasa.gov)
 - NASA's PHA definition: [cneos.jpl.nasa.gov/about/neo_groups.html](https://cneos.jpl.nasa.gov/about/neo_groups.html)
+- Planet textures: see [`docs/textures/CREDITS.md`](docs/textures/CREDITS.md)
+- Voices by [ElevenLabs](https://elevenlabs.io); live commentary by [Claude](https://www.anthropic.com/claude)
 - Built at the **Sheridan Datathon 2026**, NASA Track: Beyond Earth
 
 <div align="center">
-
-**If this made you look up, give it a ⭐**
 
 </div>
