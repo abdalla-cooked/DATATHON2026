@@ -36,7 +36,7 @@ export default function MissionControl() {
       </button>
       {line && (
         <div className={`mc-caption ${line.who.toLowerCase()}${line.hero ? ' hero' : ''}`} role="status" aria-live="polite">
-          <b>{line.hero ? '🦸 INTERN' : { CAPCOM: '🎙️ CAPCOM', INTERN: '😱 INTERN', RADIO: '📡', ALERT: '🚨' }[line.who] ?? line.who}</b> {line.text}
+          <b>{line.hero ? '🦸 INTERN' : { CAPCOM: '🎙️ CAPCOM', INTERN: '😱 INTERN', PRESIDENT: '🇺🇸 THE PRESIDENT', RADIO: '📡', ALERT: '🚨' }[line.who] ?? line.who}</b> {line.text}
         </div>
       )}
     </>

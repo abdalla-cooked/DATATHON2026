@@ -11,7 +11,7 @@ import { planetElementsAt } from './planets.js';
 import { addPlanets, addSunAndLights, loader, BG_COLOR } from './bodies.js';
 import { ALWAYS_SHOW, sampled, SAMPLE_EVERY } from './cloudFilter.js';
 import { replay, revealOf, REPLAY_GREY, SPREAD } from '../lib/replay.js';
-import { playAct } from '../lib/narration.js';
+import { playAct, playPresident } from '../lib/narration.js';
 import { MAX_JD, jdFromDate, meanAnomalyAt } from './time.js';
 import TimeControls from './TimeControls.jsx';
 import ViewButtons from './ViewButtons.jsx';
@@ -531,9 +531,15 @@ export default function SolarSystem({ asteroids, metrics, view, onSelect, pickRe
       <ImpactOverlay phase={impactPhase} model={sceneRef.current?.impact.model} onBackToStart={onReplayIntro} />
       {/* TEMPORARY: plays the impact event on demand, for testing. Model A ends in extinction, Model B saves Earth. */}
       {impactPhase === 'idle' && (
-        <button type="button" className="impact-test" onClick={() => sceneRef.current?.impact.start(view.model)}>
-          TEST: impact event (Model {view.model})
-        </button>
+        <div className="test-buttons">
+          {/* Mission Control Live: the President drops in for one exchange, then leaves (lib/president.js) */}
+          <button type="button" className="impact-test president-test" onClick={() => playPresident()}>
+            🇺🇸 Presidential visit
+          </button>
+          <button type="button" className="impact-test" onClick={() => sceneRef.current?.impact.start(view.model)}>
+            TEST: impact event (Model {view.model})
+          </button>
+        </div>
       )}
       <ViewButtons views={VIEWS} initial="earth" onView={(name) => sceneRef.current?.flyTo(name)}>
         {counts.total > 0 && (

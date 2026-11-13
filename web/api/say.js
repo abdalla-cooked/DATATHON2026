@@ -7,7 +7,10 @@
 import L from '../src/lib/lines.js';
 import { buildLines, sanitize, toneOf } from '../src/lib/dialogue.js';
 import { verify } from './_sign.js';
+import { PRESIDENT_SCENE, PRESIDENT_VOICE } from '../src/lib/president.js';
 
+// The President's scene works out of the box with a stock ElevenLabs voice ("Clyde", gravelly American male); override in .env.
+const DEFAULT_VOICES = { PRESIDENT: '2EiwWnXFnvU5JabPnv8n' };
 const MODEL_ID = process.env.LIVE_VOICE_MODEL || 'eleven_v4_turbo'; // fast (~100 ms) AND acts out [delivery tags] like [panicking]
 const PER_IP_PER_MIN = Number(process.env.LIVE_LINES_PER_MIN || 40);
 const CHARS_PER_HOUR = Number(process.env.LIVE_CHARS_PER_HOUR || 20000);  // protects the quota per instance
@@ -39,7 +42,9 @@ export default async function handler(req, res) {
   const q = Object.fromEntries(new URL(req.url, 'http://local').searchParams);
   let line = null;
   let tone = '';
-  if (q.sig) {
+  if (q.scene === 'president') {
+    line = PRESIDENT_SCENE[Number(q.i)] ?? null;    // fixed scene (president.js): voices line i, nothing else
+  } else if (q.sig) {
     tone = q.tone || '';
     if (verify(q.who, q.text, q.sig, tone)) line = [q.who, q.text];
   } else {
@@ -52,7 +57,7 @@ export default async function handler(req, res) {
   const [who, text] = line;
   tone = toneOf(who, text) || tone;  // the line's own [tag] picks the delivery; else the risk band's tone
   const key = process.env.ELEVENLABS_API_KEY;
-  const voice = process.env[`${who}_VOICE_ID`];
+  const voice = process.env[`${who}_VOICE_ID`] || DEFAULT_VOICES[who];
   if (!key || !voice) return send(res, 503, 'live voice not configured');
 
   const ip = String(req.headers['x-forwarded-for'] || req.socket?.remoteAddress || '?').split(',')[0].trim();
@@ -64,7 +69,7 @@ export default async function handler(req, res) {
       method: 'POST',
       headers: { 'xi-api-key': key, 'Content-Type': 'application/json', Accept: 'audio/mpeg' },
       // the INTERN's emotion (panic … glad) picks a matching delivery; everyone else uses their base settings
-      body: JSON.stringify({ text, model_id: MODEL_ID, voice_settings: (who === 'INTERN' && L.intern_tones?.[tone]) || L.voices[who] }),
+      body: JSON.stringify({ text, model_id: MODEL_ID, voice_settings: (who === 'INTERN' && L.intern_tones?.[tone]) || (who === 'PRESIDENT' ? PRESIDENT_VOICE : L.voices[who]) }),
     });
     if (!r.ok) return send(res, 502, `elevenlabs ${r.status}`);
     const audio = Buffer.from(await r.arrayBuffer());

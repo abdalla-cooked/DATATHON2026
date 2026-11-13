@@ -7,6 +7,7 @@
 import L from './lines.js';
 import { buildLines, isPanic, paramsFor, stripTags, toQuery } from './dialogue.js';
 import { music } from './music.js';
+import { PRESIDENT_SCENE } from './president.js';
 
 let manifest = null;
 let live = false;
@@ -33,7 +34,7 @@ const heroTag = (text) => {
   return /bold|triumph|proud|confiden/.test(tag) || (/determined/.test(tag) && !/timid/.test(tag));
 };
 const caption = (c) => {
-  music.duck(c?.who === 'CAPCOM' || c?.who === 'INTERN'); // the music sits under the voices
+  music.duck(['CAPCOM', 'INTERN', 'PRESIDENT'].includes(c?.who)); // the music sits under the voices
   listeners.forEach((fn) => fn(c && { ...c, hero: c.who === 'INTERN' && heroTag(c.text), text: stripTags(c.text) }));
 };
 const wait = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -160,6 +161,21 @@ export async function playAct(key, sfx = { before: 'radio' }) {
   const lines = manifest?.acts?.[key]
     ?? L.acts[key]?.map(([who, text]) => ({ who, text: text.replace('{hidden_measured}', 'Dozens'), src: null }));
   return playDialogue(lines, sfx);
+}
+
+// "Presidential visit" button: CAPCOM and the intern, then the President drops in for one exchange and leaves.
+export async function playPresident() {
+  await ready;
+  // The President's own lines are pre-rendered with a local voice clone (scripts/president_voice.py), so they play
+  // everywhere, even on GitHub Pages; a clip is only used while its line still has the exact wording it was made from.
+  const clips = (await getJSON('audio/president/manifest.json')) || {};
+  // h = fingerprint of the words, so editing a line in president.js skips the day-long cached clip of the old wording
+  const h = (t) => [...t].reduce((x, c) => (Math.imul(x, 31) + c.charCodeAt(0)) | 0, 7).toString(36);
+  const lines = PRESIDENT_SCENE.map(([who, text], i) => {
+    const clip = clips[i]?.text === text ? clips[i].src : null;
+    return { who, text, src: clip || (live ? `api/say?scene=president&i=${i}&h=${h(text)}` : null) };
+  });
+  return playDialogue(lines, { before: 'radio' });
 }
 
 export async function playReaction(key) {

@@ -11,7 +11,7 @@ const liveVoiceInDev = (mode) => ({
   name: 'mission-control-live-dev-api',
   configureServer(server) {
     const env = loadEnv(mode, fileURLToPath(new URL('..', import.meta.url)), '');
-    for (const k of ['ELEVENLABS_API_KEY', 'CAPCOM_VOICE_ID', 'INTERN_VOICE_ID', 'ANTHROPIC_API_KEY',
+    for (const k of ['ELEVENLABS_API_KEY', 'CAPCOM_VOICE_ID', 'INTERN_VOICE_ID', 'PRESIDENT_VOICE_ID', 'ANTHROPIC_API_KEY',
                      'LIVE_SCRIPT_MODEL', 'LIVE_SCRIPT_EFFORT']) {
       if (env[k] && !process.env[k]) process.env[k] = env[k];
     }

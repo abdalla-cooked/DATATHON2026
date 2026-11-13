@@ -93,9 +93,11 @@
 }
 
 /* TEMPORARY test trigger */
+.test-buttons { position: fixed; right: 16px; bottom: 16px; z-index: 6; display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
 .impact-test {
-  position: fixed; right: 16px; bottom: 16px; z-index: 6; padding: 6px 10px; cursor: pointer;
+  padding: 6px 10px; cursor: pointer;
   font: 600 11px system-ui, sans-serif; letter-spacing: .05em; color: #ffb3ad;
   background: rgba(40, 8, 6, .85); border: 1px dashed #ff3b30; border-radius: 6px;
 }
-@media (max-width: 760px) { .impact-test { bottom: 112px; } }
+.president-test { color: #ffe08a; background: rgba(10, 18, 48, .85); border-color: #ffc83d; }
+@media (max-width: 760px) { .test-buttons { bottom: 112px; } }
